@@ -4868,8 +4868,55 @@ void Phase1::TryShipProbe() {
 }
 
 // Runs on the main thread once per frame (only for the player's Human update).
+// Identity probe: at every world load, dump the first entities with their handle objId, position,
+// archetype and index. Run this on BOTH machines and diff the two lists - if objIds match for the same
+// NPC, mirroring can bind by identity instead of by proximity, which removes the whole class of
+// wrong-body/swapping bugs. If they differ, identity has to be built (spawn order or host-issued spawns).
+static void ProbeIdentityOnce() {
+    World* w = World::GetCurrentWorld();
+    if (!w) return;
+    static void* s_lastWorld = nullptr;
+    if (w == s_lastWorld) return;
+    s_lastWorld = w;
+
+    __try {
+        BaseBigArray<Reference>& ents = w->m_EntityManager.m_Entities;
+        int n = ents.GetSize();
+        L("[Id] world=%p worldId=%016llX count=%d\n", w, (unsigned long long)w->GetObjectID(), n);
+        int logged = 0;
+        for (int i = 0; i < n && logged < 30; ++i) {
+            Reference* ref = ents.GetElement(i);
+            if (!ref || !readable(ref, 4)) break;
+            HandleContainer* hc = ref->m_HandleContainer;
+            if (!hc || !readable(hc, 4)) continue;
+            Entity* e = (Entity*)hc->m_Object;
+            if (!e || !readable(e, 4)) continue;
+
+            uint32_t arch = 0, bhvVt = 0;
+            Component** data = *(Component***)((char*)e + 0x60);
+            int nc = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+            if (nc <= 0 || nc > 96) nc = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            if (data && readable(data, 4) && nc > 0 && nc <= 96) {
+                for (int k = 0; k < nc; ++k) {
+                    Component* c = data[k];
+                    uint32_t vt = (c && readable(c, 4)) ? *(uint32_t*)c : 0;
+                    if (vt == 0x026E34D8) { bhvVt = vt; arch = *(uint32_t*)((char*)c + 0x14) & 0xFFFF; }
+                }
+            }
+            L("[Id] idx=%d objId=%llu ent=%08X evt=%08X bhv=%08X arch=%04X pos=(%.2f,%.2f,%.2f)\n",
+              i, (unsigned long long)hc->GetObjectID(), e, (unsigned int)e->vftable, bhvVt, arch,
+              e->m_GlobalMatrix.M41, e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43);
+            ++logged;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[Id] EXCEPTION 0x%08X\n", GetExceptionCode());
+    }
+}
+
 static void __cdecl OnFrame(Human* updatedHuman) {
     if (!isPlayerUpdate(base(), updatedHuman)) return;
+
+    ProbeIdentityOnce();
 
     // Keep g_localShipZ fresh every frame (not just inside the net capture), so the ghost's render
     // override has a live wave height even when Net is off (single-player F12 test). The ghost's
