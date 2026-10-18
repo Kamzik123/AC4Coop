@@ -2505,16 +2505,40 @@ static bool SelfTestModeActive() {
 struct DriveEnt { Entity* e; float pos[3]; float quat[4]; unsigned int alias; int dead; };
 static DriveEnt s_drive[MAX_SYNC_ENTITIES];
 static int      s_driveN = 0;
-static void* s_mirroredEnt[96];
+// These tables used to be 96 entries and silently stopped recording past that. A Havana crowd has 111+
+// mirrored humans, so the dead list filled up, MirrorKilledLocally() started returning false and every
+// dead body re-ran the full visual-death path every frame - that was the guest freeze. Ring-buffer them
+// at a size that cannot be reached by one snapshot, so an entry is always recorded (evicting the oldest)
+// and the per-frame guard still works.
+static const int MIRROR_TABLE = 512;
+static void* s_mirroredEnt[MIRROR_TABLE];
 static int   s_mirroredN = 0;
 struct MirrorAction { unsigned int ent; unsigned int alias; };
-static MirrorAction s_mirrorAct[96];
+static MirrorAction s_mirrorAct[MIRROR_TABLE];
 static int s_mirrorActN = 0;
+
+static void MirrorTablePut(void** table, int& n, void* e) {
+    if (n < MIRROR_TABLE) { table[n++] = e; return; }
+    int slot = (int)((unsigned int)e % (unsigned int)MIRROR_TABLE);   // deterministic eviction
+    table[slot] = e;
+}
 
 static bool MirrorFirstSight(void* e) {
     for (int i = 0; i < s_mirroredN; ++i) if (s_mirroredEnt[i] == e) return false;
-    if (s_mirroredN < 96) s_mirroredEnt[s_mirroredN++] = e;
+    MirrorTablePut(s_mirroredEnt, s_mirroredN, e);
     return true;
+}
+
+static void MirrorAliasRemember(void* e, unsigned int alias) {
+    if (s_mirrorActN < MIRROR_TABLE) {
+        s_mirrorAct[s_mirrorActN].ent = (unsigned int)e;
+        s_mirrorAct[s_mirrorActN].alias = alias;
+        ++s_mirrorActN;
+        return;
+    }
+    int slot = (int)((unsigned int)e % (unsigned int)MIRROR_TABLE);
+    s_mirrorAct[slot].ent = (unsigned int)e;
+    s_mirrorAct[slot].alias = alias;
 }
 
 static bool MirrorAliasChanged(void* e, unsigned int alias) {
@@ -2524,18 +2548,14 @@ static bool MirrorAliasChanged(void* e, unsigned int alias) {
             s_mirrorAct[i].alias = alias;
             return true;
         }
-    if (s_mirrorActN < 96) {
-        s_mirrorAct[s_mirrorActN].ent = (unsigned int)e;
-        s_mirrorAct[s_mirrorActN].alias = alias;
-        ++s_mirrorActN;
-    }
+    MirrorAliasRemember(e, alias);
     return true;
 }
 
 // Mirrors THIS peer killed. The host is still reporting them alive (its snapshot predates the kill or
 // the kill hasn't arrived), so es.dead alone is not enough: without this we would keep driving the
 // corpse's transform/clip from the host snapshot and it would stand back up or slide around.
-static void* s_mirrorDeadLocal[96];
+static void* s_mirrorDeadLocal[MIRROR_TABLE];
 static int   s_mirrorDeadLocalN = 0;
 
 static bool MirrorKilledLocally(void* e) {
@@ -2544,7 +2564,27 @@ static bool MirrorKilledLocally(void* e) {
 }
 static void MarkMirrorKilledLocally(void* e) {
     if (MirrorKilledLocally(e)) return;
-    if (s_mirrorDeadLocalN < 96) s_mirrorDeadLocal[s_mirrorDeadLocalN++] = e;
+    MirrorTablePut(s_mirrorDeadLocal, s_mirrorDeadLocalN, e);
+}
+
+// Belt and braces: even with the table above, never run the visual-death path twice for the same body
+// within a few seconds. Re-running it every frame is what froze the guest.
+struct RecentDeath { unsigned int ent; uint64_t ms; };
+static RecentDeath s_recentDeath[256];
+static int s_recentDeathN = 0;
+static bool DeathAppliedRecently(unsigned int e) {
+    uint64_t now = GetTickCount64();
+    for (int i = 0; i < s_recentDeathN; ++i)
+        if (s_recentDeath[i].ent == e) return (now - s_recentDeath[i].ms) < 5000;
+    return false;
+}
+static void MarkDeathApplied(unsigned int e) {
+    uint64_t now = GetTickCount64();
+    for (int i = 0; i < s_recentDeathN; ++i)
+        if (s_recentDeath[i].ent == e) { s_recentDeath[i].ms = now; return; }
+    if (s_recentDeathN < 256) { s_recentDeath[s_recentDeathN].ent = e; s_recentDeath[s_recentDeathN].ms = now; ++s_recentDeathN; return; }
+    int slot = (int)(e % 256u);
+    s_recentDeath[slot].ent = e; s_recentDeath[slot].ms = now;
 }
 
 static void ApplyGuards(const EntityPacket& pkt) {
@@ -2645,8 +2685,9 @@ static void ApplyGuards(const EntityPacket& pkt) {
             // (4) Death: reproduce the REAL death locally instead of hand-writing AI flags. Once per
             //     entity. The old `ai+0xB8 |= 4` write is removed — it is only one of the two terms of
             //     the engine's is-alive test and left the mirror in a half-dead state.
-            if (es.dead && !MirrorKilledLocally(best)) {
+            if (es.dead && !MirrorKilledLocally(best) && !DeathAppliedRecently((unsigned int)best)) {
                 MarkMirrorKilledLocally(best);
+                MarkDeathApplied((unsigned int)best);
                 L("[Mirror] ent=%08X host says dead -> visual death locally\n", best);
                 MirrorVisualDeath(best);
             }
@@ -3924,7 +3965,7 @@ static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float 
             // The guest's entity is a playback dummy with its behaviour disabled, so the engine's own
             // death (SetLife) must not run here; the host keeps the full recipe.
             if (g_entHost) KillGuardEntity((Entity*)ent);
-            else           MirrorVisualDeath((Entity*)ent);
+            else if (!DeathAppliedRecently(ent)) { MarkDeathApplied(ent); MirrorVisualDeath((Entity*)ent); }
         }
         return;
     }
