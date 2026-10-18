@@ -3891,29 +3891,20 @@ static void MirrorVisualDeath(Entity* e) {
 }
 
 static void MirrorVisualDeathInner(Entity* e) {
-    if (!e) return;
-    unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
-    unsigned int hp = FindHealthInAI(ai);
-    if (!hp) hp = CachedHealthForEntity((unsigned int)e);
-    if (hp && ai && readable((void*)ai, 0xC0) && readable((void*)hp, 0x70)) {
-        *(unsigned char*)(ai + 0x8C) = 1;
-        *(unsigned short*)(hp + 0x5C) = 0xFFFF;
-        *(unsigned int*)(hp + 0x60) |= 0x01000000u;
-    }
-    {
-        unsigned int svc = ((unsigned int (__cdecl*)(int))0x10EF8C0)((int)e);
-        if (svc && readable((void*)svc, 0x20)) *(unsigned int*)(svc + 4) |= 0x1000u;
-    }
-    Human* h = AIEntityHelper::GetHuman(e);
-    if (h && readable(h, 4)) {
-        ActionComponent* ac = h->GetActionComponent();
-        if (ac && readable(ac, 0x40))
-            ac->SetTargetAction((int)1818493434u, 0, 0, 0xFFFF, ACTLAYER_PRIMARY);
-        CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
-        if (cc && readable(cc, 0x600))
-            ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, 0x29);
-    }
-    L("[Mirror] visual death ent=%08X (no SetLife: behaviour is disabled)\n", e);
+    // Hide the body instead of faking an engine death.
+    //
+    // The previous version wrote the AI-dead byte, the health flags and the is-alive service directly.
+    // The engine then kept dispatching statechart triggers into that half-torn-down machine and crashed at
+    // 0x6797DC (x = this+0x114 null) - a fault in engine internals, not in a pointer of ours. Faking death
+    // on a body whose behaviour is disabled cannot be made safe from outside.
+    //
+    // A transform write is the one operation on a mirror that has never faulted, so a dead mirror is moved
+    // far below the world and simply stops being drawn. The corpse vanishes instead of ragdolling; that is
+    // the trade for not corrupting a live statechart.
+    HookMath::Transform m = e->m_GlobalMatrix;
+    m.M42 -= 1000.0f;
+    e->SetGlobalMatrixInternal(&m, false);
+    L("[Mirror] hid ent=%08X (no engine death faked)\n", e);
 }
 
 static void KillGuardEntityInner(Entity* e);     // wrapped below
