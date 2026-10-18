@@ -18,4 +18,10 @@ namespace Net {
     void     SetStrictPeer(bool strict); // accept datagrams only from the configured PeerIP (default true)
     uint64_t LastRecvMs();               // GetTickCount64() of the last ACCEPTED packet (0 = none yet)
     uint32_t MillisSinceRecv();          // ms since the last accepted packet; 0xFFFFFFFF if none yet
+
+    // Counters for the [Net] stats line. txBytes counts what sendto() was given (the full packet
+    // struct), so the number is the real wire cost of this protocol, not an estimate.
+    struct Stats { uint32_t txPackets, txBytes, txEnts, rxPackets, rxBytes; };
+    void GetStats(Stats& out);
+    void ResetStats();
 }

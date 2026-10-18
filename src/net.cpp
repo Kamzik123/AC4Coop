@@ -23,6 +23,8 @@ namespace {
 
     void dbg(const char* s) { printf("%s", s); OutputDebugStringA(s); }
 
+    volatile LONG g_txPackets = 0, g_txBytes = 0, g_txEnts = 0, g_rxPackets = 0, g_rxBytes = 0;
+
     DWORD WINAPI RecvThread(LPVOID) {
         // Read into a buffer sized for the LARGEST packet type (EntityPacket), then dispatch on the
         // leading magic. Both PlayerState and EntityPacket share the one UDP socket.
@@ -52,6 +54,8 @@ namespace {
                         if (playerPkt) { g_remote = *(PlayerState*)buf; g_haveRemote = true; }
                         else           { g_remoteEntities = *(EntityPacket*)buf; g_haveEntities = true; }
                         g_lastRecvMs = GetTickCount64();   // heartbeat for the presence check
+                        InterlockedIncrement(&g_rxPackets);
+                        InterlockedAdd(&g_rxBytes, (LONG)n);
                         LeaveCriticalSection(&g_lock);
                     }
                 }
@@ -124,6 +128,8 @@ bool IsSecondInstance() { return g_secondInstance; }
 void Send(const PlayerState& s) {
     if (!g_enabled) return;
     sendto(g_sock, (const char*)&s, sizeof(s), 0, (sockaddr*)&g_peer, sizeof(g_peer));
+    InterlockedIncrement(&g_txPackets);
+    InterlockedAdd(&g_txBytes, (LONG)sizeof(s));
 }
 
 bool GetRemote(PlayerState& out) {
@@ -139,6 +145,9 @@ bool GetRemote(PlayerState& out) {
 void SendEntities(const EntityPacket& p) {
     if (!g_enabled) return;
     sendto(g_sock, (const char*)&p, sizeof(p), 0, (sockaddr*)&g_peer, sizeof(g_peer));
+    InterlockedIncrement(&g_txPackets);
+    InterlockedAdd(&g_txBytes, (LONG)sizeof(p));
+    InterlockedAdd(&g_txEnts, (LONG)p.count);
 }
 
 bool GetEntities(EntityPacket& out) {
@@ -169,6 +178,23 @@ uint32_t MillisSinceRecv() {
     LeaveCriticalSection(&g_lock);
     if (t == 0) return 0xFFFFFFFFu;               // nothing received yet
     return (uint32_t)(GetTickCount64() - t);       // 64-bit delta, narrowed after the subtraction
+}
+
+// ---- wire counters ------------------------------------------------------------------------------
+void GetStats(Stats& out) {
+    out.txPackets = (uint32_t)InterlockedCompareExchange(&g_txPackets, 0, 0);
+    out.txBytes   = (uint32_t)InterlockedCompareExchange(&g_txBytes,   0, 0);
+    out.txEnts    = (uint32_t)InterlockedCompareExchange(&g_txEnts,    0, 0);
+    out.rxPackets = (uint32_t)InterlockedCompareExchange(&g_rxPackets, 0, 0);
+    out.rxBytes   = (uint32_t)InterlockedCompareExchange(&g_rxBytes,   0, 0);
+}
+
+void ResetStats() {
+    InterlockedExchange(&g_txPackets, 0);
+    InterlockedExchange(&g_txBytes,   0);
+    InterlockedExchange(&g_txEnts,    0);
+    InterlockedExchange(&g_rxPackets, 0);
+    InterlockedExchange(&g_rxBytes,   0);
 }
 
 } // namespace Net

@@ -116,6 +116,7 @@ int    g_disableSpawns = 0;
 // time, lerping between the two snapshots bracketing render time. Hides jitter and packet loss.
 int    g_interpEnabled = 1;  // [Net] Interpolation
 int    g_interpDelayMs = 100;// [Net] InterpDelayMs (render this far behind now; >= ~2 packet intervals)
+int    g_snapHz = 20;        // [Net] SnapshotHz (entity snapshot cadence, independent of frame rate)
 
 // HumanGroundData drive fields, offsets from the bundle pointer *(GetHuman(entity)+0x160).
 // All PC-verified by the mapped Human.h.
@@ -2701,11 +2702,20 @@ static void EntitySyncTick() {
     }
 
     if (g_entHost) {
-        EntityPacket pkt;
-        CaptureShips(pkt);
-        CaptureGuards(pkt);   // append the characters after the ships
-        if (pkt.count) Net::SendEntities(pkt);
-        // Peer-reported kills (guest -> host): resolve by position and kill the real guard.
+        // Snapshot cadence, decoupled from the frame rate: sending the 7 KB EntityPacket every frame was
+        // the whole bandwidth cost of this protocol. [Net] SnapshotHz (default 20).
+        static uint64_t s_lastSnapMs = 0;
+        uint64_t snapNow = GetTickCount64();
+        uint32_t snapInterval = g_snapHz > 0 ? (1000u / (uint32_t)g_snapHz) : 0u;
+        if (snapInterval == 0 || s_lastSnapMs == 0 || snapNow - s_lastSnapMs >= snapInterval) {
+            s_lastSnapMs = snapNow;
+            EntityPacket pkt;
+            CaptureShips(pkt);
+            CaptureGuards(pkt);   // append the characters after the ships
+            if (pkt.count) Net::SendEntities(pkt);
+        }
+        // Peer-reported kills (guest -> host): resolve by position and kill the real guard. Runs every
+        // frame - events must not be gated by the snapshot cadence.
         EntityPacket in;
         if (Net::GetEntities(in) && in.protoVer == NET_PROTO_VER) ProcessKillEvents(in);
     } else {
@@ -4792,6 +4802,22 @@ static void __cdecl OnFrame(Human* updatedHuman) {
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", Net::Init() ? 1 : 0);
     }
 
+    // Wire stats every 5 s: measured, not estimated.
+    {
+        static uint64_t s_statsLast = 0;
+        uint64_t stNow = GetTickCount64();
+        if (!s_statsLast) s_statsLast = stNow;
+        if (Net::Enabled() && stNow - s_statsLast >= 5000) {
+            Net::Stats st; Net::GetStats(st);
+            double secs = (stNow - s_statsLast) / 1000.0;
+            L("[Net] stats tx=%u pkt, %u B, %u ent  rx=%u pkt, %u B  |  %.1f kB/s up, %.1f kB/s down\n",
+              st.txPackets, st.txBytes, st.txEnts, st.rxPackets, st.rxBytes,
+              (st.txBytes / 1024.0) / secs, (st.rxBytes / 1024.0) / secs);
+            Net::ResetStats();
+            s_statsLast = stNow;
+        }
+    }
+
     if (g_dumpReq) { g_dumpReq = 0; Phase1::DumpPlayerInfo(); }   // F7: works in net + local modes
     if (g_crowdReq) { g_crowdReq = 0; Phase1::TryCrowdProbe(); }  // F8: crowd body probe (net + local)
     if (g_sceneReq) { g_sceneReq = 0; Phase1::TrySceneProbe(); }  // F9: scene/interior probe (net + local)
@@ -5364,6 +5390,9 @@ void Phase1::DumpPlayerInfo() {
 
 void Phase1::InstallFrameHook() {
     g_driveLoco = GetPrivateProfileIntA("Coop", "DriveLocomotion", 0, ".\\AC4Coop.ini");
+    g_snapHz = GetPrivateProfileIntA("Net", "SnapshotHz", 20, ".\\AC4Coop.ini");
+    if (g_snapHz < 1) g_snapHz = 1;
+    if (g_snapHz > 60) g_snapHz = 60;
     g_driveContext = GetPrivateProfileIntA("Coop", "DriveContext", 0, ".\\AC4Coop.ini");
     g_driveActions = GetPrivateProfileIntA("Coop", "DriveActions", 1, ".\\AC4Coop.ini");
     g_disablePuppetAI = GetPrivateProfileIntA("Coop", "DisablePuppetAI", 1, ".\\AC4Coop.ini");
