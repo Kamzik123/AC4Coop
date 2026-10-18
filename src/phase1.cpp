@@ -2161,6 +2161,39 @@ static bool ObjMapFind(uint64_t objId, unsigned int* ent, unsigned int* hp) {
     return false;
 }
 
+// ---- host -> guest death lane -------------------------------------------------------------------
+// A killed NPC drops out of m_EntityManager.m_Entities, so a dead=1 snapshot entry is usually never
+// produced and the peer's mirror stays alive. The host therefore watches each soldier's Life and
+// reports the 0xFFFF transition through the same kind=3 lane the guest already uses (ApplyPeerHealth
+// handles life==0xFFFF on either side).
+static const uint8_t KIND_KILL = 3;
+
+struct HostLifeWatch { uint64_t objId; unsigned short life; unsigned int hpSvc; unsigned int gen; };
+static HostLifeWatch s_hostLife[256];
+static int  s_hostLifeN = 0;
+static unsigned int s_hostLifeGen = 0;
+
+static HostLifeWatch* HostLifeFor(uint64_t objId) {
+    for (int i = 0; i < s_hostLifeN; ++i) if (s_hostLife[i].objId == objId) return &s_hostLife[i];
+    if (s_hostLifeN >= 256) return nullptr;
+    HostLifeWatch* w = &s_hostLife[s_hostLifeN++];
+    w->objId = objId; w->life = 0; w->hpSvc = 0; w->gen = 0;
+    return w;
+}
+
+static void EmitHostDeath(EntityPacket& pkt, uint32_t& count, uint64_t objId, const float* pos) {
+    if (!objId || count >= (uint32_t)MAX_SYNC_ENTITIES) return;
+    EntityState& es = pkt.ents[count];
+    memset(&es, 0, sizeof(es));
+    es.kind = KIND_KILL;
+    es.objId = objId;
+    es.hp = 0xFFFF;
+    if (pos) { es.pos[0] = pos[0]; es.pos[1] = pos[1]; es.pos[2] = pos[2]; }
+    ++count;
+    L("[Relay] host DEATH objId=%llu -> peer\n", (unsigned long long)objId);
+}
+
+
 // Guest-side map: host-assigned objId -> local mirror entity, filled from the snapshots.
 static ObjEntry s_guestObj[256];
 static int s_guestObjN = 0;
@@ -2253,6 +2286,17 @@ static void CaptureGuards(EntityPacket& pkt) {
                 es.dead = EngineIsAlive((unsigned int)e) ? 0 : 1;
             }
             ObjMapAdd(es.objId, (unsigned int)e, hpSvc);
+            // Host -> guest death lane: remember Life and flag the 0xFFFF transition.
+            uint64_t deathId = 0;
+            if (es.objId) {
+                HostLifeWatch* w = HostLifeFor(es.objId);
+                if (w) {
+                    w->gen = s_hostLifeGen;
+                    if (!w->hpSvc && hpSvc) w->hpSvc = hpSvc;
+                    if (w->life != 0xFFFFu && w->life != 0 && es.hp == 0xFFFFu) { deathId = es.objId; w->life = 0xFFFFu; }
+                    else if (w->life != 0xFFFFu) w->life = es.hp;
+                }
+            }
             if (es.dead) {
                 static void* s_capDead[64];
                 static int   s_capDeadN = 0;
@@ -2279,8 +2323,25 @@ static void CaptureGuards(EntityPacket& pkt) {
                 }
             }
             ++count;
+            if (deathId) EmitHostDeath(pkt, count, deathId, nullptr);
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
+
+    // Anything we tracked last capture but did not see now either walked out of range or died. Only the
+    // cached health's dead flag decides; a guard that merely left has it clear and is left alone.
+    for (int i = 0; i < s_hostLifeN; ++i) {
+        HostLifeWatch& w = s_hostLife[i];
+        if (w.gen == s_hostLifeGen || w.life == 0xFFFFu || !w.hpSvc) continue;
+        bool dead = false;
+        __try { dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0; }
+        __except (EXCEPTION_EXECUTE_HANDLER) { dead = false; }
+        if (dead) {
+            w.life = 0xFFFFu;
+            EmitHostDeath(pkt, count, w.objId, nullptr);
+        }
+    }
+    ++s_hostLifeGen;
+
     pkt.count = count;
 }
 
@@ -2288,7 +2349,7 @@ static void CaptureGuards(EntityPacket& pkt) {
 // The peer's mirrors die natively (verified live), so the guest only has to notice and report it.
 // Kills travel as EntityPacket entries with kind == 3; the host resolves them by position (the same
 // 4 m tolerance ApplyGuards already uses) and runs the verified kill recipe on the matching soldier.
-static const uint8_t KIND_KILL = 3;
+// KIND_KILL is declared above, next to the host-side death watch that also emits it.
 
 // Defined below with the mirror bookkeeping; needed here for the local-kill marking.
 static void MarkMirrorKilledLocally(void* e);
@@ -4645,7 +4706,7 @@ static void __cdecl OnFrame(Human* updatedHuman) {
         s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, ".\\AC4Coop.ini");
         s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
-        Net::Init();
+        L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", Net::Init() ? 1 : 0);
     }
 
     if (g_dumpReq) { g_dumpReq = 0; Phase1::DumpPlayerInfo(); }   // F7: works in net + local modes
