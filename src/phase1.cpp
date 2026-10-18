@@ -4956,7 +4956,20 @@ static void ProbeIdentityOnce() {
     }
 }
 
+static void OnFrameInner(Human* updatedHuman);
+
+// Any access violation inside our per-frame work is logged and that frame is skipped, instead of taking
+// the process down. Crashes that follow from engine state we already corrupted will still happen, but a
+// bad pointer in our own code no longer kills the game - and the log names the frame instead of ending.
 static void __cdecl OnFrame(Human* updatedHuman) {
+    __try { OnFrameInner(updatedHuman); }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        static int s_n = 0;
+        if (s_n < 20) { ++s_n; L("[Frame] EXCEPTION 0x%08X in on-frame work (skipped)\n", GetExceptionCode()); }
+    }
+}
+
+static void OnFrameInner(Human* updatedHuman) {
     if (!isPlayerUpdate(base(), updatedHuman)) return;
 
     ProbeIdentityOnce();
