@@ -2223,6 +2223,22 @@ static void MarkPeerApplied(unsigned int e) {
     if (s_peerAppliedN < 64) s_peerApplied[s_peerAppliedN++] = e;
 }
 
+// Soldier archetypes, measured on the host (bhv+0x14 & 0xFFFF, all on behaviour vtable 0x026E34D8).
+// 0x35F7 was the only one accepted before; the other three are the gunners/agiles/heavies/captains the
+// tester reported as not synced. Values are ids, not offsets - 0x0000/0x0400/0x0404 also showed up but
+// look like pointer low words rather than archetypes, so they stay out until proven otherwise.
+static bool IsSoldierArchetype(uint32_t id) {
+    switch (id) {
+    case 0x35F7:   // normal soldier
+    case 0x31EC:
+    case 0x318C:
+    case 0x3594:
+        return true;
+    default:
+        return false;
+    }
+}
+
 static void CaptureGuards(EntityPacket& pkt) {
     ObjMapReset();                       // rebuild the objId table for this capture
     World* world = World::GetCurrentWorld();
@@ -2264,10 +2280,13 @@ static void CaptureGuards(EntityPacket& pkt) {
                 for (int a = 0; a < s_archN; ++a) if (s_archVt[a] == avt && s_archId[a] == aid) { seen = true; break; }
                 if (!seen && s_archN < 16) {
                     s_archVt[s_archN] = avt; s_archId[s_archN] = aid; ++s_archN;
-                    L("[Arch] bhvVt=%08X id14=%04X\n", avt, aid);
+                    unsigned int ahp = FindHealthInAI((unsigned int)AIEntityHelper::GetEntityAI(e));
+                    unsigned int alife = (ahp && readable((void*)ahp, 0x70)) ? *(unsigned short*)(ahp + 0x5C) : 0;
+                    L("[Arch] bhvVt=%08X id14=%04X life=%u accepted=%d\n",
+                      avt, aid, alife, IsSoldierArchetype(aid) ? 1 : 0);
                 }
             }
-            if ((*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF) != 0x35F7) continue;   // only the soldiers
+            if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             float dx=x-px, dy=y-py, dz=z-pz;
             if (dx*dx+dy*dy+dz*dz > 80.0f*80.0f) continue;   // only nearby characters
@@ -2346,14 +2365,18 @@ static void CaptureGuards(EntityPacket& pkt) {
         HostLifeWatch& w = s_hostLife[i];
         if (w.gen == s_hostLifeGen || w.life == 0xFFFFu || !w.hpSvc) continue;
         bool dead = false;
-        __try { dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0; }
+        unsigned short life = w.life;
+        __try {
+            dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0;
+            life = *(unsigned short*)(w.hpSvc + 0x5C);      // the service can outlive the entity list entry
+        }
         __except (EXCEPTION_EXECUTE_HANDLER) { dead = false; }
         if (!w.vanishedLogged) {
             w.vanishedLogged = true;
             L("[Relay] objId=%llu vanished dead=%d life=%u\n",
-              (unsigned long long)w.objId, dead ? 1 : 0, (unsigned)w.life);
+              (unsigned long long)w.objId, dead ? 1 : 0, (unsigned)life);
         }
-        if (dead) {
+        if (life == 0xFFFFu || dead) {
             w.life = 0xFFFFu;
             EmitHostDeath(pkt, count, w.objId, nullptr);
         }
@@ -2536,7 +2559,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only
                 }
                 if (!skel || !bhvC) continue;
-                if ((*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF) != 0x35F7) continue;   // only the soldiers
+                if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
                 float dx = e->m_GlobalMatrix.M41 - es.pos[0];
                 float dy = e->m_GlobalMatrix.M42 - es.pos[1];
                 float dz = e->m_GlobalMatrix.M43 - es.pos[2];
