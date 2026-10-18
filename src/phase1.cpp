@@ -2313,6 +2313,7 @@ static void CaptureGuards(EntityPacket& pkt) {
             EntityState& es = pkt.ents[count];
             es.key = (uint32_t)i;
             es.kind = 2;    // character (guard)
+            es.arch = (uint16_t)(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF);
             es.pos[0]=x; es.pos[1]=y; es.pos[2]=z;
             HookMath::Quaternion q; HookMath::FromMatrix(&e->m_GlobalMatrix, &q);
             es.quat[0]=q.x; es.quat[1]=q.y; es.quat[2]=q.z; es.quat[3]=q.w;
@@ -2610,6 +2611,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
     BaseBigArray<Reference>& ents = world->m_EntityManager.m_Entities;
     int nobj = ents.GetSize();
     s_driveN = 0;                       // rebuild the per-frame drive cache
+    unsigned int usedEnt[MAX_SYNC_ENTITIES]; int usedN = 0;   // one local body per host entity, per packet
     __try {
         for (uint32_t i = 0; i < pkt.count; ++i) {
             const EntityState& es = pkt.ents[i];
@@ -2639,6 +2641,15 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     AbstractEntityAI* aiPre = AIEntityHelper::GetEntityAI(e);
                     unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
                     if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
+                }
+                // Class-aware matching: if the host told us the archetype, only consider bodies of that
+                // class. Without this a heavy could be played by a civilian standing nearby.
+                if (es.arch && (uint16_t)(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF) != es.arch) continue;
+                // One body per host entity per snapshot: skip anything already claimed this packet.
+                {
+                    bool taken = false;
+                    for (int u = 0; u < usedN; ++u) if (usedEnt[u] == (unsigned int)e) { taken = true; break; }
+                    if (taken) continue;
                 }
                 // Stable binding: once an objId is tied to a local entity, keep that body - but only while
                 // the body is plausibly still the same one. If it sits far from where the host says the
@@ -2675,6 +2686,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     continue;
                 }
             }
+            if (usedN < MAX_SYNC_ENTITIES) usedEnt[usedN++] = (unsigned int)best;
             // Guest relay: if OUR attack is what killed this mirror, report it to the host (which owns
             // the real guard). Skipped when the death came from the host snapshot, so it can't echo.
             GuestObjAdd(es.objId, (unsigned int)best);   // objId -> local mirror, for inbound events

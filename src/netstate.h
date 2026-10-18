@@ -113,7 +113,7 @@ struct PlayerState {
 static const uint32_t NET_MAGIC = 0x43344341; // 'AC4C'
 // Wire/struct-layout version. PlayerState is #pragma pack(1): adding a field shifts every following
 // offset, so both peers MUST run the same build. Bump this whenever the layout changes.
-static const uint32_t NET_PROTO_VER = 7;
+static const uint32_t NET_PROTO_VER = 8;   // 8: EntityState carries the NPC archetype id (was _pad2)
 
 // ---- entity sync (host-authoritative "synced worlds") -------------------------------
 // One replicated entity's transform. `key` is the index in the host's enumeration; `kind`
@@ -136,7 +136,7 @@ struct EntityState {
     int      hullHP;       // ship hull HP (ships only; 0 for guards) - host-authoritative damage
     uint64_t objId;        // host-assigned stable identity (HandleContainer::m_ObjectID); 0 = unknown
     uint16_t hp;           // host-authoritative Life (guards); 0xFFFF = dead
-    uint16_t _pad2;
+    uint16_t arch;         // archetype id at behaviour+0x14: lets the peer match class-to-class
 };
 
 struct EntityPacket {
