@@ -2224,21 +2224,8 @@ static void MarkPeerApplied(unsigned int e) {
     if (s_peerAppliedN < 64) s_peerApplied[s_peerAppliedN++] = e;
 }
 
-// Soldier archetypes, measured on the host (bhv+0x14 & 0xFFFF, all on behaviour vtable 0x026E34D8).
-// 0x35F7 was the only one accepted before; the other three are the gunners/agiles/heavies/captains the
-// tester reported as not synced. Values are ids, not offsets - 0x0000/0x0400/0x0404 also showed up but
-// look like pointer low words rather than archetypes, so they stay out until proven otherwise.
-static bool IsSoldierArchetype(uint32_t id) {
-    switch (id) {
-    case 0x35F7:   // normal soldier
-    case 0x31EC:
-    case 0x318C:
-    case 0x3594:
-        return true;
-    default:
-        return false;
-    }
-}
+// (the archetype whitelist that used to live here was removed: the inventory probe proved the +0x14 id is
+// not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
 static void CaptureGuards(EntityPacket& pkt) {
     ObjMapReset();                       // rebuild the objId table for this capture
@@ -2306,11 +2293,20 @@ static void CaptureGuards(EntityPacket& pkt) {
                     float ddz = e->m_GlobalMatrix.M43 - pz;
                     L("[Arch] vt=%08X id=%04X skel=%u ent=%08X evt=%08X human=%d life=%u/%u stage=%d alias=%08X comps=%d d2=%.0f accepted=%d\n",
                       avt, aid, ask, e, (unsigned int)e->vftable, hh ? 1 : 0, life, maxl, stage, alias, n,
-                      ddx*ddx + ddy*ddy + ddz*ddz, (avt == 0x026E34D8 && IsSoldierArchetype(aid)) ? 1 : 0);
+                      ddx*ddx + ddy*ddy + ddz*ddz,
+                      (avt == 0x026E34D8 && ai2 && hp2 && readable((void*)ai2, 0xC0)) ? 1 : 0);
                 }
             }
             if (!skel || !bhvC) continue;
-            if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
+            // Class coverage: accept any BhvGenericNPC that is a real human with a health service. The
+            // archetype id is NOT a reliable filter - the inventory probe found live NPCs with ids 35F7,
+            // 318C, 31EC, 3594, 0000, 0001 and 0484, and a dead body reading 0400. "Full class list"
+            // therefore means every human NPC, including civilians, not a hard-coded set.
+            {
+                AbstractEntityAI* aiPre = AIEntityHelper::GetEntityAI(e);
+                unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
+                if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
+            }
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             float dx=x-px, dy=y-py, dz=z-pz;
             if (dx*dx+dy*dy+dz*dz > 80.0f*80.0f) continue;   // only nearby characters
@@ -2584,7 +2580,12 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only
                 }
                 if (!skel || !bhvC) continue;
-                if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
+                {
+                    // Same predicate as the capture side: any human NPC with a health service.
+                    AbstractEntityAI* aiPre = AIEntityHelper::GetEntityAI(e);
+                    unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
+                    if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
+                }
                 // Stable binding: once an objId is tied to a local entity, keep that body even if another
                 // soldier is momentarily closer. Re-matching by position alone made mirrors swap and look
                 // messy when several enemies stood together.
