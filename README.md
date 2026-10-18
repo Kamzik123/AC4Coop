@@ -5,7 +5,9 @@ Built as an **ASI plugin** (`bin\AC4Coop.asi`), so it needs an ASI loader such a
 game folder.
 
 Two game instances connect over UDP. Each one spawns a **puppet** `Human` that mirrors the other player's
-position, orientation and animation.
+position, orientation and animation. On top of that, the host's world is **mirrored** to the peer: the
+host is authoritative, and the peer's guards + ships become playback dummies driven from the host's
+snapshot (see **World mirror** below).
 
 ## Status
 
@@ -15,8 +17,17 @@ Working:
   Works with two instances on one PC (auto port-swap) or across two PCs.
 - **Puppet lifecycle.** The puppet spawns automatically when the peer is in the same world. It despawns
   when the peer leaves or disconnects, and is dropped and respawned across world travel.
-- **Empty shared world.** All ambient spawning is suppressed (`DisableSpawns=1`), because ambient NPCs are
-  seeded independently on each client.
+- **Host-authoritative world mirror (`EntitySync=1`).** The host owns its world; the peer's guards and
+  ships are **playback dummies** driven every frame from the host's snapshot — the same seam as the
+  player puppet. Per matched guard: disable `BhvGenericNPC`, set `CharacterController::m_DriveEntity =
+  false` (this is the piece that used to crash/freeze — the controller was fighting the drive), then
+  `SetGlobalMatrixInternal` (transform) + `SetTargetAction` (action clip). Nearest-position matching keys
+  each host guard to its peer mirror (spawns are deterministic). The host's dying guard sends its **die
+  clip** + a dead flag, so the peer's mirror falls. Verified in a single-instance self-test; a
+  two-machine pass should confirm it over the wire.
+- **Ship sync.** The peer's ship mirrors position + heading via the render-override seam (a ship ghost).
+  Hull HP is a plain value (`*(ship+0x5C) + 0x84`) — readable and writable — so ship damage can be
+  replicated without the guard health-statechart problem.
 - **Position and orientation.** The puppet is placed every frame with `SetGlobalMatrixInternal`, and
   `CharacterController::m_DriveEntity = false` stops its physics from fighting the placement. This is
   jitter-free in every context.
@@ -48,7 +59,9 @@ The animation side is "good enough for now". See **Known issues / next** below.
 | `HybridLoco=1` | Per-context ownership: on ground the puppet's own state machine animates; everywhere else we replicate actions. With this on, the action/blend sync above runs **only off-ground**. Set `0` to use action replication everywhere. |
 | `SeekOnSwitch` | Seek a newly targeted action to the peer's phase (default 1). |
 | `MinBlendInMs` | Blend used when the peer's switch had none (default 100, 0 = copy the cut exactly). |
-| `DisableSpawns` | Suppress ambient spawning (default 1). |
+| `DisableSpawns` | Suppress ambient spawning (legacy, default 1). Superseded by the world mirror when `EntitySync=1`. |
+| `EntitySync=1` | Host-authoritative **world mirror**: relay the host's guards + ships to the peer. Set `EntityHost=1` on the authoritative machine and `0` on the mirror. |
+| `EntitySelfTest=1` | Single-instance self-test: capture the host's own guards + ships and drive them at `EntitySelfTestOffset` units, to verify the mirror pipeline without a peer. |
 
 `[Net]`: `Enabled`, `PeerIP`, `LocalPort`/`PeerPort`, `Interpolation`, `InterpDelayMs`.
 `[Display]`: `Fullscreen`, `Borderless`, `ForceWindowedMs` (windowed mode is recommended for two-instance
@@ -56,8 +69,9 @@ testing).
 
 ## Wire format
 
-`src/netstate.h` holds `PlayerState`, one packed struct per packet. The receiver drops any packet whose
-size differs, so **both instances must run the same build**. Main fields:
+`src/netstate.h` holds two packet types: `PlayerState` (the puppet) and `EntityPacket` / `EntityState`
+(the world mirror — guards + ships). The receiver drops any packet whose size differs, so **both
+instances must run the same build**. `PlayerState` main fields:
 
 - the global matrix
 - legacy ground data
@@ -68,6 +82,9 @@ size differs, so **both instances must run the same build**. Main fields:
 - blend-in descriptor (`blendInLen`, `blendInStartFromEnd`, `blendInTargetStart`, `blendInFlags`)
 - `timeScale`
 - a 128-byte context union (swim, now mostly legacy)
+
+`EntityPacket` (the world mirror) carries `count` + `EntityState[]`: `key, kind (1=ship, 2=guard),
+dead, stage, pos[3], quat[4], actionAlias`.
 
 ## Build
 
@@ -80,6 +97,7 @@ Copy `bin\AC4Coop.asi` and `AC4Coop.ini` next to `AC4BFSP.exe` (with an ASI load
 run two instances with `PeerIP=127.0.0.1` and the default ports.
 
 - **Hotkeys:**
+  - **F4** dumps the entity enumeration + the guard/health probe to the log.
   - **F6** requests a manual puppet spawn (used when `[Net] Enabled=0`).
   - **F7** dumps the player `Human*` and the swim chain to the log.
 - **Logs:** written next to `AC4Coop.asi` (the game folder): `phase0_log.txt` and
@@ -128,8 +146,8 @@ Evaluator layout (same on PC and PS3):
 ## Source layout
 
 - `src/dllmain.cpp`: ASI entry, windowed mode, hotkey poll thread, log.
-- `src/phase1.{h,cpp}`: frame hook, spawn/despawn, `CaptureLocalState` / `ApplyRemoteState`, interpolation,
-  spawn suppression.
+- `src/phase1.{h,cpp}`: frame hook, spawn/despawn, `CaptureLocalState` / `ApplyRemoteState`,
+  interpolation, `CaptureGuards`/`ApplyGuards` + `CaptureShips`/`ApplyShips` (the world mirror).
 - `src/net.{h,cpp}`: UDP transport.
 - `src/netstate.h`: wire struct.
 - `src/windowed.{h,cpp}`, `src/scimitarCommandLineOptions.h`: windowed mode.
@@ -140,6 +158,16 @@ Evaluator layout (same on PC and PS3):
 
 ## Known issues / next
 
+- **Combat interactivity (the next big step).** The peer's guards are playback dummies — they mirror the
+  host but don't react to the peer. To let the peer *fight* the same guards, relay the peer's **pad
+  inputs** (buttons + stick) to the host and let the host's own combat system resolve the damage (this
+  sidesteps the guard health statechart entirely — a real second player's input drives the damage). The
+  input system is mapped: `PlayerPadManager` at `World+0x7F8 → *(holder+4)`, the `FirePadButtonPressed`
+  / `Released` / `StickChanged` events (`sub_800F60` → `sub_7FE9A0`), the pad readers
+  (`PadButtonReader`/`PadAxisReader`), and the device layer (DirectInput + XInput). The per-pad **state
+  struct** (buttons bitmask + stick floats) still needs a live dump.
+- **Guard death over the wire.** The die clip + dead flag are replicated; a live kill on the host should
+  make the peer's mirror fall. The ragdoll (physics) isn't replicated — the clip alone provides the fall.
 - **Climbing IK:** hand and foot targets aren't replicated, so climb poses are approximate.
 - **Phase drift:** the phase is synced only on action switch. Long loops can drift; no continuous
   correction yet.
@@ -150,3 +178,51 @@ Evaluator layout (same on PC and PS3):
 - **Leftover code:** the swim context block and the ground-data drive are legacy under action replication
   and can be removed.
 - **Pause menu:** the puppet disappears in the pause menu.
+
+## Combat sync — real kills on both sides (2026-10-17)
+
+The earlier plan (relay raw pad input so the host resolves the damage) is **superseded**. All of the
+following is verified against the live game:
+
+- **A mirrored guard takes real damage.** The damage system is independent of the behaviour we disable
+  for the mirror: hitting a playback dummy moves its health (`36/36 -> 35/36 -> dead`).
+- **Entity -> health mapping** (no heap scan needed): `GetEntityAI(guard)` -> the AI's service table at
+  `ai+0x70` (count at `ai+0x76`); the entry whose vtable is `0x02712F60` is that guard's `CSrvNPCHealth`
+  (`Life` at `+0x5C`, `Max` at `+0x5E`, flags at `+0x60`). Live soldiers show 20 services, including
+  `CSrvNPCDeath` (vtable `0x02722528`).
+- **Death is engine-native.** `CSrvNPCHealth::SetLife(hp, -1)` (`sub_19FB4C0`) is the engine's own death
+  write: a negative value lands `Life` on `0xFFFF` and posts the health event. Writing `0xFFFF` directly
+  does **not** work — the setter (and its event) is the trigger.
+- **The is-dead predicate** is `sub_753330`: `*(BYTE**)(ai+0x98) && **... || *(BYTE*)(ai+0x8C)`, and
+  `ai+0x98` is just a cached pointer to `health+0x63`.
+
+Kill recipe (verified live: guard dies, plays the death animation, lies down, no collision):
+
+```
+ai = AIEntityHelper::GetEntityAI(guard);
+hp = service in ai->[+0x70] (count +0x76) whose vtable == 0x02712F60;
+cc = ((Human*)AIEntityHelper::GetHuman(guard))->GetCharacterComponent();
+
+((int (__thiscall*)(void*, int))0x19FB4C0)(hp, -1);   // SetLife(-1): engine death + event
+hp->[+0x60] |= 0x01000000;                            // dead flag
+ai->[+0x8C] = 1;                                      // engine is-dead predicate
+SetTargetAction(1818493434) on the ActionComponent;   // death clip (captured from a natural kill)
+((char (__thiscall*)(void*, int))0x636480)(&cc->m_FilterInfo, 0x29);  // SetLayer -> Disabled
+```
+
+`SetLayer(..., 0x29)` is what removes the corpse's collision body (`CollisionFilterInfo::SetLayer`
+propagates the filter to the physics object). Do **not** set `m_DriveEntity = false` on a corpse — the
+controller then stops applying the animation's root motion and the body stands back up (A/B verified).
+
+**Guest -> host relay:** the guest watches each mirror's `Life` in `ApplyGuards`; on the `0xFFFF`
+transition it sends an `EntityPacket` entry with `kind = 3` carrying the host-space position. The host
+resolves the nearest soldier within 4 m and runs the recipe. Host-replicated deaths are not echoed back
+(`es.dead` check).
+
+**Debug hotkeys:** `F1` simulate a peer kill (goes through the position path, not a pointer);
+`F2` guest-side detection harness (press twice: record alive, then kill+report); `F3` ship field diff.
+
+**Known limits:** self-test skips the transform write (the capture source and the mirror are the same
+world, so it was redundant snapping and showed as jitter); real two-machine co-op will need interpolation
+of guard transforms between snapshots. Ship hull HP is still unknown — it is not a `CSrvHealth` object
+and not in the ship AI's service table.

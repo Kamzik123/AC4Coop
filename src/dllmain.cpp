@@ -96,6 +96,7 @@ static DWORD WINAPI PollThread(LPVOID)
     pGetGlobalPos = (GetGlobalPos_t)(base + RVA_GetGlobalPosition);
 
     logline("[AC4Coop] Phase 0 online. module base = %p\n", (void*)base);
+    Phase1::InstallVirtualPadHook();   // Phase A: must run before the engine enumerates pads
     logline("[AC4Coop] GetWorld=%p  GetPlayer=%p  GetGlobalPosition=%p\n",
             (void*)pGetWorld, (void*)pGetPlayer, (void*)pGetGlobalPos);
 
@@ -104,6 +105,7 @@ static DWORD WINAPI PollThread(LPVOID)
 
     while (g_run)
     {
+        Phase1::InstallVirtualPadHook();   // retry until xinput1_3.dll is loaded
         Sleep(50); // ~20 Hz
         ++ticks;
 
@@ -118,6 +120,78 @@ static DWORD WINAPI PollThread(LPVOID)
         bool f7 = (GetAsyncKeyState(VK_F7) & 0x8000) != 0;
         if (f7 && !f7prev) { logline("[AC4Coop] F7 -> dump requested\n"); Phase1::RequestDump(); }
         f7prev = f7;
+
+        // F8 (edge-triggered): crowd (non-player) body probe — GO/NO-GO for the ambient-NPC-sync plan.
+        static bool f8prev = false;
+        bool f8 = (GetAsyncKeyState(VK_F8) & 0x8000) != 0;
+        if (f8 && !f8prev) { logline("[AC4Coop] F8 -> crowd probe requested\n"); Phase1::RequestCrowdProbe(); }
+        f8prev = f8;
+
+        // F9 (edge-triggered): scene/interior probe — observation only, logs the [Scene] block.
+        static bool f9prev = false;
+        bool f9 = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
+        if (f9 && !f9prev) { logline("[AC4Coop] F9 -> scene probe requested\n"); Phase1::RequestSceneProbe(); }
+        f9prev = f9;
+
+        // F10 (edge-triggered): ship/boarding probe -- observation only, logs the [Ship] block.
+        static bool f10prev = false;
+        bool f10 = (GetAsyncKeyState(VK_F10) & 0x8000) != 0;
+        if (f10 && !f10prev) { logline("[AC4Coop] F10 -> ship probe requested\n"); Phase1::RequestShipProbe(); }
+        f10prev = f10;
+
+        // F11 (edge-triggered): REMOVE the ghost ship (safe hide) — press before switching worlds.
+        static bool f11prev = false;
+        bool f11 = (GetAsyncKeyState(VK_F11) & 0x8000) != 0;
+        if (f11 && !f11prev) { logline("[AC4Coop] F11 -> remove ghost ship\n"); Phase1::RequestGhostDespawn(); }
+        f11prev = f11;
+
+        // F12 (edge-triggered): construct-ship experiment -- build a SHIP entity at the ctor VA and add it
+        // to the world so the USER can see whether the engine streams its model (hull/masts) on its own.
+        static bool f12prev = false;
+        bool f12 = (GetAsyncKeyState(VK_F12) & 0x8000) != 0;
+        if (f12 && !f12prev) { logline("[AC4Coop] F12 -> construct-ship experiment\n"); Phase1::RequestShipCtorProbe(); }
+        f12prev = f12;
+
+        // F13 (edge-triggered): ship-drive test -- write +50 X onto the LOCAL ship's transform, then let the
+        // USER watch whether the ship jumps and STAYS (transform writable -> we can drive it) or snaps back
+        // (physics owns the transform). Observation only; no wire/co-op state touched.
+        static bool f13prev = false;
+        bool f13 = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
+        if (f13 && !f13prev) { logline("[AC4Coop] F5 -> ship-drive test\n"); Phase1::RequestShipDriveProbe(); }
+        f13prev = f13;
+
+        // F1 (edge-triggered): guard -> CSrvNPCHealth mapping probe — test which owner object holds
+        // the guard's health service.
+        static bool f1prev = false;
+        bool f1 = (GetAsyncKeyState(VK_F1) & 0x8000) != 0;
+        if (f1 && !f1prev) { logline("[AC4Coop] F1 -> guard health map\n"); Phase1::RequestGuardHealthMap(); }
+        f1prev = f1;
+
+        // F2 (edge-triggered): health heap-scan probe — find the live CSrvHealth objects by vtable.
+        static bool f2prev = false;
+        bool f2 = (GetAsyncKeyState(VK_F2) & 0x8000) != 0;
+        if (f2 && !f2prev) { logline("[AC4Coop] F2 -> health heap probe\n"); Phase1::RequestHealthProbe(); }
+        f2prev = f2;
+
+        // F3 (edge-triggered): input-state probe — dump the input manager + device input state to pin
+        // the per-pad buttons + stick layout for the input relay. Read-only.
+        static bool f3prev = false;
+        bool f3 = (GetAsyncKeyState(VK_F3) & 0x8000) != 0;
+        if (f3 && !f3prev) { logline("[AC4Coop] F3 -> input-state probe\n"); Phase1::RequestInputProbe(); }
+        f3prev = f3;
+
+        // V (edge-triggered): toggle the pad-1 test stick and compare player vs puppet movement.
+        static bool vprev = false;
+        bool v = (GetAsyncKeyState('V') & 0x8000) != 0;
+        if (v && !vprev) { logline("[AC4Coop] V -> toggle virtual pad stick\n"); Phase1::ToggleVirtualPad(); }
+        vprev = v;
+
+        // F4 (edge-triggered): entity-enumeration probe — dump the world's entity lists (ship list,
+        // character list, object list, entity manager) to verify the offsets live. Observation only.
+        static bool f14prev = false;
+        bool f14 = (GetAsyncKeyState(VK_F4) & 0x8000) != 0;
+        if (f14 && !f14prev) { logline("[AC4Coop] F4 -> entity-enumeration probe\n"); Phase1::RequestEntityEnum(); }
+        f14prev = f14;
 
         // (Phase 0 position logging removed — Phase 1 uses the main-thread frame hook.)
         (void)lastPlayer;
@@ -174,8 +248,12 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // Phase 1: hook the per-frame Human update so spawns/drives run on the game's main thread.
         Phase1::InstallFrameHook();
 
-        // Front B: bring up the peer-to-peer UDP link (no-op unless [Net] Enabled=1).
-        Net::Init();
+        // Front B (peer-to-peer UDP link) is started on the first in-world frame instead of at
+        // DLL attach. The game's launch chain (Steam -> Ubisoft -> DRM -> real game) starts more
+        // than one process that loads this ASI, and the transient one binds the UDP port and then
+        // dies - so the LIVE game's bind fails and it never gets a socket. The transient processes
+        // never reach a player frame, so starting the link here means only the live game binds.
+        (void)0;
 
         CreateThread(nullptr, 0, PollThread, nullptr, 0, nullptr);
     } else if (reason == DLL_PROCESS_DETACH) {

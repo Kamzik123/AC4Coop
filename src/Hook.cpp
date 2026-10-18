@@ -1,59 +1,59 @@
 #include "Hook.h"
-#include <chrono>
 
-uintptr_t GameModuleBase = (uintptr_t)GetModuleHandle("ac4bfsp.exe");
+#include <chrono>
+#include <thread>
+
+uintptr_t GameModuleBase = (uintptr_t)GetModuleHandleA("ac4bfsp.exe");
 
 namespace Hook
 {
+	// Patch a 5-byte relative JMP at pAddress, NOP-filling up to dwLen. Returns 1 on success, 0 if the
+	// page could not be made writable.
 	int DetourFunc(BYTE* pAddress, DWORD dwJumpTo, DWORD dwLen)
 	{
-		DWORD dwOldProtect, dwBkup, dwRelAddr;
-		// Basic VirtualProtect... y'all should know this
-		VirtualProtect(pAddress, dwLen, PAGE_EXECUTE_READWRITE, &dwOldProtect);
-		// Calculate the "distance" we're gonna have to jump - the size of the JMP instruction
-		dwRelAddr = (DWORD)(dwJumpTo - (DWORD)pAddress) - 5;
-		// Write the JMP opcode @ our jump position...
-		*pAddress = 0xE9;
-		// Write the offset to where we're gonna jump
-		*((DWORD*)(pAddress + 0x1)) = dwRelAddr;
-		// Overwrite the rest of the bytes with NOPs
-		for (DWORD x = 0x5; x < dwLen; x++)
-			*(pAddress + x) = 0x90;
-		// Restore the default permissions
-		VirtualProtect(pAddress, dwLen, dwOldProtect, &dwBkup);
+		if (!pAddress || dwLen < 5) return 0;
 
+		DWORD oldProtect = 0;
+		if (!VirtualProtect(pAddress, dwLen, PAGE_EXECUTE_READWRITE, &oldProtect)) return 0;
+
+		pAddress[0] = 0xE9;                                   // JMP rel32
+		DWORD rel = (DWORD)(dwJumpTo - (DWORD)(uintptr_t)pAddress) - 5;
+		*(DWORD*)(pAddress + 1) = rel;
+		for (DWORD i = 5; i < dwLen; ++i) pAddress[i] = 0x90; // NOP padding
+
+		DWORD ignored = 0;
+		VirtualProtect(pAddress, dwLen, oldProtect, &ignored);
 		return 1;
 	}
 
 	void RestoreFunction(uintptr_t address, uintptr_t size, BYTE* values)
 	{
-		DWORD dwOldProtect, dwBkup;
-		BYTE* pAddress = (BYTE*)address;
+		if (!address || !size || !values) return;
 
-		VirtualProtect(pAddress, size, PAGE_EXECUTE_READWRITE, &dwOldProtect);
+		BYTE* p = (BYTE*)address;
+		DWORD oldProtect = 0;
+		if (!VirtualProtect(p, size, PAGE_EXECUTE_READWRITE, &oldProtect)) return;
 
-		for (uint32_t i = 0; i < size; i++)
-		{
-			*((BYTE*)(pAddress + i)) = values[i];
-		}
+		for (uintptr_t i = 0; i < size; ++i) p[i] = values[i];
 
-		VirtualProtect(pAddress, size, dwOldProtect, &dwBkup);
+		DWORD ignored = 0;
+		VirtualProtect(p, size, oldProtect, &ignored);
 	}
 
-	void PreciseSleep(unsigned int microseconds) {
-		static bool highResolutionTimerInitialized = false;
-		if (!highResolutionTimerInitialized) {
-			TIMECAPS tc;
-			if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) {
-				timeBeginPeriod(tc.wPeriodMin);
-				highResolutionTimerInitialized = true;
-			}
+	void PreciseSleep(unsigned int microseconds)
+	{
+		// Ask for 1 ms timer resolution once; the spin below then honours sub-millisecond waits.
+		static bool raised = false;
+		if (!raised) {
+			TIMECAPS caps = {};
+			if (timeGetDevCaps(&caps, sizeof(caps)) == TIMERR_NOERROR)
+				timeBeginPeriod(caps.wPeriodMin ? caps.wPeriodMin : 1);
+			raised = true;
 		}
 
-		auto start = std::chrono::high_resolution_clock::now();
-		auto end = start + std::chrono::microseconds(microseconds);
-		while (std::chrono::high_resolution_clock::now() < end) {
-			Sleep(0);
-		}
+		auto deadline = std::chrono::high_resolution_clock::now()
+			+ std::chrono::microseconds(microseconds);
+		while (std::chrono::high_resolution_clock::now() < deadline)
+			std::this_thread::yield();
 	}
 }

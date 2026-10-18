@@ -31,8 +31,11 @@ union ContextBlock {
 // The full transferable player state (Front A proved these reproduce movement).
 struct PlayerState {
     uint32_t magic;                 // NET_MAGIC
+    uint32_t protoVer;              // NET_PROTO_VER — struct/wire-layout version (both peers MUST match)
     uint32_t seq;                   // sender frame counter
     uint64_t worldId;               // ManagedObject::GetObjectID(world) — must match to show a puppet
+    uint32_t sceneKey;              // packed world-cell of the player (0 = unknown) — interior/exterior gate
+    uint32_t sceneCellId;           // engine's own last-load cell id (diagnosis only)
     HookMath::Transform    matrix;  // global matrix (rows 0-2 rotation, row 3 translation)
     float    curSpeed;              // HumanGroundData.m_CurSpeedRatio
     float    destSpeed;             // HumanGroundData.m_DestSpeedRatio
@@ -97,8 +100,50 @@ struct PlayerState {
     // matching `contextId` is meaningful on any given packet.
     ContextBlock ctx;
 
+    // ---- ship sync (filled when the player is aboard their ship) ---------------------
+    bool     shipValid;    // player is aboard a ship -> the fields below are meaningful
+    float    shipPos[3];   // ship world position (x,y,z) = m_GlobalMatrix.M41/42/43
+    float    shipQuat[4];  // ship rotation quaternion (x,y,z,w), from the 3x3 at +0x10
+    int32_t  shipHP;       // ship hull HP = *(int*)(*(void**)(ship+0x5C)+0x84)
+
     uint8_t  valid;                 // 1 = a live player was captured
 };
 #pragma pack(pop)
 
 static const uint32_t NET_MAGIC = 0x43344341; // 'AC4C'
+// Wire/struct-layout version. PlayerState is #pragma pack(1): adding a field shifts every following
+// offset, so both peers MUST run the same build. Bump this whenever the layout changes.
+static const uint32_t NET_PROTO_VER = 7;
+
+// ---- entity sync (host-authoritative "synced worlds") -------------------------------
+// One replicated entity's transform. `key` is the index in the host's enumeration; `kind`
+// selects which list that index is into (0 = World::m_CharacterList, 1 = ships filtered
+// from m_EntityManager.m_Entities by vtable 0x01E4A128). pos = m_GlobalMatrix.M41/M42/M43;
+// quat = the 3x3 rotation (HookMath::FromMatrix).
+static const uint32_t NET_ENTITY_MAGIC = 0x45344341; // 'AC4E'
+static const int      MAX_SYNC_ENTITIES = 128;
+
+#pragma pack(push, 1)
+struct EntityState {
+    uint32_t key;          // index in the source list
+    uint8_t  kind;         // 2 = guard (soldier), 1 = ship
+    uint8_t  dead;         // death state: 1 = dead (*(*(e+0xE8)+0x1C)+0xB8 & 0xC == 4)
+    uint8_t  stage;        // HumanGroundStage (Fight=4 = aggro, Navigation=1 = calm)
+    uint8_t  _pad;
+    float    pos[3];       // world position (x,y,z)
+    float    quat[4];      // world rotation (x,y,z,w)
+    uint32_t actionAlias;  // current action clip (file alias); 0 = none (guards only)
+    int      hullHP;       // ship hull HP (ships only; 0 for guards) - host-authoritative damage
+    uint64_t objId;        // host-assigned stable identity (HandleContainer::m_ObjectID); 0 = unknown
+    uint16_t hp;           // host-authoritative Life (guards); 0xFFFF = dead
+    uint16_t _pad2;
+};
+
+struct EntityPacket {
+    uint32_t magic;        // NET_ENTITY_MAGIC
+    uint32_t protoVer;     // NET_PROTO_VER (both peers MUST match)
+    uint32_t seq;          // sender frame counter
+    uint32_t count;        // valid entries in ents[]
+    EntityState ents[MAX_SYNC_ENTITIES];
+};
+#pragma pack(pop)
