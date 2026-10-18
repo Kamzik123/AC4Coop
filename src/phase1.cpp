@@ -2567,6 +2567,20 @@ static void MarkMirrorKilledLocally(void* e) {
     MirrorTablePut(s_mirrorDeadLocal, s_mirrorDeadLocalN, e);
 }
 
+// Reverse lookup: which host objId is this local body already playing? Used to stop one body being
+// hijacked by a second host NPC when several candidates sit inside the position tolerance.
+static uint64_t GuestObjOfEnt(unsigned int ent) {
+    for (int i = 0; i < s_guestObjN; ++i) if (s_guestObj[i].ent == ent) return s_guestObj[i].objId;
+    return 0;
+}
+
+// Drop a binding whose local body no longer is where the host says the entity is - that means the address
+// was freed and reused, and keeping the binding is what makes a body appear to teleport between NPCs.
+static void GuestObjForget(uint64_t objId) {
+    for (int i = 0; i < s_guestObjN; ++i)
+        if (s_guestObj[i].objId == objId) { s_guestObj[i].ent = 0; return; }
+}
+
 // Belt and braces: even with the table above, never run the visual-death path twice for the same body
 // within a few seconds. Re-running it every frame is what froze the guest.
 struct RecentDeath { unsigned int ent; uint64_t ms; };
@@ -2600,7 +2614,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
         for (uint32_t i = 0; i < pkt.count; ++i) {
             const EntityState& es = pkt.ents[i];
             if (es.kind != 2) continue;
-            Entity* best = 0; Component* bestBhv = 0; float bestD = 4.0f * 4.0f;   // 4m match tolerance
+            Entity* best = 0; Component* bestBhv = 0; float bestD = 1.5f * 1.5f;   // 1.5m match tolerance
             for (int j = 0; j < nobj; ++j) {
                 Reference* ref = ents.GetElement(j);
                 if (!ref || !readable(ref, 4)) break;
@@ -2626,10 +2640,16 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
                     if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
                 }
-                // Stable binding: once an objId is tied to a local entity, keep that body even if another
-                // soldier is momentarily closer. Re-matching by position alone made mirrors swap and look
-                // messy when several enemies stood together.
-                if (es.objId && GuestObjFind(es.objId) == (unsigned int)e) { best = e; bestBhv = bhvC; break; }
+                // Stable binding: once an objId is tied to a local entity, keep that body - but only while
+                // the body is plausibly still the same one. If it sits far from where the host says the
+                // entity is, the address was freed and reused, so forget the binding and re-match.
+                if (es.objId && GuestObjFind(es.objId) == (unsigned int)e) {
+                    float sdx = e->m_GlobalMatrix.M41 - es.pos[0];
+                    float sdy = e->m_GlobalMatrix.M42 - es.pos[1];
+                    float sdz = e->m_GlobalMatrix.M43 - es.pos[2];
+                    if (sdx*sdx + sdy*sdy + sdz*sdz < 25.0f * 25.0f) { best = e; bestBhv = bhvC; break; }
+                    GuestObjForget(es.objId);
+                }
                 float dx = e->m_GlobalMatrix.M41 - es.pos[0];
                 float dy = e->m_GlobalMatrix.M42 - es.pos[1];
                 float dz = e->m_GlobalMatrix.M43 - es.pos[2];
@@ -2637,6 +2657,24 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 if (d < bestD) { bestD = d; best = e; bestBhv = bhvC; }
             }
             if (!best) continue;
+            // Never let two host entities drive the same local body. With civilians in the pool a 4 m
+            // radius routinely held several candidates, and a body could be taken over by a second NPC -
+            // visible as one citizen being dragged tens of metres. Reject a body that already plays a
+            // different objId.
+            if (es.objId) {
+                uint64_t owner = GuestObjOfEnt((unsigned int)best);
+                if (owner && owner != es.objId) {
+                    static unsigned int s_loggedSteal[16]; static int s_loggedStealN = 0;
+                    bool seen = false;
+                    for (int k = 0; k < s_loggedStealN; ++k) if (s_loggedSteal[k] == (unsigned int)best) { seen = true; break; }
+                    if (!seen && s_loggedStealN < 16) {
+                        s_loggedSteal[s_loggedStealN++] = (unsigned int)best;
+                        L("[Mirror] refused to steal ent=%08X (already objId=%llu, wanted %llu)\n",
+                          best, (unsigned long long)owner, (unsigned long long)es.objId);
+                    }
+                    continue;
+                }
+            }
             // Guest relay: if OUR attack is what killed this mirror, report it to the host (which owns
             // the real guard). Skipped when the death came from the host snapshot, so it can't echo.
             GuestObjAdd(es.objId, (unsigned int)best);   // objId -> local mirror, for inbound events
@@ -2644,8 +2682,8 @@ static void ApplyGuards(const EntityPacket& pkt) {
             // Visibility: log each guard the first time it becomes a playback dummy, so a live test can
             // state unambiguously whether the guard being hit was mirrored or a normal AI.
             if (MirrorFirstSight(best))
-                L("[Mirror] ent=%08X -> playback dummy pos=(%.1f,%.1f,%.1f) dead=%u\n",
-                  best, es.pos[0], es.pos[1], es.pos[2], (unsigned)es.dead);
+                L("[Mirror] ent=%08X -> playback dummy objId=%llu pos=(%.1f,%.1f,%.1f) dead=%u\n",
+                  best, (unsigned long long)es.objId, es.pos[0], es.pos[1], es.pos[2], (unsigned)es.dead);
             // Re-assert EVERY tick. The engine re-enables the behaviour/controller on its own; once it is
             // back the guard fights the drive — which shows up as glitching/popping and a framerate
             // collapse. One-time disabling is NOT sufficient (verified live).
