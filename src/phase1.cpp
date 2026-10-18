@@ -2168,7 +2168,7 @@ static bool ObjMapFind(uint64_t objId, unsigned int* ent, unsigned int* hp) {
 // handles life==0xFFFF on either side).
 static const uint8_t KIND_KILL = 3;
 
-struct HostLifeWatch { uint64_t objId; unsigned short life; unsigned int hpSvc; unsigned int gen; };
+struct HostLifeWatch { uint64_t objId; unsigned short life; unsigned int hpSvc; unsigned int gen; bool vanishedLogged; };
 static HostLifeWatch s_hostLife[256];
 static int  s_hostLifeN = 0;
 static unsigned int s_hostLifeGen = 0;
@@ -2177,7 +2177,7 @@ static HostLifeWatch* HostLifeFor(uint64_t objId) {
     for (int i = 0; i < s_hostLifeN; ++i) if (s_hostLife[i].objId == objId) return &s_hostLife[i];
     if (s_hostLifeN >= 256) return nullptr;
     HostLifeWatch* w = &s_hostLife[s_hostLifeN++];
-    w->objId = objId; w->life = 0; w->hpSvc = 0; w->gen = 0;
+    w->objId = objId; w->life = 0; w->hpSvc = 0; w->gen = 0; w->vanishedLogged = false;
     return w;
 }
 
@@ -2254,6 +2254,19 @@ static void CaptureGuards(EntityPacket& pkt) {
                 if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only (excludes BhvAssassin player/puppet)
             }
             if (!skel || !bhvC) continue;
+            // Archetype probe: every distinct (behaviour vtable, +0x14 id) seen, so the filter below can be
+            // widened from data instead of guesswork. Logs once per combination per session.
+            {
+                static uint32_t s_archVt[16]; static uint32_t s_archId[16]; static int s_archN = 0;
+                uint32_t avt = *(uint32_t*)bhvC;
+                uint32_t aid = *(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF;
+                bool seen = false;
+                for (int a = 0; a < s_archN; ++a) if (s_archVt[a] == avt && s_archId[a] == aid) { seen = true; break; }
+                if (!seen && s_archN < 16) {
+                    s_archVt[s_archN] = avt; s_archId[s_archN] = aid; ++s_archN;
+                    L("[Arch] bhvVt=%08X id14=%04X\n", avt, aid);
+                }
+            }
             if ((*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF) != 0x35F7) continue;   // only the soldiers
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             float dx=x-px, dy=y-py, dz=z-pz;
@@ -2335,6 +2348,11 @@ static void CaptureGuards(EntityPacket& pkt) {
         bool dead = false;
         __try { dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0; }
         __except (EXCEPTION_EXECUTE_HANDLER) { dead = false; }
+        if (!w.vanishedLogged) {
+            w.vanishedLogged = true;
+            L("[Relay] objId=%llu vanished dead=%d life=%u\n",
+              (unsigned long long)w.objId, dead ? 1 : 0, (unsigned)w.life);
+        }
         if (dead) {
             w.life = 0xFFFFu;
             EmitHostDeath(pkt, count, w.objId, nullptr);
