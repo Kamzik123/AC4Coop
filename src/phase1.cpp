@@ -2270,23 +2270,46 @@ static void CaptureGuards(EntityPacket& pkt) {
                 if (vt == 0x01E41E58) skel = true;
                 if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only (excludes BhvAssassin player/puppet)
             }
-            if (!skel || !bhvC) continue;
-            // Archetype probe: every distinct (behaviour vtable, +0x14 id) seen, so the filter below can be
-            // widened from data instead of guesswork. Logs once per combination per session.
+            // ---- class inventory ----
+            // The binary carries no class names (RTTI is stripped), so the NPC taxonomy has to be measured.
+            // Log once per distinct (behaviour vtable, +0x14 id, skeleton?) triple, with enough state to act
+            // as the behaviour spec later. Covers EVERY entity in the world, not just the ones we sync.
             {
-                static uint32_t s_archVt[16]; static uint32_t s_archId[16]; static int s_archN = 0;
-                uint32_t avt = *(uint32_t*)bhvC;
-                uint32_t aid = *(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF;
+                static uint32_t s_invVt[48], s_invId[48], s_invSkel[48];
+                static int s_invN = 0;
+                uint32_t avt = bhvC ? *(uint32_t*)bhvC : 0;
+                uint32_t aid = bhvC ? (*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF) : 0;
+                uint32_t ask = skel ? 1u : 0u;
                 bool seen = false;
-                for (int a = 0; a < s_archN; ++a) if (s_archVt[a] == avt && s_archId[a] == aid) { seen = true; break; }
-                if (!seen && s_archN < 16) {
-                    s_archVt[s_archN] = avt; s_archId[s_archN] = aid; ++s_archN;
-                    unsigned int ahp = FindHealthInAI((unsigned int)AIEntityHelper::GetEntityAI(e));
-                    unsigned int alife = (ahp && readable((void*)ahp, 0x70)) ? *(unsigned short*)(ahp + 0x5C) : 0;
-                    L("[Arch] bhvVt=%08X id14=%04X life=%u accepted=%d\n",
-                      avt, aid, alife, IsSoldierArchetype(aid) ? 1 : 0);
+                for (int a = 0; a < s_invN; ++a)
+                    if (s_invVt[a] == avt && s_invId[a] == aid && s_invSkel[a] == ask) { seen = true; break; }
+                if (!seen && s_invN < 48) {
+                    s_invVt[s_invN] = avt; s_invId[s_invN] = aid; s_invSkel[s_invN] = ask; ++s_invN;
+                    unsigned int ai2 = (unsigned int)AIEntityHelper::GetEntityAI(e);
+                    unsigned int hp2 = FindHealthInAI(ai2);
+                    unsigned int life = (hp2 && readable((void*)hp2, 0x70)) ? *(unsigned short*)(hp2 + 0x5C) : 0;
+                    unsigned int maxl = (hp2 && readable((void*)hp2, 0x70)) ? *(unsigned short*)(hp2 + 0x5E) : 0;
+                    Human* hh = AIEntityHelper::GetHuman(e);
+                    int stage = -1; uint32_t alias = 0;
+                    if (hh && readable(hh, 4)) {
+                        HumanDataBundle* b = hh->m_Data.m_HumanDataBundle;
+                        if (b && readable(b, 4)) stage = (int)b->m_GroundData.m_HumanGroundStage;
+                        ActionComponent* ac = hh->GetActionComponent();
+                        if (ac && readable(ac, 0x40)) {
+                            unsigned char mir = 0;
+                            void* act = ac->GetCurrentAction(&mir, 0, ACTLAYER_PRIMARY);
+                            if (act && readable(act, 0x14)) alias = *(uint32_t*)((char*)act + 8);
+                        }
+                    }
+                    float ddx = e->m_GlobalMatrix.M41 - px;
+                    float ddy = e->m_GlobalMatrix.M42 - py;
+                    float ddz = e->m_GlobalMatrix.M43 - pz;
+                    L("[Arch] vt=%08X id=%04X skel=%u ent=%08X evt=%08X human=%d life=%u/%u stage=%d alias=%08X comps=%d d2=%.0f accepted=%d\n",
+                      avt, aid, ask, e, (unsigned int)e->vftable, hh ? 1 : 0, life, maxl, stage, alias, n,
+                      ddx*ddx + ddy*ddy + ddz*ddz, (avt == 0x026E34D8 && IsSoldierArchetype(aid)) ? 1 : 0);
                 }
             }
+            if (!skel || !bhvC) continue;
             if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             float dx=x-px, dy=y-py, dz=z-pz;
