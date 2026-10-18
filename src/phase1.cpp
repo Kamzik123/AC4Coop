@@ -2401,6 +2401,7 @@ static unsigned int FindHealthInAI(unsigned int ai);     // defined further belo
 static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float y, float z);  // below
 static bool SelfTestModeActive();                        // defined below
 static void KillGuardEntity(Entity* e);                  // defined below
+static void MirrorVisualDeath(Entity* e);                // defined below
 
 // Re-entrancy guard shared by both event lanes (self-test loopback must not ping-pong).
 static bool s_inEventLoop = false;
@@ -2560,6 +2561,10 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 }
                 if (!skel || !bhvC) continue;
                 if (!IsSoldierArchetype(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF)) continue;
+                // Stable binding: once an objId is tied to a local entity, keep that body even if another
+                // soldier is momentarily closer. Re-matching by position alone made mirrors swap and look
+                // messy when several enemies stood together.
+                if (es.objId && GuestObjFind(es.objId) == (unsigned int)e) { best = e; bestBhv = bhvC; break; }
                 float dx = e->m_GlobalMatrix.M41 - es.pos[0];
                 float dy = e->m_GlobalMatrix.M42 - es.pos[1];
                 float dz = e->m_GlobalMatrix.M43 - es.pos[2];
@@ -2617,8 +2622,8 @@ static void ApplyGuards(const EntityPacket& pkt) {
             //     the engine's is-alive test and left the mirror in a half-dead state.
             if (es.dead && !MirrorKilledLocally(best)) {
                 MarkMirrorKilledLocally(best);
-                L("[Mirror] ent=%08X host says dead -> applying the real death locally\n", best);
-                KillGuardEntity(best);
+                L("[Mirror] ent=%08X host says dead -> visual death locally\n", best);
+                MirrorVisualDeath(best);
             }
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
@@ -3747,6 +3752,36 @@ static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float 
 }
 
 // The verified kill recipe, applied to one specific guard entity.
+// Visual-only death for a playback dummy. The guest's mirrors have their behaviour component disabled
+// every tick, so posting the engine's own death (SetLife) drives a statechart that is not running - the
+// crash a tester hit when a host kill replicated. Everything the renderer and the snapshot need is set
+// directly instead.
+static void MirrorVisualDeath(Entity* e) {
+    if (!e) return;
+    unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
+    unsigned int hp = FindHealthInAI(ai);
+    if (!hp) hp = CachedHealthForEntity((unsigned int)e);
+    if (hp && ai && readable((void*)ai, 0xC0) && readable((void*)hp, 0x70)) {
+        *(unsigned char*)(ai + 0x8C) = 1;
+        *(unsigned short*)(hp + 0x5C) = 0xFFFF;
+        *(unsigned int*)(hp + 0x60) |= 0x01000000u;
+    }
+    {
+        unsigned int svc = ((unsigned int (__cdecl*)(int))0x10EF8C0)((int)e);
+        if (svc && readable((void*)svc, 0x20)) *(unsigned int*)(svc + 4) |= 0x1000u;
+    }
+    Human* h = AIEntityHelper::GetHuman(e);
+    if (h && readable(h, 4)) {
+        ActionComponent* ac = h->GetActionComponent();
+        if (ac && readable(ac, 0x40))
+            ac->SetTargetAction((int)1818493434u, 0, 0, 0xFFFF, ACTLAYER_PRIMARY);
+        CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
+        if (cc && readable(cc, 0x600))
+            ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, 0x29);
+    }
+    L("[Mirror] visual death ent=%08X (no SetLife: behaviour is disabled)\n", e);
+}
+
 static void KillGuardEntity(Entity* e) {
     if (!e) return;
 
@@ -3754,6 +3789,10 @@ static void KillGuardEntity(Entity* e) {
     unsigned int hp = FindHealthInAI(ai);
     L("[KF] target ent=%08X ai=%08X health=%08X pos=(%.1f,%.1f,%.1f)\n",
       e, ai, hp, e->m_GlobalMatrix.M41, e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43);
+    // No health service means this is not a killable NPC (stale/duplicated entity, or a junk AI pointer).
+    // Everything below walks the AI, so stop here - a tester crash came from exactly this: ai=10251025
+    // passed the readable() test and EngineIsAlive() faulted on it.
+    if (!hp) { L("[KF] no health service (ai=%08X) -> skip\n", ai); return; }
     if (!ai || !readable((void*)ai, 0xC0)) { L("[KF] ai unreadable\n"); return; }
 
     L("[KF] before: alive=%d  health life=%u/%u flags=%08X\n", (int)EngineIsAlive((unsigned int)e),
@@ -3848,7 +3887,10 @@ static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float 
         if (ent) {
             MarkPeerApplied(ent);                 // don't echo it back
             MarkMirrorKilledLocally((void*)ent);  // stop driving the corpse
-            KillGuardEntity((Entity*)ent);
+            // The guest's entity is a playback dummy with its behaviour disabled, so the engine's own
+            // death (SetLife) must not run here; the host keeps the full recipe.
+            if (g_entHost) KillGuardEntity((Entity*)ent);
+            else           MirrorVisualDeath((Entity*)ent);
         }
         return;
     }
