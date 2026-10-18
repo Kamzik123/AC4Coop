@@ -2602,6 +2602,39 @@ static void MarkDeathApplied(unsigned int e) {
     s_recentDeath[slot].ent = e; s_recentDeath[slot].ms = now;
 }
 
+// Reject non-finite transforms before they reach the engine: a single NaN written into a matrix poisons
+// culling/physics for everything downstream, and the symptom is an unrelated crash later.
+static bool FiniteVec(const float* v, int n) {
+    for (int i = 0; i < n; ++i) {
+        float x = v[i];
+        if (!(x == x) || x > 1e7f || x < -1e7f) return false;
+    }
+    return true;
+}
+
+// Alias debounce: the captured clip can alternate between two values for a snapshot or two (it is read
+// mid-switch), and re-issuing SetTargetAction on every change restarts the clip - which reads as flicker.
+// Only apply an alias that has been stable for two consecutive snapshots.
+static bool MirrorAliasShouldApply(void* e, unsigned int alias) {
+    static struct { unsigned int ent; unsigned int pending; unsigned int applied; int count; } t[MIRROR_TABLE];
+    static int n = 0;
+    int slot = -1;
+    for (int i = 0; i < n; ++i) if (t[i].ent == (unsigned int)e) { slot = i; break; }
+    if (slot < 0) {
+        if (n >= MIRROR_TABLE) return false;
+        slot = n++;
+        t[slot].ent = (unsigned int)e; t[slot].pending = alias; t[slot].applied = 0; t[slot].count = 1;
+        return false;                       // baseline: do not touch the clip on first sight
+    }
+    if (t[slot].pending != alias) { t[slot].pending = alias; t[slot].count = 1; return false; }
+    if (t[slot].count < 2) { ++t[slot].count; return false; }
+    if (t[slot].applied == alias) return false;
+    t[slot].applied = alias;
+    return true;
+}
+
+static unsigned int s_covMatched = 0, s_covNoBody = 0, s_covStolen = 0;   // coverage counters, reset with stats
+
 static void ApplyGuards(const EntityPacket& pkt) {
     World* world = World::GetCurrentWorld();
     if (!world) return;
@@ -2616,6 +2649,8 @@ static void ApplyGuards(const EntityPacket& pkt) {
         for (uint32_t i = 0; i < pkt.count; ++i) {
             const EntityState& es = pkt.ents[i];
             if (es.kind != 2) continue;
+            // Never feed the engine a NaN/inf transform (see FiniteVec).
+            if (!FiniteVec(es.pos, 3) || !FiniteVec(es.quat, 4)) continue;
             Entity* best = 0; Component* bestBhv = 0; float bestD = 1.5f * 1.5f;   // 1.5m match tolerance
             for (int j = 0; j < nobj; ++j) {
                 Reference* ref = ents.GetElement(j);
@@ -2667,7 +2702,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 float d = dx*dx + dy*dy + dz*dz;
                 if (d < bestD) { bestD = d; best = e; bestBhv = bhvC; }
             }
-            if (!best) continue;
+            if (!best) { ++s_covNoBody; continue; }
             // Never let two host entities drive the same local body. With civilians in the pool a 4 m
             // radius routinely held several candidates, and a body could be taken over by a second NPC -
             // visible as one citizen being dragged tens of metres. Reject a body that already plays a
@@ -2683,10 +2718,12 @@ static void ApplyGuards(const EntityPacket& pkt) {
                         L("[Mirror] refused to steal ent=%08X (already objId=%llu, wanted %llu)\n",
                           best, (unsigned long long)owner, (unsigned long long)es.objId);
                     }
+                    ++s_covStolen;
                     continue;
                 }
             }
             if (usedN < MAX_SYNC_ENTITIES) usedEnt[usedN++] = (unsigned int)best;
+            ++s_covMatched;
             // Guest relay: if OUR attack is what killed this mirror, report it to the host (which owns
             // the real guard). Skipped when the death came from the host snapshot, so it can't echo.
             GuestObjAdd(es.objId, (unsigned int)best);   // objId -> local mirror, for inbound events
@@ -2751,7 +2788,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     if (!s_selfTestMode) ((Entity*)best)->SetGlobalMatrixInternal(&m, bigJump);
                 }
                 // Only re-issue the clip when the alias changed.
-                if (es.actionAlias && MirrorAliasChanged(best, es.actionAlias)) {
+                if (es.actionAlias && MirrorAliasShouldApply(best, es.actionAlias)) {
                     if (bh && readable(bh, 4)) {
                         ActionComponent* ac = bh->GetActionComponent();
                         if (ac && readable(ac, 0x40))
@@ -3918,20 +3955,14 @@ static void MirrorVisualDeath(Entity* e) {
 }
 
 static void MirrorVisualDeathInner(Entity* e) {
-    // Hide the body instead of faking an engine death.
+    // A dead mirror is simply left alone: we stop driving it (MarkMirrorKilledLocally) and touch nothing.
     //
-    // The previous version wrote the AI-dead byte, the health flags and the is-alive service directly.
-    // The engine then kept dispatching statechart triggers into that half-torn-down machine and crashed at
-    // 0x6797DC (x = this+0x114 null) - a fault in engine internals, not in a pointer of ours. Faking death
-    // on a body whose behaviour is disabled cannot be made safe from outside.
-    //
-    // A transform write is the one operation on a mirror that has never faulted, so a dead mirror is moved
-    // far below the world and simply stops being drawn. The corpse vanishes instead of ragdolling; that is
-    // the trade for not corrupting a live statechart.
-    HookMath::Transform m = e->m_GlobalMatrix;
-    m.M42 -= 1000.0f;
-    e->SetGlobalMatrixInternal(&m, false);
-    L("[Mirror] hid ent=%08X (no engine death faked)\n", e);
+    // History: faking the engine death corrupted the statechart (crash at 0x6797DC, this+0x114 null);
+    // then hiding the body 1000 m below the world still crashed at the same offset, so moving a body out
+    // of the loaded grid may itself break the statechart/AI bookkeeping. Leaving the corpse standing is
+    // ugly, but it is the only variant that touches no engine state at all - and this build is an A/B for
+    // exactly that question.
+    L("[Mirror] dead ent=%08X left in place (no flags, no teleport)\n", e);
 }
 
 static void KillGuardEntityInner(Entity* e);     // wrapped below
@@ -5034,9 +5065,11 @@ static void OnFrameInner(Human* updatedHuman) {
         if (Net::Enabled() && stNow - s_statsLast >= 5000) {
             Net::Stats st; Net::GetStats(st);
             double secs = (stNow - s_statsLast) / 1000.0;
-            L("[Net] stats tx=%u pkt, %u B, %u ent  rx=%u pkt, %u B  |  %.1f kB/s up, %.1f kB/s down\n",
+            L("[Net] stats tx=%u pkt, %u B, %u ent  rx=%u pkt, %u B  |  %.1f kB/s up, %.1f kB/s down  |  mirror ok=%u nobod=%u steal=%u\n",
               st.txPackets, st.txBytes, st.txEnts, st.rxPackets, st.rxBytes,
-              (st.txBytes / 1024.0) / secs, (st.rxBytes / 1024.0) / secs);
+              (st.txBytes / 1024.0) / secs, (st.rxBytes / 1024.0) / secs,
+              s_covMatched, s_covNoBody, s_covStolen);
+            s_covMatched = 0; s_covNoBody = 0; s_covStolen = 0;
             Net::ResetStats();
             s_statsLast = stNow;
         }
