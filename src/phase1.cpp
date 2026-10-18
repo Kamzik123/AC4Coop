@@ -3881,7 +3881,16 @@ static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float 
 // every tick, so posting the engine's own death (SetLife) drives a statechart that is not running - the
 // crash a tester hit when a host kill replicated. Everything the renderer and the snapshot need is set
 // directly instead.
+static void MirrorVisualDeathInner(Entity* e);   // wrapped below
 static void MirrorVisualDeath(Entity* e) {
+    if (!e || !readable(e, 4)) return;
+    __try { MirrorVisualDeathInner(e); }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[Mirror] visual death EXCEPTION 0x%08X (ent=%08X)\n", GetExceptionCode(), e);
+    }
+}
+
+static void MirrorVisualDeathInner(Entity* e) {
     if (!e) return;
     unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
     unsigned int hp = FindHealthInAI(ai);
@@ -3907,7 +3916,16 @@ static void MirrorVisualDeath(Entity* e) {
     L("[Mirror] visual death ent=%08X (no SetLife: behaviour is disabled)\n", e);
 }
 
+static void KillGuardEntityInner(Entity* e);     // wrapped below
 static void KillGuardEntity(Entity* e) {
+    if (!e || !readable(e, 4)) return;
+    __try { KillGuardEntityInner(e); }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[KF] EXCEPTION 0x%08X (ent=%08X) - kill aborted\n", GetExceptionCode(), e);
+    }
+}
+
+static void KillGuardEntityInner(Entity* e) {
     if (!e) return;
 
     unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
@@ -4001,6 +4019,19 @@ static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float 
         ent = (unsigned int)e;
         hp  = CachedHealthForEntity(ent);
         L("[Kill] objId=%llu unknown -> position fallback ent=%08X\n", (unsigned long long)objId, ent);
+    }
+    // The binding can outlive the body: an event may arrive for an objId whose mirror was freed and its
+    // address reused. Every path below calls into the engine with this pointer, so prove it is still a
+    // character entity before going anywhere near it.
+    if (ent) {
+        bool looksCharacter = false;
+        __try { looksCharacter = readable((void*)ent, 8) && *(uint32_t*)ent == 0x01E4CE90u; }
+        __except (EXCEPTION_EXECUTE_HANDLER) { looksCharacter = false; }
+        if (!looksCharacter) {
+            L("[Kill] objId=%llu -> stale ent=%08X, binding dropped\n", (unsigned long long)objId, ent);
+            GuestObjForget(objId);
+            return;
+        }
     }
     if (!hp && ent) {
         hp = FindHealthInAI((unsigned int)AIEntityHelper::GetEntityAI((Entity*)ent));
