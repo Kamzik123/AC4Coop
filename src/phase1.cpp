@@ -2696,10 +2696,10 @@ static void ApplyGuards(const EntityPacket& pkt) {
             if (MirrorFirstSight(best))
                 L("[Mirror] ent=%08X -> playback dummy objId=%llu pos=(%.1f,%.1f,%.1f) dead=%u\n",
                   best, (unsigned long long)es.objId, es.pos[0], es.pos[1], es.pos[2], (unsigned)es.dead);
-            // Re-assert EVERY tick. The engine re-enables the behaviour/controller on its own; once it is
-            // back the guard fights the drive — which shows up as glitching/popping and a framerate
-            // collapse. One-time disabling is NOT sufficient (verified live).
-            if (bestBhv && readable(bestBhv, 0x40))
+            // Re-assert the disable, but only when the engine has actually re-enabled it. Calling
+            // SetEnabled(false) unconditionally every tick costs an interlocked write and makes the
+            // behaviour/anim graph pop.
+            if (bestBhv && readable(bestBhv, 0x40) && ((Component*)bestBhv)->GetEnabled())
                 ((Component*)bestBhv)->SetEnabled(false);
             Human* bh = AIEntityHelper::GetHuman(best);
             if (bh && readable(bh, 4)) {
@@ -2718,11 +2718,38 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 }
             }
             if (!es.dead && !locallyDead) {
-                HookMath::Quaternion q; q.x=es.quat[0]; q.y=es.quat[1]; q.z=es.quat[2]; q.w=es.quat[3];
-                HookMath::Transform m;
-                HookMath::ToMatrix(&q, &m);
-                m.M41 = es.pos[0]; m.M42 = es.pos[1]; m.M43 = es.pos[2];
-                if (!s_selfTestMode) ((Entity*)best)->SetGlobalMatrixInternal(&m, true);
+                // Only write when the transform actually moved. At 20 Hz a stationary NPC was being
+                // re-written every snapshot, each time with a physics capsule push - that reads as
+                // tweaking/flicker. Small deltas are skipped entirely; a real move is applied without
+                // the physics push unless it is large enough to need one.
+                static struct { unsigned int ent; float pos[3]; float quat[4]; } s_last[MIRROR_TABLE];
+                static int s_lastN = 0;
+                int slot = -1;
+                for (int k = 0; k < s_lastN; ++k) if (s_last[k].ent == (unsigned int)best) { slot = k; break; }
+                if (slot < 0 && s_lastN < MIRROR_TABLE) { slot = s_lastN++; s_last[slot].ent = (unsigned int)best; s_last[slot].pos[0] = 1e30f; }
+                bool moved = true;
+                float dp = 1e30f;
+                if (slot >= 0) {
+                    dp = (es.pos[0]-s_last[slot].pos[0])*(es.pos[0]-s_last[slot].pos[0])
+                       + (es.pos[1]-s_last[slot].pos[1])*(es.pos[1]-s_last[slot].pos[1])
+                       + (es.pos[2]-s_last[slot].pos[2])*(es.pos[2]-s_last[slot].pos[2]);
+                    float dq = 0.0f;
+                    for (int k = 0; k < 4; ++k) { float d = es.quat[k]-s_last[slot].quat[k]; dq += d*d; }
+                    moved = (dp > 0.05f*0.05f) || (dq > 1e-4f);
+                    if (moved) {
+                        for (int k = 0; k < 3; ++k) s_last[slot].pos[k] = es.pos[k];
+                        for (int k = 0; k < 4; ++k) s_last[slot].quat[k] = es.quat[k];
+                    }
+                }
+                if (moved) {
+                    HookMath::Quaternion q; q.x=es.quat[0]; q.y=es.quat[1]; q.z=es.quat[2]; q.w=es.quat[3];
+                    HookMath::Transform m;
+                    HookMath::ToMatrix(&q, &m);
+                    m.M41 = es.pos[0]; m.M42 = es.pos[1]; m.M43 = es.pos[2];
+                    // A capsule push per snapshot was pure jitter; only a jump (>5 m) needs physics.
+                    bool bigJump = (dp > 25.0f);
+                    if (!s_selfTestMode) ((Entity*)best)->SetGlobalMatrixInternal(&m, bigJump);
+                }
                 // Only re-issue the clip when the alias changed.
                 if (es.actionAlias && MirrorAliasChanged(best, es.actionAlias)) {
                     if (bh && readable(bh, 4)) {
