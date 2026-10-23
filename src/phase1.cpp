@@ -93,6 +93,7 @@ int      g_switchCd   = 0;               // frames to suppress OUR action writes
 // ExitCurrentContext, no target needed). A disallowed id pops the puppet back to ground instead of crashing.
 unsigned g_ctxMask = (1u << 6) | (1u << 10);
 HookMath::Vector4  g_offset = { 2.0f, 0.0f, 0.0f, 0.0f }; // puppet stands +2m on X from the player
+static float     g_puppetParkX = 0.0f;   // [Coop] PuppetParkX: test-only sideways shift of the puppet
 
 // [Coop] ShipPassenger: deck offset, in the LOCAL ship's local space (metres), where the peer's puppet is
 // placed when BOTH peers are aboard their own ships. Axes are a first guess for this build (X right,
@@ -116,6 +117,23 @@ int    g_disableSpawns = 0;
 // time, lerping between the two snapshots bracketing render time. Hides jitter and packet loss.
 int    g_interpEnabled = 1;  // [Net] Interpolation
 int    g_interpDelayMs = 100;// [Net] InterpDelayMs (render this far behind now; >= ~2 packet intervals)
+int    g_interpMaxExtrapMs = 100; // [Net] InterpMaxExtrapMs (bounded forward extrapolation past the newest packet)
+
+// [Relevance] Phase 1: only replicate entities near the PEER, not near the host.
+// The host learns the peer's position from the incoming PlayerState (s.matrix) in ApplyRemoteState, so this
+// needs no engine data. 0 (or an unknown peer) disables the filter entirely (fail-open).
+static float g_peerPos[3] = { 0.0f, 0.0f, 0.0f };
+static bool  g_peerPosValid = false;
+static float g_relevanceRadiusM = 250.0f;       // characters
+static float g_shipRelevanceRadiusM = 1000.0f;  // ships (sparse, so a wide radius is cheap)
+
+static bool IsRelevantToPeer(float x, float y, float z, float radiusM) {
+    if (!g_peerPosValid || radiusM <= 0.0f) return true;
+    const float dx = x - g_peerPos[0];
+    const float dy = y - g_peerPos[1];
+    const float dz = z - g_peerPos[2];
+    return (dx * dx + dy * dy + dz * dz) <= (radiusM * radiusM);
+}
 int    g_snapHz = 20;        // [Net] SnapshotHz (entity snapshot cadence, independent of frame rate)
 
 // HumanGroundData drive fields, offsets from the bundle pointer *(GetHuman(entity)+0x160).
@@ -1132,6 +1150,13 @@ bool Phase1::CaptureLocalState(PlayerState& s) {
 // Apply a remote peer's state to the puppet (absolute position — shared world coords, no offset).
 // Never nulls g_puppet on a transient fault (that would trigger endless respawns).
 void Phase1::ApplyRemoteState(const PlayerState& s) {
+    // [Relevance] Remember where the peer actually is; the host's entity capture filters by this.
+    if (s.valid) {
+        g_peerPos[0] = s.matrix.M41;
+        g_peerPos[1] = s.matrix.M42;
+        g_peerPos[2] = s.matrix.M43;
+        g_peerPosValid = true;
+    }
     // Ship sync (independent of the puppet): drive the spawned ghost ship to the peer's ship position.
     if (s.valid && s.shipValid) {
         g_ghostSyncPos[0] = s.shipPos[0];
@@ -1153,6 +1178,10 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
         // is what FSM/physics-driven contexts (swim) actually position from — that's handled by the kamikaze
         // controller warp just below. s.matrix is pack(1)/const, so copy to an aligned local for the call.
         HookMath::Transform m = s.matrix;
+        // [Coop] PuppetParkX: test-only. Shifts the puppet sideways off the peer's exact position so a
+        // single machine can see whether local AI treats it as a real body (loopback otherwise puts the
+        // puppet exactly inside the player, which makes "did the guard attack the puppet" unobservable).
+        if (g_puppetParkX != 0.0f) m.M41 += g_puppetParkX;
         g_puppet->SetGlobalMatrixInternal(&m, true);
         Human* h = AIEntityHelper::GetHuman(g_puppet);
         HumanDataBundle* qB = h->m_Data.m_HumanDataBundle;
@@ -1467,8 +1496,8 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
         }
         static int lc = 0;
         if ((++lc % 30) == 0)
-            L("[Net] apply seq=%u pos=(%.1f,%.1f,%.1f) spd=%.2f bundle=%d\n",
-              s.seq, g_puppet->m_GlobalMatrix.M41, g_puppet->m_GlobalMatrix.M42, g_puppet->m_GlobalMatrix.M43, s.curSpeed, bok ? 1 : 0);
+            L("[Net] apply seq=%u pos=(%.1f,%.1f,%.1f) spd=%.2f dst=%.2f ctx=%d bundle=%d\n",
+              s.seq, g_puppet->m_GlobalMatrix.M41, g_puppet->m_GlobalMatrix.M42, g_puppet->m_GlobalMatrix.M43, s.curSpeed, s.destSpeed, (int)s.contextId, bok ? 1 : 0);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         static int ec = 0; if ((++ec % 30) == 0) L("[Net] ApplyRemoteState EXCEPTION (code=0x%08X)\n", GetExceptionCode());
     }
@@ -1998,6 +2027,7 @@ static int   g_entSync = -1;   // ini [Coop] EntitySync (read once)
 static int   g_entHost = -1;   // ini [Coop] EntityHost (read once): 1 = authoritative sender
 static uint32_t g_entSeq = 0;  // entity-packet sequence
 
+
 // Render-override targets: ghost entity + the transform to render it at. Filled each tick, consumed by
 // the SetGlobalMatrixInternal hook — drives the RENDER (the last write, so no fight with physics).
 struct SyncTarget {
@@ -2067,6 +2097,9 @@ static void CaptureShips(EntityPacket& pkt) {
             Entity* ent = GetShipEntity(mgr, i);
             if (!ent || *(uint32_t*)ent != 0x01E4A128u) continue;
             if (ent == localShip) continue;   // skip the Jackdaw (synced via g_ghostShip)
+            // [Relevance] Same combined rule as the guards, but with the (wider) ship radius.
+            if (!IsRelevantToPeer(ent->m_GlobalMatrix.M41, ent->m_GlobalMatrix.M42, ent->m_GlobalMatrix.M43,
+                                  g_shipRelevanceRadiusM)) continue;
             fillShipState(pkt.ents[count], ent, (uint32_t)i);
             ++count;
         }
@@ -2308,8 +2341,14 @@ static void CaptureGuards(EntityPacket& pkt) {
                 if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
             }
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
+            // [Relevance] Replicate a character if it is near the HOST's player (the original 80 m cap)
+            // or anywhere within RelevanceRadiusM of the PEER. Without the peer term, a partner a few
+            // hundred metres away sees no NPCs at all; without the host term we lose the local scene
+            // when the peer is far. IsRelevantToPeer fails open when the peer is unknown, so a single
+            // instance reproduces the original behaviour exactly.
             float dx=x-px, dy=y-py, dz=z-pz;
-            if (dx*dx+dy*dy+dz*dz > 80.0f*80.0f) continue;   // only nearby characters
+            const bool nearHost = (dx*dx + dy*dy + dz*dz) <= (80.0f * 80.0f);
+            if (!nearHost && !IsRelevantToPeer(x, y, z, g_relevanceRadiusM)) continue;
             EntityState& es = pkt.ents[count];
             es.key = (uint32_t)i;
             es.kind = 2;    // character (guard)
@@ -2690,10 +2729,18 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 // the body is plausibly still the same one. If it sits far from where the host says the
                 // entity is, the address was freed and reused, so forget the binding and re-match.
                 if (es.objId && GuestObjFind(es.objId) == (unsigned int)e) {
+                    // Sticky binding: keep the body as long as it is still the same KIND of NPC. A human
+                    // guard walking 30 m must NOT lose its body and re-match onto someone else's - that
+                    // is what moved guards to the wrong post and gave them the wrong behaviour. The
+                    // distance test now only catches heap address reuse (an impossible jump), not motion.
+                    const uint16_t localArch = (uint16_t)(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF);
+                    const bool archOk = (!es.arch || localArch == es.arch);
                     float sdx = e->m_GlobalMatrix.M41 - es.pos[0];
                     float sdy = e->m_GlobalMatrix.M42 - es.pos[1];
                     float sdz = e->m_GlobalMatrix.M43 - es.pos[2];
-                    if (sdx*sdx + sdy*sdy + sdz*sdz < 25.0f * 25.0f) { best = e; bestBhv = bhvC; break; }
+                    if (archOk && (sdx*sdx + sdy*sdy + sdz*sdz) < 100.0f * 100.0f) {
+                        best = e; bestBhv = bhvC; break;
+                    }
                     GuestObjForget(es.objId);
                 }
                 float dx = e->m_GlobalMatrix.M41 - es.pos[0];
@@ -2856,6 +2903,54 @@ static void EntitySyncTick() {
     // Gate on a real loaded world: the title/menu screen has m_CharacterList == 1 (just the player).
     World* gateWorld = World::GetCurrentWorld();
     if (!gateWorld || gateWorld->m_CharacterList.GetSize() < 2) return;
+
+    // [Ident] One-shot identity probe (per world). Dumps every human's m_ObjectID + spawn position +
+    // archetype so two sessions (or two machines) can be compared: if the same NPC at the same place
+    // carries the same objId, the id is content-derived and can replace position matching entirely.
+    {
+        static void*    s_identWorld = nullptr;
+        static uint64_t s_identWorldId = 0;
+        uint64_t wid = gateWorld->GetObjectID();
+        if (gateWorld != s_identWorld || wid != s_identWorldId) {
+            s_identWorld = gateWorld; s_identWorldId = wid;
+            BaseBigArray<Reference>& el = gateWorld->m_EntityManager.m_Entities;
+            int n = el.GetSize();
+            int logged = 0;
+            Entity* pl = gateWorld->GetPlayer();
+            L("[Ident] --- world=%p worldId=%llu entities=%d ---\n",
+              gateWorld, (unsigned long long)wid, n);
+            (void)pl;
+            __try {
+                for (int i = 0; i < n && logged < 400; ++i) {
+                    Reference* ref = el.GetElement(i);
+                    if (!ref || !readable(ref, 4)) break;
+                    HandleContainer* hc = ref->m_HandleContainer;
+                    if (!hc || !readable(hc, 4)) continue;
+                    Entity* e = (Entity*)hc->m_Object;
+                    if (!e || !readable(e, 4) || e == pl) continue;
+                    Component** data = *(Component***)((char*)e + 0x60);
+                    int cn = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+                    if (cn <= 0 || cn > 96) cn = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                    if (!data || !readable(data, 4) || cn <= 0 || cn > 96) continue;
+                    bool skel = false; Component* bhv = 0;
+                    for (int k = 0; k < cn; ++k) {
+                        Component* c = data[k];
+                        uint32_t vt = (c && readable(c, 4)) ? *(uint32_t*)c : 0;
+                        if (vt == 0x01E41E58) skel = true;
+                        if (vt == 0x026E34D8) bhv = c;
+                    }
+                    if (!skel || !bhv) continue;
+                    L("[Ident] objId=%llu arch=%04X pos=(%.2f,%.2f,%.2f) ent=%08X\n",
+                      (unsigned long long)hc->GetObjectID(),
+                      (unsigned)(*(uint32_t*)((char*)bhv + 0x14) & 0xFFFF),
+                      e->m_GlobalMatrix.M41, e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43,
+                      (unsigned)e);
+                    ++logged;
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { L("[Ident] EXC 0x%08X\n", GetExceptionCode()); }
+            L("[Ident] --- %d humans logged ---\n", logged);
+        }
+    }
 
     static uint32_t tick = 0;
     if (++tick < 6) return;      // ~10 Hz throttle (60fps / 6)
@@ -4605,8 +4700,9 @@ static bool isPlayerUpdate(uintptr_t b, Human* updatedHuman) {
 }
 
 // ---- snapshot interpolation (main-thread only; no locking needed) ------------------
-// Buffer the last N received remote states with their local arrival time, then each frame render
-// the puppet at (now - g_interpDelayMs), lerping between the two snapshots that bracket that time.
+// Buffer the last N received remote states with their local arrival time (microseconds, see NowUs),
+// then each frame render the puppet at (now - g_interpDelayMs), lerping between the two snapshots
+// that bracket that time and extrapolating a short bounded step past the newest one.
 struct Snap { PlayerState st; uint64_t t; };
 static const int SNAP_MAX = 32;
 static Snap     g_snaps[SNAP_MAX];
@@ -4614,6 +4710,45 @@ static int      g_snapCount = 0;   // filled entries (<= SNAP_MAX)
 static int      g_snapHead  = 0;   // ring index of the next write slot
 static uint32_t g_lastSnapSeq = 0;
 static bool     g_haveSnapSeq = false;
+static float    s_lastLerpT = 0.0f;   // last valid lerp ratio (reused when two stamps are equal)
+
+// Microsecond monotonic clock. GetTickCount64() ticks at the 15.6 ms timer resolution, which turns
+// the interpolation buffer's timestamps into visible stairs; QPC does not.
+static uint64_t NowUs() {
+    static uint64_t freq = 0;
+    if (!freq) { LARGE_INTEGER f; QueryPerformanceFrequency(&f); freq = (uint64_t)f.QuadPart; }
+    LARGE_INTEGER c; QueryPerformanceCounter(&c);
+    return (uint64_t)((double)c.QuadPart * 1000000.0 / (double)freq);
+}
+
+// ---- smoothing instrumentation (printed + reset by the 5 s [Net] stats block) ---------------
+static uint32_t s_interpFrames  = 0;   // ComputeInterpolated calls that produced a state
+static uint32_t s_holdFrames    = 0;   // held the newest sample (one sample / zero dt / over the extrap cap)
+static uint32_t s_extrapFrames  = 0;   // rendered a bounded extrapolation past the newest sample
+static uint32_t s_clampFrames   = 0;   // render time before the oldest sample -> clamped to it
+static uint32_t s_eqTFrames     = 0;   // tb <= ta -> reused s_lastLerpT
+static uint32_t s_reorderDrops  = 0;   // out-of-order packet dropped, buffer kept
+static uint32_t s_wipeCount     = 0;   // buffer wiped (seq jumped backwards by > 1000 = peer restart)
+static uint32_t s_batchExtra    = 0;   // frames that drained more than one packet
+
+// Per-frame movement of the puppet's applied matrix (XZ distance + |dY|): the smoothing metric.
+static int      s_appliedValid  = 0;
+static float    s_appliedPos[3] = {0.0f, 0.0f, 0.0f};
+static uint32_t s_appliedFrames = 0;
+static double   s_appliedSum    = 0.0;
+static double   s_appliedMax    = 0.0;
+
+// Call right after ApplyRemoteState: measures how far the puppet target moved since the last frame.
+static void NoteAppliedPos(float x, float y, float z) {
+    if (s_appliedValid) {
+        float dx = x - s_appliedPos[0], dy = y - s_appliedPos[1], dz = z - s_appliedPos[2];
+        double d = (double)sqrtf(dx * dx + dz * dz) + (double)fabsf(dy);
+        s_appliedSum += d;
+        if (d > s_appliedMax) s_appliedMax = d;
+        ++s_appliedFrames;
+    }
+    s_appliedPos[0] = x; s_appliedPos[1] = y; s_appliedPos[2] = z; s_appliedValid = 1;
+}
 
 static void norm3(float* v) {
     float len = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -4674,35 +4809,74 @@ static void lerpState(const PlayerState& a, const PlayerState& b, float t, Playe
     }
 }
 
-// Append a freshly-received packet. Dedupes by seq; a backwards seq (peer reconnect) resets the buffer.
-static void PushSnapshot(const PlayerState& s, uint64_t now) {
+// Append a freshly-received packet. Dedupes by seq; a duplicated seq is ignored, and a single
+// reordered packet is dropped without touching the buffer (UDP reorders routinely). Only a seq that
+// jumps backwards by more than 1000 is treated as a peer restart and wipes the history.
+static void PushSnapshot(const PlayerState& s, uint64_t nowUs) {
     if (g_haveSnapSeq) {
         if (s.seq == g_lastSnapSeq) return;            // duplicate of the newest — GetRemote holds it
-        if (s.seq <  g_lastSnapSeq) { g_snapCount = 0; g_snapHead = 0; }  // reset/reconnect
+        if (s.seq <  g_lastSnapSeq) {
+            if ((g_lastSnapSeq - s.seq) > 1000) {      // peer restart -> the old history is useless
+                g_snapCount = 0; g_snapHead = 0;
+                ++s_wipeCount;
+            } else {
+                ++s_reorderDrops;                      // late/reordered packet: drop it, keep the buffer
+                return;
+            }
+        }
     }
     g_snaps[g_snapHead].st = s;
-    g_snaps[g_snapHead].t  = now;
+    g_snaps[g_snapHead].t  = nowUs;
     g_snapHead = (g_snapHead + 1) % SNAP_MAX;
     if (g_snapCount < SNAP_MAX) ++g_snapCount;
     g_lastSnapSeq = s.seq; g_haveSnapSeq = true;
 }
 
-// Produce the interpolated state for render time (now - delay). Holds the newest state when render
-// time runs past it (packet loss/stall) and clamps to the oldest before the buffer fills.
-static bool ComputeInterpolated(uint64_t now, PlayerState& out) {
+// Produce the interpolated state for render time (now - delay). Extrapolates a bounded step past the
+// newest sample (instead of freezing) and clamps to the oldest before the buffer fills.
+static bool ComputeInterpolated(uint64_t nowUs, PlayerState& out) {
     if (g_snapCount == 0) return false;
+    ++s_interpFrames;
     int newestIdx = (g_snapHead - 1 + SNAP_MAX) % SNAP_MAX;
     int oldestIdx = (g_snapHead - g_snapCount + SNAP_MAX) % SNAP_MAX;
-    uint64_t renderT = now > (uint64_t)g_interpDelayMs ? now - (uint64_t)g_interpDelayMs : 0;
+    const uint64_t delayUs = (uint64_t)g_interpDelayMs * 1000;   // ini key stays in milliseconds
+    uint64_t renderT = nowUs > delayUs ? nowUs - delayUs : 0;
 
-    if (g_snapCount == 1 || renderT >= g_snaps[newestIdx].t) { out = g_snaps[newestIdx].st; return true; }
-    if (renderT <= g_snaps[oldestIdx].t)                     { out = g_snaps[oldestIdx].st; return true; }
+    if (g_snapCount == 1) { ++s_holdFrames; out = g_snaps[newestIdx].st; return true; }
+    if (renderT > g_snaps[newestIdx].t) {
+        // Render time is past the newest packet: a packet gap longer than InterpDelayMs would otherwise
+        // render as freeze-then-teleport. Move forward along the newest segment's velocity for at most
+        // InterpMaxExtrapMs; position only (rotation + animation fields come from the newest sample).
+        int prevIdx = (newestIdx - 1 + SNAP_MAX) % SNAP_MAX;
+        const Snap& newest = g_snaps[newestIdx];
+        const Snap& prev   = g_snaps[prevIdx];
+        uint64_t dt  = newest.t > prev.t ? newest.t - prev.t : 0;
+        uint64_t gap = renderT - newest.t;
+        uint64_t cap = (uint64_t)g_interpMaxExtrapMs * 1000;
+        if (dt == 0 || cap == 0 || gap > cap) { ++s_holdFrames; out = newest.st; return true; }
+        float inv = 1.0f / (float)dt;
+        out = newest.st;
+        out.matrix.M41 = newest.st.matrix.M41 + (newest.st.matrix.M41 - prev.st.matrix.M41) * inv * (float)gap;
+        out.matrix.M42 = newest.st.matrix.M42 + (newest.st.matrix.M42 - prev.st.matrix.M42) * inv * (float)gap;
+        out.matrix.M43 = newest.st.matrix.M43 + (newest.st.matrix.M43 - prev.st.matrix.M43) * inv * (float)gap;
+        ++s_extrapFrames;
+        return true;
+    }
+    if (renderT <= g_snaps[oldestIdx].t)                     { ++s_clampFrames; out = g_snaps[oldestIdx].st; return true; }
     for (int i = 0; i < g_snapCount - 1; ++i) {
         int ai = (oldestIdx + i)     % SNAP_MAX;
         int bi = (oldestIdx + i + 1) % SNAP_MAX;
         uint64_t ta = g_snaps[ai].t, tb = g_snaps[bi].t;
         if (renderT >= ta && renderT <= tb) {
-            float t = (tb > ta) ? (float)(renderT - ta) / (float)(tb - ta) : 1.0f;
+            float t;
+            if (tb > ta) {
+                t = (float)(renderT - ta) / (float)(tb - ta);
+                if (t < 0.0f) t = 0.0f; else if (t > 1.0f) t = 1.0f;
+                s_lastLerpT = t;
+            } else {
+                t = s_lastLerpT;       // equal stamps: keep the last valid ratio, never snap to 1.0
+                ++s_eqTFrames;
+            }
             lerpState(g_snaps[ai].st, g_snaps[bi].st, t, out);
             return true;
         }
@@ -5054,21 +5228,62 @@ static void OnFrameInner(Human* updatedHuman) {
         s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, ".\\AC4Coop.ini");
         s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
-        L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", Net::Init() ? 1 : 0);
+        bool netOk = Net::Init();
+        L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
+        // Log the config Net::Init() actually reads, so a failed two-machine session is diagnosable from
+        // this log alone (the bind/peer line only reaches net_log.txt + OutputDebugString, which are often
+        // missing from the game folder). Same keys/defaults as net.cpp.
+        {
+            char cfgPeer[64] = {0};
+            GetPrivateProfileStringA("Net", "PeerIP", "127.0.0.1", cfgPeer, sizeof(cfgPeer), ".\\AC4Coop.ini");
+            L("[Net] cfg enabled=%d peer=%s local=%d peerPort=%d strictPeer=%d\n",
+              GetPrivateProfileIntA("Net", "Enabled",   0, ".\\AC4Coop.ini"),
+              cfgPeer,
+              GetPrivateProfileIntA("Net", "LocalPort", 47801, ".\\AC4Coop.ini"),
+              GetPrivateProfileIntA("Net", "PeerPort",  47801, ".\\AC4Coop.ini"),
+              s_netStrictPeer);
+            if (!netOk)
+                L("[Net] init=FALSE -> link disabled ([Net] Enabled=0, or bind/socket failure; details in net_log.txt)\n");
+        }
     }
 
     // Wire stats every 5 s: measured, not estimated.
     {
         static uint64_t s_statsLast = 0;
+        static int s_txOnlyPolls = 0;      // consecutive 5 s polls with tx>0 and rx==0 (one-shot warning)
+        static bool s_txOnlyWarned = false;
         uint64_t stNow = GetTickCount64();
         if (!s_statsLast) s_statsLast = stNow;
         if (Net::Enabled() && stNow - s_statsLast >= 5000) {
+            // Smoothing metric first: per-frame puppet movement over the window (XZ + |dY|) plus which
+            // interpolation path produced it. This is the before/after signal - not an opinion.
+            {
+                double avgD = s_appliedFrames ? s_appliedSum / (double)s_appliedFrames : 0.0;
+                L("[Smooth] frames=%u hold=%u ext=%u clamp=%u eqT=%u drop=%u wipe=%u extra=%u avgD=%.4f maxD=%.4f\n",
+                  s_interpFrames, s_holdFrames, s_extrapFrames, s_clampFrames, s_eqTFrames,
+                  s_reorderDrops, s_wipeCount, s_batchExtra, avgD, s_appliedMax);
+                s_interpFrames = s_holdFrames = s_extrapFrames = s_clampFrames = 0;
+                s_eqTFrames = s_reorderDrops = s_wipeCount = s_batchExtra = 0;
+                s_appliedFrames = 0; s_appliedSum = 0.0; s_appliedMax = 0.0;
+                s_appliedValid = 0;   // don't count a delta across the window boundary
+            }
             Net::Stats st; Net::GetStats(st);
             double secs = (stNow - s_statsLast) / 1000.0;
             L("[Net] stats tx=%u pkt, %u B, %u ent  rx=%u pkt, %u B  |  %.1f kB/s up, %.1f kB/s down  |  mirror ok=%u nobod=%u steal=%u\n",
               st.txPackets, st.txBytes, st.txEnts, st.rxPackets, st.rxBytes,
               (st.txBytes / 1024.0) / secs, (st.rxBytes / 1024.0) / secs,
               s_covMatched, s_covNoBody, s_covStolen);
+            // One-shot receive watchdog: counters reset every poll, so 2 polls with tx and no rx
+            // means ~10 s of transmitting into the void. Say so once - silence is the failure mode
+            // that cost us a whole two-machine session.
+            if (st.rxPackets > 0) {
+                s_txOnlyPolls = 0;
+            } else if (st.txPackets > 0) {
+                if (++s_txOnlyPolls >= 2 && !s_txOnlyWarned) {
+                    s_txOnlyWarned = true;
+                    L("[Net] WARNING: 10 s of tx with rx=0 - peer not running, wrong PeerIP/port, firewall, or proto mismatch\n");
+                }
+            }
             s_covMatched = 0; s_covNoBody = 0; s_covStolen = 0;
             Net::ResetStats();
             s_statsLast = stNow;
@@ -5142,11 +5357,17 @@ static void OnFrameInner(Human* updatedHuman) {
         else stable = 0;
 
         uint64_t now = GetTickCount64();
+        uint64_t nowUs = NowUs();         // microsecond clock for the interpolation buffer only
         bool loading = engineLoading();   // engine streaming/tearing down a world
 
-        // Pull the newest raw packet; track freshness (seq advanced) and whether it's in OUR world.
+        // Pull every player packet queued since the last frame (last-wins would drop samples exactly
+        // when the frame rate dips); `raw` is still the newest one, so all the logic below is unchanged.
         PlayerState raw;
-        bool gotRaw = Net::GetRemote(raw) && raw.valid;
+        PlayerState batch[8];
+        int nb = Net::DrainRemote(batch, 8);
+        bool gotRaw = (nb > 0);
+        if (gotRaw) raw = batch[nb - 1];
+        if (gotRaw && !raw.valid) gotRaw = false;
 
         // ---- Feature #3: protocol-version gate (NetStrictPeer / NetStrictPeer=0 disables the timer arm) ----
         // A peer from a different source has a different packed PlayerState layout: its fields decode as
@@ -5172,7 +5393,12 @@ static void OnFrameInner(Human* updatedHuman) {
         if (gotRaw && raw.seq != lastRawSeq) {
             lastRawSeq = raw.seq;
             if (rawSameWorld) lastFreshMs = now;        // a fresh same-world packet keeps the puppet alive
-            if (g_interpEnabled && protoOk) PushSnapshot(raw, now);
+            if (g_interpEnabled && protoOk) {
+                // Feed the buffer EVERY packet received this frame, not just the last one; PushSnapshot
+                // dedupes by seq, so a re-drained or duplicate packet is harmless.
+                for (int i = 0; i < nb; ++i) if (batch[i].valid) PushSnapshot(batch[i], nowUs);
+                if (nb > 1) ++s_batchExtra;
+            }
         }
         // Peer is "present" only with a recent fresh same-world packet AND (Feature #3) a live receive
         // timer — covers world change, disconnect, silence and unexpected-source drops, where GetRemote
@@ -5257,7 +5483,7 @@ static void OnFrameInner(Human* updatedHuman) {
             if (g_puppet) {
                 // Render a delayed, interpolated state; with interp off, use the raw latest packet.
                 PlayerState remote; bool haveRemote;
-                if (g_interpEnabled) haveRemote = ComputeInterpolated(now, remote);
+                if (g_interpEnabled) haveRemote = ComputeInterpolated(nowUs, remote);
                 else { remote = raw; haveRemote = gotRaw; }
                 // Same world + same scene ONLY: never drive a puppet from a peer we've gated out
                 // (proto mismatch, different world cell, or unknown-and-disallowed).
@@ -5297,6 +5523,7 @@ static void OnFrameInner(Human* updatedHuman) {
                                 pr.matrix.M21 = sm.M21; pr.matrix.M22 = sm.M22; pr.matrix.M23 = sm.M23;
                                 pr.matrix.M31 = sm.M31; pr.matrix.M32 = sm.M32; pr.matrix.M33 = sm.M33;
                                 Phase1::ApplyRemoteState(pr);
+                                NoteAppliedPos(pr.matrix.M41, pr.matrix.M42, pr.matrix.M43);
                                 placedOnDeck = true;
                                 if (!s_passengerWasOn) {
                                     s_passengerWasOn = true;
@@ -5315,6 +5542,7 @@ static void OnFrameInner(Human* updatedHuman) {
                             L("[Ship] passenger: peer off ship -> normal placement\n");
                         }
                         Phase1::ApplyRemoteState(remote);
+                        NoteAppliedPos(remote.matrix.M41, remote.matrix.M42, remote.matrix.M43);
                     }
                 }
             }
@@ -5654,6 +5882,9 @@ void Phase1::InstallFrameHook() {
     g_driveActions = GetPrivateProfileIntA("Coop", "DriveActions", 1, ".\\AC4Coop.ini");
     g_disablePuppetAI = GetPrivateProfileIntA("Coop", "DisablePuppetAI", 1, ".\\AC4Coop.ini");
     g_hybridLoco = GetPrivateProfileIntA("Coop", "HybridLoco", 1, ".\\AC4Coop.ini");
+    // Test-only: shift the puppet sideways so a single machine can test AI reaction to it.
+    // 0 (default) = off, production behaviour unchanged. Read as an int in centimetres.
+    g_puppetParkX = (float)GetPrivateProfileIntA("Coop", "PuppetParkX", 0, ".\\AC4Coop.ini");
     g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, ".\\AC4Coop.ini");
     g_minBlendIn = GetPrivateProfileIntA("Coop", "MinBlendInMs", 100, ".\\AC4Coop.ini") / 1000.0f;
     // DriveContextMask: read as a string so hex ("0x440") or decimal both parse. Empty -> keep the safe
@@ -5669,6 +5900,16 @@ void Phase1::InstallFrameHook() {
                    || GetPrivateProfileIntA("Coop", "DisableCrowd", 0, ".\\AC4Coop.ini");
     g_interpEnabled = GetPrivateProfileIntA("Net", "Interpolation", 1, ".\\AC4Coop.ini");
     g_interpDelayMs = GetPrivateProfileIntA("Net", "InterpDelayMs", 100, ".\\AC4Coop.ini");
+    g_interpMaxExtrapMs = GetPrivateProfileIntA("Net", "InterpMaxExtrapMs", 100, ".\\AC4Coop.ini");
+    if (g_interpMaxExtrapMs < 0)   g_interpMaxExtrapMs = 0;
+    if (g_interpMaxExtrapMs > 300) g_interpMaxExtrapMs = 300;
+    // [Relevance] Character radius (250 m default) and ship radius (1000 m default; ships are sparse).
+    g_relevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "RelevanceRadiusM", 250, ".\\AC4Coop.ini");
+    g_shipRelevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "ShipRelevanceRadiusM", 1000, ".\\AC4Coop.ini");
+    if (g_relevanceRadiusM < 0.0f) g_relevanceRadiusM = 0.0f;
+    if (g_shipRelevanceRadiusM < 0.0f) g_shipRelevanceRadiusM = 0.0f;
+    L("[Phase1] RelevanceRadiusM=%.0f (characters), ShipRelevanceRadiusM=%.0f (ships); peer-relative, 0 = off\n",
+      g_relevanceRadiusM, g_shipRelevanceRadiusM);
     InstallGetUnusedPadHook();
     InstallNoPauseHook();
     if (g_disableSpawns) { InstallSpawnRequestHook(); InstallCrowdSpawnHook(); }

@@ -9,6 +9,7 @@ namespace Net {
     bool IsSecondInstance();            // true if LocalPort was taken (this is the same-PC 2nd instance)
     void Send(const PlayerState& s);    // sendto peer (no-op if disabled)
     bool GetRemote(PlayerState& out);   // copy latest received state; false if none yet
+    int  DrainRemote(PlayerState* out, int max); // pop up to max queued player packets, arrival order
 
     // Entity sync (host-authoritative "synced worlds"): a separate packet type on the same socket.
     void SendEntities(const EntityPacket& p);   // sendto peer (no-op if disabled)

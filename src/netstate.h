@@ -113,7 +113,7 @@ struct PlayerState {
 static const uint32_t NET_MAGIC = 0x43344341; // 'AC4C'
 // Wire/struct-layout version. PlayerState is #pragma pack(1): adding a field shifts every following
 // offset, so both peers MUST run the same build. Bump this whenever the layout changes.
-static const uint32_t NET_PROTO_VER = 8;   // 8: EntityState carries the NPC archetype id (was _pad2)
+static const uint32_t NET_PROTO_VER = 9;   // 9: compact per-field entity wire (EntityField mask)
 
 // ---- entity sync (host-authoritative "synced worlds") -------------------------------
 // One replicated entity's transform. `key` is the index in the host's enumeration; `kind`
@@ -147,3 +147,35 @@ struct EntityPacket {
     EntityState ents[MAX_SYNC_ENTITIES];
 };
 #pragma pack(pop)
+
+// ---- Phase 2: compact entity wire ------------------------------------------------------------
+// EntityPacket above remains the canonical DECODED form, so every consumer (ApplyShips/ApplyGuards/
+// ProcessKillEvents) is unchanged. On the wire each entity is:
+//     u32 key, u8 kind, u16 fieldMask, then only the fields whose bit is set (fixed order below).
+// A field is omitted when it equals the sender's shadow copy, so a static NPC costs 7 bytes instead
+// of 56. Every captured entity is still sent on every packet, so `count` keeps its old meaning.
+// Old (proto 8) peers are rejected by the protoVer check rather than mis-parsed.
+enum EntityField : uint16_t {
+    EF_POS    = 1u << 0,   // float pos[3]
+    EF_QUAT   = 1u << 1,   // float quat[4]
+    EF_ACTION = 1u << 2,   // u32 actionAlias
+    EF_HULLHP = 1u << 3,   // i32 hullHP
+    EF_HP     = 1u << 4,   // u16 hp
+    EF_ARCH   = 1u << 5,   // u16 arch
+    EF_DEAD   = 1u << 6,   // u8  dead
+    EF_STAGE  = 1u << 7,   // u8  stage
+    EF_OBJID  = 1u << 8,   // u64 objId
+    EF_ALL    = 0x01FFu,
+};
+
+#pragma pack(push, 1)
+struct EntityWireHeader {
+    uint32_t magic;    // NET_ENTITY_MAGIC
+    uint32_t protoVer; // NET_PROTO_VER
+    uint32_t seq;
+    uint32_t epoch;    // shadow generation: both peers drop their delta base when this changes
+    uint32_t count;
+};
+#pragma pack(pop)
+static const int ENTITY_WIRE_HEADER_SIZE = 20;
+static const int ENTITY_WIRE_RECORD_MAX  = 16 + 50;  // key+kind+idKind+mask+id + every field (worst case)
