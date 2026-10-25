@@ -132,9 +132,17 @@ int __cdecl OnIntercept(void* node)
 // Entry stub: ECX = node (__thiscall). Preserve the volatile registers the caller may still hold,
 // answer the gate, then either return 1 or run the stolen instruction in the trampoline.
 //
-//   push edx / push ecx        ; save EDX; pass node as the __cdecl argument
+// Stack discipline matters here and is easy to get wrong: the saved ECX and the ECX passed as the
+// __cdecl argument must be TWO separate slots. Pushing ECX once and then "popping it back" after
+// `add esp,4` silently pops the return address instead, so the callee returns into garbage. ECX is
+// needed intact on the trampoline path (`mov ax,[ecx+0FCh]`), so it is pushed twice:
+//
+//   push edx                   ; save EDX
+//   push ecx                   ; save ECX (node) -- slot 1
+//   push ecx                   ; pass node as the __cdecl argument -- slot 2
 //   call OnIntercept
-//   add  esp,4 / pop edx / pop ecx
+//   add  esp,4                 ; drop the argument, saved ECX still on top
+//   pop  ecx / pop edx         ; restore both
 //   test eax,eax
 //   jne  guarded -> mov eax,1 ; ret
 //   else -> jmp dword ptr [g_trampoline]   (mov ax,[ecx+0FCh]; jmp 0x00679227)
@@ -142,11 +150,12 @@ __declspec(naked) void GuardDetour()
 {
     __asm {
         push edx
-        push ecx                        // node -> first argument of OnIntercept
+        push ecx                        // save node (slot 1)
+        push ecx                        // node -> first argument of OnIntercept (slot 2)
         call OnIntercept
-        add  esp, 4
-        pop  edx
+        add  esp, 4                     // drop the argument only
         pop  ecx                        // restore node for the original/trampoline path
+        pop  edx
         test eax, eax
         jne  guard_fired
         jmp  dword ptr [g_trampoline]
