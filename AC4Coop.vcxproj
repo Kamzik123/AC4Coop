@@ -107,6 +107,7 @@
     <ClCompile Include="src\phase1.cpp" />
     <ClCompile Include="src\net.cpp" />
     <ClCompile Include="src\action_guard.cpp" />
+    <ClCompile Include="src\deref_guard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hook.h" />
@@ -115,6 +116,7 @@
     <ClInclude Include="src\net.h" />
     <ClInclude Include="src\netstate.h" />
     <ClInclude Include="src\action_guard.h" />
+    <ClInclude Include="src\deref_guard.h" />
     <ClInclude Include="src\Scimitar\AI\AbstractEntityAI.h" />
     <ClInclude Include="src\Scimitar\AI\AIActor.h" />
     <ClInclude Include="src\Scimitar\AI\AIEntityHelper.h" />

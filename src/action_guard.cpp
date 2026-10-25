@@ -188,7 +188,7 @@ void ActionGuard::Init()
 
     // Config gate: [Coop] GuardNullActionTarget=0 leaves the game completely unpatched (A/B without a
     // rebuild). Read the same way as the surrounding options.
-    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 1, INI_PATH) == 0) {
+    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 0, INI_PATH) == 0) {
         OutputDebugStringA("[AG] disabled by [Coop] GuardNullActionTarget=0\n");
         return;
     }

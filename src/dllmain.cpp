@@ -19,6 +19,7 @@
 #include "phase1.h"
 #include "net.h"
 #include "action_guard.h"
+#include "deref_guard.h"
 
 // ---- Target function RVAs (file VA - 0x400000) ---------------------------------
 static const uintptr_t RVA_GetWorld          = 0x14D4D0;
@@ -251,7 +252,12 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
 
         // Guard the action/animation state gate (0x00679220) so a node with no bound target never
         // reaches sub_681980 / sub_679750's unchecked [node+0x114] dereference. [Coop] GuardNullActionTarget
+        // Kept for A/B only; default 0 (forcing the gate to 1 breaks sub_736410).
         ActionGuard::Init();
+
+        // Correct fix for the same crash: per-site null guards on the two nullable node pointers
+        // (+0x114 / +0x118), which the node constructor leaves NULL. [Coop] GuardNullTarget, default 1.
+        DerefGuard::Init();
 
         // Front B (peer-to-peer UDP link) is started on the first in-world frame instead of at
         // DLL attach. The game's launch chain (Steam -> Ubisoft -> DRM -> real game) starts more
