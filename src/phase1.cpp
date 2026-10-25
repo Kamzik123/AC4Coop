@@ -5996,7 +5996,31 @@ void Phase1::InstallFrameHook() {
     // position match stays as the fallback, so 0 reproduces the previous behaviour exactly.
     g_idResolver = GetPrivateProfileIntA("Coop", "IdResolver", 1, ".\\AC4Coop.ini") != 0;
     L("[IdRes] entity identity: %s\n", g_idResolver ? "registry first, scan fallback" : "scan only");
-    InstallGetUnusedPadHook();
+    // --------------------------------------------------------------------------------------------
+    // [Coop] LegacyPadIdHook (default 1) — gates the GetUnusedPadID detour ONLY.
+    //
+    // STATUS: this hook is LIVE and REQUIRED by the puppet spawn path. BhvAssassin::AddToWorldInternal
+    // calls GetUnusedPadID while g_blockReg is set by TrySpawnPuppet (phase1.cpp:537), and the detour
+    // is what gives the puppet a genuinely empty pad slot instead of the local player's active one.
+    // g_blockReg is cleared on despawn (phase1.cpp:1513, 5519) and on liveness drop. The callback is a
+    // pure pass-through whenever g_blockReg is null, i.e. for the real player and outside a spawn.
+    //
+    // There is no "SpawnBody" config key in the source at all — that name never existed as an ini key.
+    // Do not describe this hook as dead or as gated: it is on the live spawn path.
+    //
+    // LegacyPadIdHook=0 is a DIAGNOSTIC A/B switch only (crash triage): it removes the detour
+    // entirely, so the puppet enrols onto the real player's pad+gamer and puppet spawning will likely
+    // break. Leave at 1 for normal play.
+    // --------------------------------------------------------------------------------------------
+    const bool legacyPadIdHook = GetPrivateProfileIntA("Coop", "LegacyPadIdHook", 1, ".\\AC4Coop.ini") != 0;
+    if (legacyPadIdHook) {
+        InstallGetUnusedPadHook();
+        L("[Hook] GetUnusedPadID detour: installed\n");
+        OutputDebugStringA("[Hook] GetUnusedPadID detour: installed\n");
+    } else {
+        L("[Hook] GetUnusedPadID detour: disabled (LegacyPadIdHook=0)\n");
+        OutputDebugStringA("[Hook] GetUnusedPadID detour: disabled (LegacyPadIdHook=0)\n");
+    }
     InstallNoPauseHook();
     if (g_disableSpawns) { InstallSpawnRequestHook(); InstallCrowdSpawnHook(); }
     uintptr_t b = base();
