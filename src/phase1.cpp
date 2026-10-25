@@ -2674,6 +2674,73 @@ static bool MirrorAliasShouldApply(void* e, unsigned int alias) {
 
 static unsigned int s_covMatched = 0, s_covNoBody = 0, s_covStolen = 0;   // coverage counters, reset with stats
 
+// ---- [IdRes] engine-resolver entity identity (additive; the scan below stays the fallback) --------
+// The engine keeps an object registry at VA 0x004DD9824: table pointer at +0x10, uint16 count at +0x16,
+// stride 16, entry {id_lo, id_hi, owner, extra}. 0x00A1F160 is
+// `void* __thiscall (registry, uint32_t id_lo, uint32_t id_hi)` (retn 8) and returns entry->owner, or 0
+// for (0,0), for unknown ids, and when byte_27F4AC6 == 0.
+//
+// It has NO generation check, so an id that was destroyed and re-issued can hand back a dangling
+// pointer. Every hit is therefore verified against the object's own id before it is used. The resolver
+// also dereferences the registry critical section at *0x004DD601C unconditionally, so that pointer is
+// checked first (it is null before the registry comes up and after a teardown).
+static bool g_idResolver = true;
+static int  s_idResHit  = 0;
+static int  s_idResMiss = 0;
+
+static void* ResolveEntityByIdRaw(uint64_t id) {
+    if (!id) return nullptr;
+    __try {
+        if (*(void**)0x004DD601C == nullptr) return nullptr;   // registry lock/service not up
+        return Hook::CallClassMethod<void*, void*, uint32_t, uint32_t>(
+            0x00A1F160, (void*)0x004DD9824, (uint32_t)id, (uint32_t)(id >> 32));
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return nullptr;
+    }
+}
+
+// Throttle: the first 20 events, then every 500th.
+static bool IdResLogNow(int* counter) {
+    ++*counter;
+    return *counter <= 20 || (*counter % 500) == 0;
+}
+
+// The entity that currently owns `id`, or nullptr. The return value is only ever a pointer whose own id
+// reads back as `id`, so a stale-past-destroy hit degrades to a miss (and the caller falls back).
+static Entity* ResolveEntityById(uint64_t id) {
+    void* obj = ResolveEntityByIdRaw(id);
+    if (!obj) return nullptr;
+    __try {
+        if (!readable(obj, 8)) return nullptr;
+        if (((ManagedObject*)obj)->GetObjectID() != id) return nullptr;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return nullptr;
+    }
+    return (Entity*)obj;
+}
+
+// The candidate predicate ApplyGuards applies to a body: skeleton + BhvGenericNPC + a health service.
+// Returns the behaviour component (needed for the archetype check and the disable call), else nullptr.
+static Component* MirrorCandidateBhv(Entity* e, Entity* player) {
+    if (!e || e == player || !readable(e, 4)) return nullptr;
+    Component** data = *(Component***)((char*)e + 0x60);
+    int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+    if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+    if (!data || !readable(data, 4) || n <= 0 || n > 96) return nullptr;
+    bool skel = false; Component* bhvC = 0;
+    for (int k = 0; k < n; ++k) {
+        Component* c = data[k];
+        uint32_t vt = (c && readable(c, 4)) ? *(uint32_t*)c : 0;
+        if (vt == 0x01E41E58) skel = true;
+        if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only
+    }
+    if (!skel || !bhvC) return nullptr;
+    AbstractEntityAI* aiPre = AIEntityHelper::GetEntityAI(e);
+    unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
+    if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) return nullptr;
+    return bhvC;
+}
+
 static void ApplyGuards(const EntityPacket& pkt) {
     World* world = World::GetCurrentWorld();
     if (!world) return;
@@ -2691,7 +2758,22 @@ static void ApplyGuards(const EntityPacket& pkt) {
             // Never feed the engine a NaN/inf transform (see FiniteVec).
             if (!FiniteVec(es.pos, 3) || !FiniteVec(es.quat, 4)) continue;
             Entity* best = 0; Component* bestBhv = 0; float bestD = 1.5f * 1.5f;   // 1.5m match tolerance
-            for (int j = 0; j < nobj; ++j) {
+            // [IdRes] Primary path: ask the engine's registry for the id directly. Purely additive - when
+            // the resolver is off, misses, or the object fails validation, the legacy scan below runs
+            // exactly as before, so the previous behaviour cannot regress.
+            if (g_idResolver && es.objId) {
+                Entity* re = ResolveEntityById(es.objId);
+                Component* rb = re ? MirrorCandidateBhv(re, player) : nullptr;
+                if (rb && (!es.arch || (uint16_t)(*(uint32_t*)((char*)rb + 0x14) & 0xFFFF) == es.arch)) {
+                    best = re; bestBhv = rb;
+                    if (IdResLogNow(&s_idResHit))
+                        L("[IdRes] id=%016llX -> %p (resolver)\n", (unsigned long long)es.objId, re);
+                } else if (IdResLogNow(&s_idResMiss)) {
+                    L("[IdRes] id=%016llX miss -> scan\n", (unsigned long long)es.objId);
+                }
+            }
+            const int scanN = best ? 0 : nobj;               // a resolver hit skips the legacy scan
+            for (int j = 0; j < scanN; ++j) {
                 Reference* ref = ents.GetElement(j);
                 if (!ref || !readable(ref, 4)) break;
                 HandleContainer* hc = ref->m_HandleContainer;
@@ -5910,6 +5992,10 @@ void Phase1::InstallFrameHook() {
     if (g_shipRelevanceRadiusM < 0.0f) g_shipRelevanceRadiusM = 0.0f;
     L("[Phase1] RelevanceRadiusM=%.0f (characters), ShipRelevanceRadiusM=%.0f (ships); peer-relative, 0 = off\n",
       g_relevanceRadiusM, g_shipRelevanceRadiusM);
+    // [IdRes] Resolve mirrored entities through the engine's id registry first; the legacy scan +
+    // position match stays as the fallback, so 0 reproduces the previous behaviour exactly.
+    g_idResolver = GetPrivateProfileIntA("Coop", "IdResolver", 1, ".\\AC4Coop.ini") != 0;
+    L("[IdRes] entity identity: %s\n", g_idResolver ? "registry first, scan fallback" : "scan only");
     InstallGetUnusedPadHook();
     InstallNoPauseHook();
     if (g_disableSpawns) { InstallSpawnRequestHook(); InstallCrowdSpawnHook(); }

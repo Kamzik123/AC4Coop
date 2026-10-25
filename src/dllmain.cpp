@@ -18,6 +18,7 @@
 #include "windowed.h"
 #include "phase1.h"
 #include "net.h"
+#include "action_guard.h"
 
 // ---- Target function RVAs (file VA - 0x400000) ---------------------------------
 static const uintptr_t RVA_GetWorld          = 0x14D4D0;
@@ -247,6 +248,10 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
 
         // Phase 1: hook the per-frame Human update so spawns/drives run on the game's main thread.
         Phase1::InstallFrameHook();
+
+        // Guard the action/animation state gate (0x00679220) so a node with no bound target never
+        // reaches sub_681980 / sub_679750's unchecked [node+0x114] dereference. [Coop] GuardNullActionTarget
+        ActionGuard::Init();
 
         // Front B (peer-to-peer UDP link) is started on the first in-world frame instead of at
         // DLL attach. The game's launch chain (Steam -> Ubisoft -> DRM -> real game) starts more
