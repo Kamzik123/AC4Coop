@@ -5,12 +5,16 @@ Parses the ON-DISK AC4BFSP.exe, maps RVA -> file offset correctly, scans .text f
 documented patterns, and re-derives every address the plugin will patch from the pattern bases.
 Then it compares those derived addresses against the literals baked into the plugin.
 
+It also byte-checks the stale-target guard site at 0x006795FD (Part B of src/deref_guard.cpp), which
+is patched at a fixed address rather than derived from a pattern: the 6-byte load, the continue point
+(0x00679603) and the engine's "no target" path (0x00679611).
+
 This is the source of truth for the pattern set, not a throwaway: run it BEFORE building, against the
 EXE that will actually be patched. If it fails, the PATTERN is wrong -- fix the pattern, never the
 expectation.
 
-Exit codes: 0 = all patterns unique and every derived address equals its literal; 1 = oracle failure;
-2 = the EXE is not the documented build (size/hash/machine mismatch).
+Exit codes: 0 = all patterns unique and every derived address equals its literal and the stale-target
+bytes match; 1 = oracle failure; 2 = the EXE is not the documented build (size/hash/machine mismatch).
 
 Usage:
     python verify_signatures.py [path\\to\\AC4BFSP.exe]
@@ -76,6 +80,24 @@ TARGETS = [
     ("deref[5] skip", "sub_681980", 0x1DC, 0x00681B5C),
     ("action  resume", "sub_679220", 0x007, 0x00679227),
 ]
+
+# --- stale-target guard site (src/deref_guard.cpp, Part B) --------------------------------------
+# The loader that produced the EIP=0x0073448F / EDX=0xFFFFFFFF crash: it is NOT one of the six deref
+# sites, so its bytes are checked directly rather than derived from a pattern base. Offsets are fixed
+# for this build; the plugin re-verifies the same three byte strings at install time and refuses to
+# patch if any differ.
+STALE_SITE_VA = 0x006795FD          # mov ecx,[esi+0x114]
+STALE_CONT_VA = 0x00679603          # test ecx,ecx ; je 0x00679611 ; call 0x00734460
+STALE_SKIP_VA = 0x00679611          # mov byte ptr [ebp+8],0
+STALE_SITE_BYTES = bytes.fromhex("8B 8E 14 01 00 00")
+STALE_CONT_BYTES = bytes.fromhex("85 C9")
+STALE_SKIP_BYTES = bytes.fromhex("C6 45 08 00")
+
+# Informational only: the first bytes executed after each deref stub's `jmp SITE+6`. Printed so the
+# "EAX/EDX are dead at the continue point" assumption (the stub clobbers both) can be re-checked
+# against this build without a second tool.
+DEREF_CONT_VA = [0x006797DC, 0x006797EA, 0x00681AED, 0x00681B67, 0x00681B29, 0x00681B5C]
+INFO_BYTES = 6
 
 
 class PE:
@@ -277,14 +299,42 @@ def main():
     print(table(["target", "pattern", "matches", "resolved", "literal", "equal"], rows,
                 [20, 10, 7, 10, 10, 5]))
 
+    # --- table 3: stale-target guard site (fixed offsets, no pattern base) ----------------------
+    print("\n=== stale-target guard site ===")
+    rows = []
+    stale_ok = True
+    for label, va, expected, note in (
+            ("site", STALE_SITE_VA, STALE_SITE_BYTES, "mov ecx,[esi+0x114]"),
+            ("cont", STALE_CONT_VA, STALE_CONT_BYTES, "test ecx,ecx"),
+            ("skip", STALE_SKIP_VA, STALE_SKIP_BYTES, "mov byte [ebp+8],0")):
+        got = pe.read_rva(va - pe.image_base, len(expected))
+        equal = (got == expected)
+        if not equal:
+            stale_ok = False
+        rows.append(("0x%08X" % va, "0x%08X" % (va - pe.image_base),
+                     " ".join("%02X" % b for b in got),
+                     " ".join("%02X" % b for b in expected),
+                     note, "PASS" if equal else "FAIL"))
+    print(table(["va", "rva", "on-disk", "expected", "instruction", "result"], rows,
+                [10, 10, 18, 18, 22, 6]))
+
+    # --- informational: bytes at each deref stub's continue target -----------------------------
+    print("\n=== deref continue targets (info: stub clobbers EAX/EDX) ===")
+    rows = []
+    for va in DEREF_CONT_VA:
+        got = pe.read_rva(va - pe.image_base, INFO_BYTES)
+        rows.append(("0x%08X" % va, " ".join("%02X" % b for b in got), "SITE+6"))
+    print(table(["va", "first %d bytes" % INFO_BYTES, "note"], rows, [10, 20, 8]))
+
     # --- verdict --------------------------------------------------------------------------------
     print()
     print("  patterns unique+equal : %s" % ("PASS" if pattern_ok else "FAIL"))
     print("  sites resolved==literal: %s" % ("PASS" if sites_ok else "FAIL"))
     print("  targets resolved==literal: %s" % ("PASS" if targets_ok else "FAIL"))
-    print("  %d sites, %d targets checked" % (len(SITES), len(TARGETS)))
+    print("  stale-target site bytes: %s" % ("PASS" if stale_ok else "FAIL"))
+    print("  %d sites, %d targets, 3 stale-target checks" % (len(SITES), len(TARGETS)))
 
-    if pattern_ok and sites_ok and targets_ok:
+    if pattern_ok and sites_ok and targets_ok and stale_ok:
         print("\nORACLE: PASS")
         return 0
     print("\nORACLE: FAIL")

@@ -21,8 +21,19 @@ namespace DerefGuard {
     // site -- and its continue/skip targets -- is then an offset from that base. The documented
     // literals (0x006797D6 / 0x006797E4 / 0x00681AE7 / 0x00681B61 / 0x00681B23 / 0x00681B49) are
     // used only as the fallback route when a pattern finds nothing on a KNOWN build.
-    // Config-gated by [Coop] GuardNullTarget (default 1; 0 = install nothing), and by
-    // BuildGate::Trusted(): an untrusted build installs nothing.
+    //
+    // Each stub now validates the loaded pointer before letting it reach the engine: non-null, inside
+    // [0x10000, 0x7F000000), and its first dword (the vtable) inside .rdata
+    // (VA 0x01E3A000 + 0x0090874A, rebased onto the module). A failure counts the hit and takes the
+    // site's documented skip target, exactly as a null did before.
+    //
+    // A separate guard covers the loader at 0x006795FD (the action-lane chain that crashed with
+    // EDX=0xFFFFFFFF, i.e. a sentinel vtable), because that site is not one of the six above.
+    //
+    // Config-gated by [Coop] GuardNullTarget (default 1; 0 = no six-site guards) and
+    // [Coop] GuardStaleTarget (default 1; 0 = no 0x006795FD guard). Both are inert when
+    // BuildGate::Trusted() is false. `GuardNullTarget=1 GuardStaleTarget=0` reproduces the previous
+    // build exactly.
     // Every site is byte-verified before it is touched; a site whose bytes differ is skipped and
     // logged, never half-patched. Safe to call more than once.
     void Init();

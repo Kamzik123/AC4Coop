@@ -36,11 +36,48 @@ namespace {
 
 const uintptr_t VA_IMAGE_BASE = 0x00400000;   // module is not ASLR-relocated (see Hook.h)
 const size_t    STEAL_LEN     = 6;            // mov ecx,[esi+disp32]
-const size_t    STUB_SIZE     = 19;           // 6 + 2 + 6 + 5
+
+// Stub layout, 63 bytes. Every branch is a rel32 conditional (0F 8x) rather than rel8, so the three
+// extra checks cannot push a short jump out of range, and the recorder always sits at a fixed offset:
+//
+//   00  8B 8E <disp32>      mov  ecx,[esi+OFF]          ; the stolen instruction, re-executed verbatim
+//   06  85 C9               test ecx,ecx
+//   08  0F 84 <rel32>       jz   <record>               ; null
+//   14  81 F9 00 00 01 00   cmp  ecx,0x00010000         ; cheap wild-pointer bound, low
+//   20  0F 82 <rel32>       jb   <record>               ; below the bound
+//   26  81 F9 00 00 00 7F   cmp  ecx,0x7F000000         ; cheap wild-pointer bound, high
+//   32  0F 83 <rel32>       jae  <record>               ; at/above the bound
+//   38  8B 01               mov  eax,[ecx]              ; the object's vtable pointer
+//   40  8D 90 <disp32>      lea  edx,[eax-RDATA_START]
+//   46  81 FA <imm32>       cmp  edx,RDATA_SIZE
+//   52  0F 83 <rel32>       jae  <record>               ; unsigned: catches below-range as well
+//   58  E9 <rel32>          jmp  SITE+6                 ; pass -> original code, unchanged
+//
+// The three wild/sentinel cases (ecx=0, ecx=0xFFFFFFFF, a vtable outside .rdata) all land on the same
+// call-free recorder as before, which counts the hit and jumps to the site's documented skip target.
+const size_t    STUB_SIZE     = 63;
 const size_t    SHIM_SIZE     = 18;           // 7 + 6 + 5
-const size_t    STUB_REGION   = 128;          // 6 * 19 = 114, rounded so shims start aligned
-const size_t    CAVE_SIZE     = 512;
+const size_t    STUB_REGION   = 384;          // 6 * 64, rounded so the shims start 16-byte aligned
+const size_t    CAVE_SIZE     = 1024;         // 6*63 + 6*18 = 486 used; the rest is headroom
 const size_t    SITE_COUNT    = 6;
+
+// .rdata, where every real vtable lives. Documented VAs for this build; rebased onto the module in
+// Init() as `base + (VA - 0x400000)` so a relocated image still validates against its own .rdata.
+const uintptr_t VA_RDATA_START = 0x01E3A000;
+const uint32_t  RDATA_SIZE     = 0x0090874A;
+
+// Wild-pointer bound for an object pointer. Anything outside [64 KiB, 0x7F000000) is not a heap
+// object on this build; in particular 0xFFFFFFFF (the observed sentinel) fails the high test.
+const uint32_t  MIN_TARGET_PTR = 0x00010000;
+const uint32_t  MAX_TARGET_PTR = 0x7F000000;
+
+// Part B: the unchecked [node+0x114] loader at the head of the action-lane call chain that crashed
+// with EIP=0x0073448F, EDX=0xFFFFFFFF. It is NOT one of the six sites above, so the null guards do
+// not cover it: 0x6795FD must get its own patch, its own cave stub and its own recorder.
+const uintptr_t LITERAL_STALE_SITE = 0x006795FD;   // mov ecx,[esi+0x114]
+const uintptr_t LITERAL_STALE_CONT = 0x00679603;   // test ecx,ecx ; je 0x679611 ; call 0x734460
+const uintptr_t LITERAL_STALE_SKIP = 0x00679611;   // mov byte ptr [ebp+8],0  (engine's "no target")
+const size_t    STALE_CAVE_SIZE    = 256;          // stub 63 + recorder 18, room to spare
 
 // A rel32 patch reaches +-2 GB. Require a comfortable margin so the boundary itself is never used.
 const uintptr_t MAX_CAVE_DELTA = 0x7FFF0000;
@@ -117,9 +154,14 @@ uintptr_t VaLiteral(uintptr_t moduleBase, uintptr_t va)
 }
 
 
+bool     g_entry     = false;   // Init() runs at most once, even when a config gate installs nothing
 bool     g_installed = false;
 BYTE*    g_cave      = nullptr;
 FILE*    g_log       = nullptr;
+
+// .rdata window for vtable validation, derived from the module base in Init().
+uintptr_t g_rdataStart = 0;
+uint32_t  g_rdataSize  = 0;
 
 // Fire counters written by the cave (absolute imm32 data stores; must outlive the cave, so they live
 // in this translation unit's data rather than in the executable cave).
@@ -128,8 +170,14 @@ volatile LONG g_lastNode[SITE_COUNT];
 LONG          g_logged[SITE_COUNT];
 volatile LONG g_totalLogged = 0;
 
+// Part B's own counter pair, same contract as the per-site ones.
+volatile LONG g_staleHits = 0;
+volatile LONG g_staleNode = 0;
+LONG          g_staleLogged = 0;
+
 // Site VAs as resolved in Init(), for the reporter's log lines (the site table itself holds offsets).
 uintptr_t     g_siteVa[SITE_COUNT];
+uintptr_t     g_staleVa = 0;
 
 // Debugger + live-readable file, same shape as the other units' loggers. Called from the game thread
 // (install time) and from the reporter thread only.
@@ -169,6 +217,24 @@ void DrainCounters()
 
         if (emit)
             Log("[DG] null target at site 0x%08X node=%p\n", (unsigned)g_siteVa[i], (void*)node);
+    }
+
+    // Part B: the stale-target guard at 0x006795FD, same reporting shape as the per-site counters.
+    if (g_staleHits) {
+        const LONG hits = g_staleHits;
+        const LONG node = g_staleNode;
+
+        bool emit = false;
+        if (g_staleLogged < 20 && hits > g_staleLogged) {
+            g_staleLogged = hits;
+            emit = true;
+        } else if (hits >= g_staleLogged + 500) {
+            g_staleLogged = hits;
+            emit = true;
+        }
+
+        if (emit)
+            Log("[DG] stale target at site 0x%08X node=%p\n", (unsigned)g_staleVa, (void*)node);
     }
 }
 
@@ -230,38 +296,88 @@ BYTE* AllocateCave(const uintptr_t* siteAddrs, const bool* valid)
     return nullptr;
 }
 
-// Writes one stub + its recorder. Both are position-independent except for the E9 targets, which are
-// computed once the cave address is final.
-void BuildStub(BYTE* stub, BYTE* shim, size_t i, uintptr_t cont, uintptr_t skip)
+// Writes one stub + its recorder. Both are position-independent except for the E9/0F 8x targets,
+// which are computed once the cave address is final. `hits` / `lastNode` are the recorder's storage
+// (per-site for Part A, a single pair for Part B).
+//
+// Register contract: the stub clobbers EAX and EDX only. ECX (the tested pointer), ESI (the node the
+// field offset is relative to), EDI and EBX are untouched. EAX holds the validated vtable pointer and
+// EDX the range delta at the moment the stub jumps to `cont`; every continue target re-loads or
+// overwrites both before reading them (`mov edx,[ecx]` / `mov eax,[ecx]`), which is asserted offline
+// by tools/verify_signatures.py.
+void BuildStub(BYTE* stub, BYTE* shim, DWORD fieldOff, uintptr_t cont, uintptr_t skip,
+               uintptr_t rdataStart, uint32_t rdataSize,
+               volatile LONG* hits, volatile LONG* lastNode)
 {
-    // 8B 8E <disp32>  mov ecx,[esi+OFF]
+    // 00  8B 8E <disp32>  mov ecx,[esi+OFF]
     stub[0] = 0x8B;
     stub[1] = 0x8E;
-    *reinterpret_cast<uint32_t*>(stub + 2) = kSites[i].fieldOff;
+    *reinterpret_cast<uint32_t*>(stub + 2) = fieldOff;
 
-    // 85 C9           test ecx,ecx
+    // 06  85 C9           test ecx,ecx
     stub[6] = 0x85;
     stub[7] = 0xC9;
 
-    // 0F 84 <rel32>   jz <record>
+    // 08  0F 84 <rel32>   jz <record>
     stub[8]  = 0x0F;
     stub[9]  = 0x84;
     *reinterpret_cast<int32_t*>(stub + 10) = Rel32(stub + 14, shim);
 
-    // E9 <rel32>      jmp SITE+6
-    stub[14] = 0xE9;
-    *reinterpret_cast<int32_t*>(stub + 15) = Rel32(stub + 19, (const void*)cont);
+    // 14  81 F9 <imm32>   cmp ecx,MIN_TARGET_PTR
+    stub[14] = 0x81;
+    stub[15] = 0xF9;
+    *reinterpret_cast<uint32_t*>(stub + 16) = MIN_TARGET_PTR;
 
-    // F0 FF 05 <imm32>  lock inc dword ptr [hits[i]]
+    // 20  0F 82 <rel32>   jb <record>      (ecx < MIN_TARGET_PTR)
+    stub[20] = 0x0F;
+    stub[21] = 0x82;
+    *reinterpret_cast<int32_t*>(stub + 22) = Rel32(stub + 26, shim);
+
+    // 26  81 F9 <imm32>   cmp ecx,MAX_TARGET_PTR
+    stub[26] = 0x81;
+    stub[27] = 0xF9;
+    *reinterpret_cast<uint32_t*>(stub + 28) = MAX_TARGET_PTR;
+
+    // 32  0F 83 <rel32>   jae <record>     (ecx >= MAX_TARGET_PTR, unsigned)
+    stub[32] = 0x0F;
+    stub[33] = 0x83;
+    *reinterpret_cast<int32_t*>(stub + 34) = Rel32(stub + 38, shim);
+
+    // 38  8B 01           mov eax,[ecx]    -- the vtable pointer; ecx is a readable object by now
+    stub[38] = 0x8B;
+    stub[39] = 0x01;
+
+    // 40  8D 90 <disp32>  lea edx,[eax-RDATA_START]
+    // The displacement is -(int32)RDATA_START, so EDX is a small unsigned distance when EAX is in
+    // .rdata and a wrapped/huge value when it is below the section (the unsigned compare rejects both).
+    stub[40] = 0x8D;
+    stub[41] = 0x90;
+    *reinterpret_cast<int32_t*>(stub + 42) = (int32_t)(-(int64_t)rdataStart);
+
+    // 46  81 FA <imm32>   cmp edx,RDATA_SIZE
+    stub[46] = 0x81;
+    stub[47] = 0xFA;
+    *reinterpret_cast<uint32_t*>(stub + 48) = rdataSize;
+
+    // 52  0F 83 <rel32>   jae <record>     (vtable outside .rdata)
+    stub[52] = 0x0F;
+    stub[53] = 0x83;
+    *reinterpret_cast<int32_t*>(stub + 54) = Rel32(stub + 58, shim);
+
+    // 58  E9 <rel32>      jmp SITE+6
+    stub[58] = 0xE9;
+    *reinterpret_cast<int32_t*>(stub + 59) = Rel32(stub + 63, (const void*)cont);
+
+    // F0 FF 05 <imm32>  lock inc dword ptr [hits]
     shim[0] = 0xF0;
     shim[1] = 0xFF;
     shim[2] = 0x05;
-    *reinterpret_cast<uint32_t*>(shim + 3) = (uint32_t)(uintptr_t)&g_hits[i];
+    *reinterpret_cast<uint32_t*>(shim + 3) = (uint32_t)(uintptr_t)hits;
 
-    // 89 35 <imm32>     mov dword ptr [lastNode[i]], esi
+    // 89 35 <imm32>     mov dword ptr [lastNode], esi
     shim[7]  = 0x89;
     shim[8]  = 0x35;
-    *reinterpret_cast<uint32_t*>(shim + 9) = (uint32_t)(uintptr_t)&g_lastNode[i];
+    *reinterpret_cast<uint32_t*>(shim + 9) = (uint32_t)(uintptr_t)lastNode;
 
     // E9 <rel32>        jmp SKIP
     shim[13] = 0xE9;
@@ -297,42 +413,11 @@ bool PatchSite(BYTE* at, const void* cont)
 
 } // namespace
 
-void DerefGuard::Init()
+// Part A: the six per-site null/stale deref guards. `game` / `moduleBase` are resolved by Init(),
+// which also owns the config gates, the log file and the reporter thread.
+static bool InstallNullGuards(HMODULE game, uintptr_t moduleBase)
 {
-    if (g_installed) return;
 
-    // Fail closed on patching, not on loading: an unverified build keeps this module resident and
-    // silent, and the process still reaches the menu.
-    if (!BuildGate::Trusted()) {
-        OutputDebugStringA("[DG] skipped: build not trusted\n");
-        return;
-    }
-
-    // Config gate: [Coop] GuardNullTarget=0 leaves the game completely unpatched (A/B without a
-    // rebuild). Default 1 — the crash is fatal, not cosmetic.
-    if (GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) == 0) {
-        OutputDebugStringA("[DG] disabled by [Coop] GuardNullTarget=0\n");
-        return;
-    }
-
-    // Several processes in AC4's launch chain load this ASI; only the real game has the module.
-    HMODULE game = (HMODULE)GameModuleBase;
-    if (!game) game = GetModuleHandleA("ac4bfsp.exe");
-    if (!game) {
-        OutputDebugStringA("[DG] install skipped: ac4bfsp.exe not loaded\n");
-        return;
-    }
-
-    // Game-folder log, live-readable (shared write denied) like phase1's. PID-suffixed so a stale
-    // process cannot hold it open and swallow a later run's evidence.
-    if (!g_log) {
-        char logPath[64];
-        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
-                    ".\\AC4Coop_deref_guard_%u.log", (unsigned)GetCurrentProcessId());
-        g_log = _fsopen(logPath, "a", _SH_DENYWR);
-    }
-
-    const uintptr_t moduleBase = (uintptr_t)game;
 
     // ---- resolve the two function bases (pattern first, literal only on a KNOWN build) ----------
     const char* const kFuncName[FUNC_COUNT]    = { "sub_679750", "sub_681980" };
@@ -398,13 +483,13 @@ void DerefGuard::Init()
 
     if (validCount == 0) {
         Log("[DG] install FAILED: no site matched the expected layout\n");
-        return;
+        return false;
     }
 
     BYTE* cave = AllocateCave(siteAddrs, valid);
     if (!cave) {
         Log("[DG] install FAILED: no cave within rel32 range\n");
-        return;
+        return false;
     }
     g_cave = cave;
 
@@ -413,9 +498,13 @@ void DerefGuard::Init()
         if (!valid[i]) continue;
         BuildStub(cave + i * STUB_SIZE,
                   cave + STUB_REGION + i * SHIM_SIZE,
-                  i,
+                  kSites[i].fieldOff,
                   contAddrs[i],
-                  skipAddrs[i]);
+                  skipAddrs[i],
+                  g_rdataStart,
+                  g_rdataSize,
+                  &g_hits[i],
+                  &g_lastNode[i]);
     }
     FlushInstructionCache(GetCurrentProcess(), cave, STUB_REGION + SITE_COUNT * SHIM_SIZE);
 
@@ -431,7 +520,168 @@ void DerefGuard::Init()
 
     Log("[DG] %u null-deref sites guarded, cave=%p\n", (unsigned)patched, cave);
 
-    g_installed = true;
+    return patched > 0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Part B: the stale-target guard at 0x006795FD.
+// ---------------------------------------------------------------------------------------------
+
+// A cave for Part B, which must install independently of the six-site cave (and of GuardNullTarget).
+static bool CaveReachable(const BYTE* cave, uintptr_t site)
+{
+    const uintptr_t d = (uintptr_t)cave > site ? (uintptr_t)cave - site : site - (uintptr_t)cave;
+    return d < MAX_CAVE_DELTA;
+}
+
+static BYTE* AllocCaveNear(uintptr_t site, size_t size)
+{
+    BYTE* cave = (BYTE*)VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE,
+                                     PAGE_EXECUTE_READWRITE);
+    if (cave && CaveReachable(cave, site)) {
+        Log("[DG] stale cave (unhinted) = %p\n", cave);
+        return cave;
+    }
+    if (cave) {
+        Log("[DG] stale cave %p out of rel32 range, retrying with hints\n", cave);
+        VirtualFree(cave, 0, MEM_RELEASE);
+    }
+
+    for (size_t h = 0; h < sizeof(CAVE_HINTS) / sizeof(CAVE_HINTS[0]); ++h) {
+        cave = (BYTE*)VirtualAlloc((LPVOID)CAVE_HINTS[h], size, MEM_COMMIT | MEM_RESERVE,
+                                   PAGE_EXECUTE_READWRITE);
+        if (!cave) continue;
+        if (CaveReachable(cave, site)) {
+            Log("[DG] stale cave (hint 0x%08X) = %p\n", (unsigned)CAVE_HINTS[h], cave);
+            return cave;
+        }
+        Log("[DG] stale cave %p out of rel32 range, next hint\n", cave);
+        VirtualFree(cave, 0, MEM_RELEASE);
+    }
+    return nullptr;
+}
+
+// The loader at the head of the action-lane call chain that crashed with EIP=0x0073448F,
+// EDX=0xFFFFFFFF (the object's first dword -- its vtable -- held the sentinel):
+//
+//   0x006795FD  8B 8E 14 01 00 00   mov  ecx,[esi+0x114]
+//   0x00679603  85 C9               test ecx,ecx
+//   0x00679605  0F 84 ..            je   0x00679611          engine's own "no target" path
+//   0x0067960B  ..                  call 0x00734460         (unchecked virtual dispatch)
+//   0x00679611  C6 45 08 00         mov  byte ptr [ebp+8],0
+//
+// The 6-byte load is replaced with `E9 rel32` + 0x90 into a private cave stub that re-executes it and
+// applies the same three Part A checks. Every reject goes through the call-free recorder (count the
+// hit, latch ESI) and then the engine's own 0x00679611; a pass jumps to 0x00679603, so the original
+// test/je/call still run in their original order.
+static bool InstallStaleTarget(uintptr_t moduleBase)
+{
+    const uintptr_t site = VaLiteral(moduleBase, LITERAL_STALE_SITE);
+    const uintptr_t cont = VaLiteral(moduleBase, LITERAL_STALE_CONT);
+    const uintptr_t skip = VaLiteral(moduleBase, LITERAL_STALE_SKIP);
+
+    static const BYTE expSite[STEAL_LEN] = { 0x8B, 0x8E, 0x14, 0x01, 0x00, 0x00 };
+    static const BYTE expCont[2]         = { 0x85, 0xC9 };
+    static const BYTE expSkip[4]         = { 0xC6, 0x45, 0x08, 0x00 };
+
+    const BYTE* p = (const BYTE*)site;
+    const BYTE* c = (const BYTE*)cont;
+    const BYTE* s = (const BYTE*)skip;
+
+    // Byte-verify the site AND both places the stub jumps to before touching a single byte.
+    if (memcmp(p, expSite, sizeof(expSite)) != 0 ||
+        memcmp(c, expCont, sizeof(expCont)) != 0 ||
+        memcmp(s, expSkip, sizeof(expSkip)) != 0) {
+        Log("[DG] stale-target guard FAILED @ 0x%08X (site %02X %02X %02X %02X %02X %02X, "
+            "cont %02X %02X, skip %02X %02X %02X %02X)\n",
+            (unsigned)site, p[0], p[1], p[2], p[3], p[4], p[5],
+            c[0], c[1], s[0], s[1], s[2], s[3]);
+        return false;
+    }
+
+    g_staleVa = site;
+
+    BYTE* cave = AllocCaveNear(site, STALE_CAVE_SIZE);
+    if (!cave) {
+        Log("[DG] stale-target guard FAILED @ 0x%08X (no cave within rel32 range)\n", (unsigned)site);
+        return false;
+    }
+
+    // Recorder immediately after the 63-byte stub: both live in this cave, nothing is shared with
+    // the six-site cave.
+    BuildStub(cave, cave + STUB_SIZE, 0x114, cont, skip,
+              g_rdataStart, g_rdataSize, &g_staleHits, &g_staleNode);
+    FlushInstructionCache(GetCurrentProcess(), cave, STUB_SIZE + SHIM_SIZE);
+
+    if (!PatchSite((BYTE*)site, cave)) {
+        Log("[DG] stale-target guard FAILED @ 0x%08X (patch failed)\n", (unsigned)site);
+        return false;
+    }
+
+    Log("[DG] stale-target guard @ 0x%08X (vtable range)\n", (unsigned)site);
+    return true;
+}
+
+void DerefGuard::Init()
+{
+    if (g_entry) return;
+    g_entry = true;
+
+    // Fail closed on patching, not on loading: an unverified build keeps this module resident and
+    // silent, and the process still reaches the menu.
+    if (!BuildGate::Trusted()) {
+        OutputDebugStringA("[DG] skipped: build not trusted\n");
+        return;
+    }
+
+    // Two independent gates. GuardNullTarget covers the six Part A sites; GuardStaleTarget covers the
+    // separate loader at 0x006795FD. `GuardNullTarget=1 GuardStaleTarget=0` reproduces the previous
+    // build exactly; `0/1` A/Bs the stale guard on its own.
+    const bool nullGuard  = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) != 0;
+    const bool staleGuard = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, INI_PATH) != 0;
+
+    if (!nullGuard)
+        OutputDebugStringA("[DG] null-target guards disabled by [Coop] GuardNullTarget=0\n");
+    if (!staleGuard)
+        OutputDebugStringA("[DG] stale-target guard disabled by [Coop] GuardStaleTarget=0\n");
+    if (!nullGuard && !staleGuard) {
+        OutputDebugStringA("[DG] disabled: both [Coop] guards are 0\n");
+        return;
+    }
+
+    // Several processes in AC4's launch chain load this ASI; only the real game has the module.
+    HMODULE game = (HMODULE)GameModuleBase;
+    if (!game) game = GetModuleHandleA("ac4bfsp.exe");
+    if (!game) {
+        OutputDebugStringA("[DG] install skipped: ac4bfsp.exe not loaded\n");
+        return;
+    }
+
+    // Game-folder log, live-readable (shared write denied) like phase1's. PID-suffixed so a stale
+    // process cannot hold it open and swallow a later run's evidence.
+    if (!g_log) {
+        char logPath[64];
+        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
+                    ".\\AC4Coop_deref_guard_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+    }
+
+    const uintptr_t moduleBase = (uintptr_t)game;
+
+    // .rdata window for vtable validation, derived from THIS module base rather than baked in, so a
+    // relocated image still validates against its own .rdata.
+    g_rdataStart = VaLiteral(moduleBase, VA_RDATA_START);
+    g_rdataSize  = RDATA_SIZE;
+    Log("[DG] vtable range 0x%08X..0x%08X (.rdata)\n",
+        (unsigned)g_rdataStart, (unsigned)(g_rdataStart + g_rdataSize));
+
+    bool installedAny = false;
+    if (nullGuard)  installedAny |= InstallNullGuards(game, moduleBase);
+    if (staleGuard) installedAny |= InstallStaleTarget(moduleBase);
+
+    g_installed = installedAny;
+    if (!installedAny) return;
+
     // _beginthreadex, not CreateThread: the reporter calls CRT functions (fputs/_vsnprintf_s) and
     // CreateThread does not initialise the CRT's per-thread state - that crashed the game at the
     // first 5 s drain (ntdll, bad per-thread pointer).

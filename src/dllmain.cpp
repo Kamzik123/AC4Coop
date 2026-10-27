@@ -14,6 +14,7 @@
 #include <windows.h>
 #include <process.h>
 #include <cstdio>
+#include <share.h>
 #include <cstdint>
 #include <cstdarg>
 #include "windowed.h"
@@ -57,13 +58,15 @@ static bool readable(const void* p, size_t n)
     return (uintptr_t)p + n <= end;
 }
 
+static bool g_stdoutReady = false;
+
 static void logline(const char* fmt, ...)
 {
     char buf[512];
     va_list ap; va_start(ap, fmt);
     _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, ap);
     va_end(ap);
-    printf("%s", buf);
+    if (g_stdoutReady) printf("%s", buf);
     if (g_log) { fputs(buf, g_log); fflush(g_log); }
     OutputDebugStringA(buf);
 }
@@ -100,20 +103,31 @@ static bool sampleOnce(Vec4& pos, void*& outWorld, void*& outPlayer)
 
 static unsigned __stdcall PollThread(void*)
 {
-    AllocConsole();
-    FILE* dummy; freopen_s(&dummy, "CONOUT$", "w", stdout);
     char leaf[64];
     wsprintfA(leaf, "phase0_log_%u.txt", GetCurrentProcessId());
     char logPath[MAX_PATH];
     Phase1::ModuleRelativePath(logPath, sizeof(logPath), leaf);
-    fopen_s(&g_log, logPath, "w");
+    // "a" + _SH_DENYWR, not fopen_s "w": this file is the heartbeat evidence and must be readable WHILE
+    // the game runs. fopen_s opened it with a share mode that denied readers, so the one check that proves
+    // PollThread is alive could not be performed during the 2026-10-27 solo run (0 B, unreadable, process
+    // alive). If the open fails we still emit through OutputDebugString, but say so in the debugger.
+    g_log = _fsopen(logPath, "a", _SH_DENYWR);
+    if (!g_log) OutputDebugStringA("[AC4Coop] phase0 log open FAILED (readable heartbeat unavailable)\n");
 
     uintptr_t base = (uintptr_t)GetModuleHandleW(nullptr);
     pGetWorld     = (GetWorld_t)    (base + RVA_GetWorld);
     pGetPlayer    = (GetPlayer_t)   (base + RVA_GetPlayer);
     pGetGlobalPos = (GetGlobalPos_t)(base + RVA_GetGlobalPosition);
 
+    // Write the first line BEFORE touching the console: AllocConsole() can block on console-host
+    // initialisation, and if it does the heartbeat must already be on disk or this thread looks dead.
     logline("[AC4Coop] Phase 0 online. module base = %p\n", (void*)base);
+
+    // No AllocConsole() here. In the 2026-10-27 solo run the console init blocked this thread after the
+    // first line was written: the start heartbeat landed, then no `tick=200` for the whole session. The
+    // log file and OutputDebugString are the evidence; a console must never gate the poll loop.
+    // g_stdoutReady stays false, so logline() skips printf.
+
     Phase1::InstallVirtualPadHook();   // Phase A: must run before the engine enumerates pads
     logline("[AC4Coop] GetWorld=%p  GetPlayer=%p  GetGlobalPosition=%p\n",
             (void*)pGetWorld, (void*)pGetPlayer, (void*)pGetGlobalPos);
