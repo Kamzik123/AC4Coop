@@ -68,7 +68,7 @@ static void logline(const char* fmt, ...)
     OutputDebugStringA(buf);
 }
 
-// Local wall-clock ISO8601 with milliseconds, used by the heartbeat / ini-watch lines. A bare counter is
+// Local wall-clock ISO8601 with milliseconds, used by the heartbeat / poll-tick lines. A bare counter is
 // not evidence of when a process was alive; a timestamp is.
 static void localIso8601(char* out, size_t cap)
 {
@@ -136,16 +136,17 @@ static unsigned __stdcall PollThread(void*)
         Sleep(50); // ~20 Hz
         ++ticks;
 
-        // Every 200 iterations (~10 s at 20 Hz): one heartbeat and one ini-watch line.
-        // The loop re-reads the ini on every iteration through InstallVirtualPadHook() ([Coop] VPadEnable,
-        // phase1.cpp:351); logging every one of those would be 20 lines/s, so the watch is reported on
-        // this slower tick instead -- the same tick on which the config re-read is known to have happened.
+        // Every 200 iterations (~10 s at 20 Hz): one heartbeat and one poll-tick line.
+        // There is NO distinct ini-watch path in this loop: its only periodic config read is
+        // InstallVirtualPadHook's [Coop] VPadEnable check, which runs on every iteration (20 Hz).
+        // So this records the poll loop's own tick -- liveness, not a config change -- and is named
+        // poll-tick so nobody later reads it as proof of a mechanism that does not exist.
         if ((ticks % 200) == 0) {
             char ts[32];
             localIso8601(ts, sizeof(ts));
             logline("[AC4Coop] heartbeat pid=%u tick=%llu ts=%s\n",
                     (unsigned)GetCurrentProcessId(), (unsigned long long)ticks, ts);
-            logline("[AC4Coop] ini-watch tick=%llu ts=%s\n", (unsigned long long)ticks, ts);
+            logline("[AC4Coop] poll-tick tick=%llu ts=%s\n", (unsigned long long)ticks, ts);
         }
 
         // F6 (edge-triggered): request a spawn; the actual work runs on the main thread (frame hook).
