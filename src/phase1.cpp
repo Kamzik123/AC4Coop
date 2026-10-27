@@ -152,7 +152,7 @@ int    g_snapHz = 20;        // [Net] SnapshotHz (entity snapshot cadence, indep
 uintptr_t base() { return (uintptr_t)GetModuleHandleW(nullptr); }
 
 void L(const char* fmt, ...) {
-    char buf[256];
+    char buf[1024];   // 1024: the [TP] probe lines carry 16 %.4f values plus a tag; 256 truncated them
     va_list ap; va_start(ap, fmt);
     _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, ap);
     va_end(ap);
@@ -5261,6 +5261,148 @@ static void ProbeIdentityOnce() {
     }
 }
 
+// ============================================================================================
+// [Coop] TransformProbe - default OFF, READ-ONLY diagnostic.
+// --------------------------------------------------------------------------------------------
+// Problem: the wire takes its transform from Entity+0x10 (m_GlobalMatrix, translation at +0x40),
+// which has no per-frame writer, so peer positions are suspected stale (observed 4.83 m peak error).
+// Three live sources are documented; this logs all of them side by side in ONE run so a single
+// launch decides which is live, instead of testing guesses serially.
+//
+//   wire  = Entity+0x10 m_GlobalMatrix  16 floats - what CaptureLocalState() sends today
+//   cc1A0 = CharacterController+0x1A0   the CC translation lane   (movaps @7C7FC7)
+//   cc1C0 = CharacterController+0x1C0   the CC basis/quaternion    (movaps @7C7E88)
+//   node  = [[CC+0x510]+0x00..0x3F]     composed node matrix (4x movaps @7C807C..7C8098)
+//
+// Offsets are quoted from existing evidence, never derived here:
+//   subsystem-re/journal/00-sync-payload.md      "The live transform is [[CC+0x510]+0x18] with
+//                                                translation +0x1A0 and basis +0x1C0, written by
+//                                                FUN_007c7da0"
+//   subsystem-re/runtime/ida/A4-cc-transform.txt the consumer 0x7C7DA0 reads +0x1A0 / +0x1C0 and
+//                                                writes [CC+0x510]+0x00..0x3F
+//   SESSION-2026-10-27.md section 12             the three capture candidates
+// The CharacterController is reached with the SAME expression phase1.cpp already uses
+// (CaptureLocalState 1110, ApplyRemoteState 1228 / 1298): h->GetCharacterComponent().
+// isOnShip reuses Human::m_IsOnShip, the field CaptureLocalState() already copies into PlayerState
+// (line 1009) - no new engine read is introduced for it.
+//
+// READ-ONLY: no engine-memory write, no Set*, no allocation. Every dereference is null/range tested,
+// then readable()-probed, then covered by the caller's __try - a bad pointer loses one log line,
+// never the process. Nothing below is even reached unless [Coop] TransformProbe=1.
+// ============================================================================================
+const uintptr_t TP_PTR_LO      = 0x00010000u;   // user-space floor: never a valid object
+const uintptr_t TP_PTR_HI      = 0x7F000000u;   // ceiling we accept for object pointers
+const uintptr_t TP_CC_EXTENT   = 0x600;         // == the readable(cc, 0x600) probe already in this file
+const uintptr_t TP_CC_OFF_A    = 0x1A0;         // documented CC translation lane
+const uintptr_t TP_CC_OFF_B    = 0x1C0;         // documented CC basis/quaternion lane
+const uintptr_t TP_CC_OFF_NODE = 0x510;         // documented scene-node pointer
+const uintptr_t TP_NODE_MATRIX_LEN = 0x40;      // 4 x movaps => 16 floats
+const uintptr_t TP_ENTITY_LEN  = 0x50;          // Entity+0x10 matrix (0x40) up to the end of it
+
+// Null + range test, length-safe (no wrap: a < HI and len <= HI - a).
+static bool tpInRange(const void* p, size_t len) {
+    const uintptr_t a = (uintptr_t)p;
+    return p != nullptr && a >= TP_PTR_LO && a < TP_PTR_HI && len <= (TP_PTR_HI - a);
+}
+
+// One "[TP]   tag   = v0 v1 ..." line. n is what the source really exposes (clamped to 16), never
+// more. The line is built first so a long float value cannot cut the line in half.
+static void tpLogVec(const char* tag, const float* v, int n) {
+    char line[640];
+    int  len = _snprintf_s(line, sizeof(line), _TRUNCATE, "[TP]   %-5s =", tag);
+    if (len < 0) return;
+    for (int i = 0; i < n && len < (int)sizeof(line) - 24; ++i) {
+        const int w = _snprintf_s(line + len, sizeof(line) - (size_t)len, _TRUNCATE, " %.4f", v[i]);
+        if (w < 0) break;
+        len += w;
+    }
+    L("%s\n", line);
+}
+
+// Up to 16 floats from cc+off, clamped to the object extent the existing code already asserts
+// readable (readable(cc, 0x600) at 1228 / 1298). Returns the number of floats actually read (0 = none).
+static int tpReadCCLane(CharacterController* cc, uintptr_t off, float* out) {
+    if (!cc || off >= TP_CC_EXTENT) return 0;
+    size_t n = (size_t)((TP_CC_EXTENT - off) / sizeof(float));
+    if (n > 16) n = 16;
+    const float* src = (const float*)((const char*)cc + off);
+    if (!tpInRange(src, n * sizeof(float)) || !readable(src, n * sizeof(float))) return 0;
+    for (size_t i = 0; i < n; ++i) out[i] = src[i];
+    return (int)n;
+}
+
+// The composed node matrix: [CC+0x510] is the node, +0x00..0x3F the 4x4 the CC pushes into it.
+static int tpReadNodeMatrix(CharacterController* cc, float* out) {
+    if (!cc) return 0;
+    const void* slot = (const char*)cc + TP_CC_OFF_NODE;
+    if (!tpInRange(slot, 4) || !readable(slot, 4)) return 0;
+    const void* node = *(const void* const*)slot;
+    if (!node || !tpInRange(node, TP_NODE_MATRIX_LEN) || !readable(node, TP_NODE_MATRIX_LEN)) return 0;
+    const float* m = (const float*)node;
+    for (int i = 0; i < 16; ++i) out[i] = m[i];
+    return 16;
+}
+
+static void ProbeTransformOne(const char* who, uint32_t frame, Entity* ent, Human* h) {
+    float wire[16], laneA[16], laneB[16], node[16];
+    int   nWire = 0, nA = 0, nB = 0, nNode = 0;
+    int   onShip = 0;
+    void* cc = nullptr;
+
+    // isOnShip: the field CaptureLocalState() already copies into PlayerState (line 1009).
+    if (h && readable(&h->m_IsOnShip, 1)) onShip = h->m_IsOnShip ? 1 : 0;
+
+    // CharacterController: the exact accessor the file already uses to reach it.
+    if (h && tpInRange(h, 4) && readable(h, 4)) cc = h->GetCharacterComponent();
+
+    const bool ccOk = cc && tpInRange(cc, TP_CC_EXTENT) && readable(cc, TP_CC_EXTENT);
+
+    // wire: Entity+0x10 (m_GlobalMatrix), 16 floats - exactly what the snapshot sends today.
+    if (ent && tpInRange(ent, TP_ENTITY_LEN) && readable(&ent->m_GlobalMatrix, sizeof(HookMath::Transform))) {
+        const float* w = (const float*)&ent->m_GlobalMatrix;
+        for (int i = 0; i < 16; ++i) wire[i] = w[i];
+        nWire = 16;
+    }
+
+    if (ccOk) {
+        CharacterController* c = (CharacterController*)cc;
+        nA    = tpReadCCLane(c, TP_CC_OFF_A, laneA);
+        nB    = tpReadCCLane(c, TP_CC_OFF_B, laneB);
+        nNode = tpReadNodeMatrix(c, node);
+    }
+
+    L("[TP] f=%u who=%s onShip=%d ent=0x%08X cc=0x%08X\n",
+      frame, who, onShip, (unsigned)(uintptr_t)ent, (unsigned)(uintptr_t)cc);
+    tpLogVec("wire",  wire,  nWire);
+    tpLogVec("cc1A0", laneA, nA);
+    tpLogVec("cc1C0", laneB, nB);
+    tpLogVec("node",  node,  nNode);
+    L("[TP]   valid = w:%d a:%d b:%d n:%d\n",
+      nWire ? 1 : 0, nA ? 1 : 0, nB ? 1 : 0, nNode ? 1 : 0);
+}
+
+// Called once per PLAYER frame (OnFrameInner). Logs the local player's entity and, if a puppet
+// exists, the puppet - every 30 frames.
+static void ProbeTransform(Human* localHuman) {
+    static uint32_t s_frame = 0;
+    if ((++s_frame % 30u) != 0) return;
+    const uint32_t frame = s_frame;
+
+    __try {
+        World* world = World::GetCurrentWorld();
+        Entity* localEnt = world ? world->GetPlayer() : nullptr;
+        ProbeTransformOne("local", frame, localEnt, localHuman);
+
+        Entity* puppet = g_puppet;
+        if (puppet && tpInRange(puppet, 4) && readable(puppet, 4)) {
+            Human* puppetHuman = AIEntityHelper::GetHuman(puppet);
+            ProbeTransformOne("puppet", frame, puppet, puppetHuman);
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[TP] EXCEPTION 0x%08X (probe line skipped)\n", GetExceptionCode());
+    }
+}
+
 static void OnFrameInner(Human* updatedHuman);
 
 // Any access violation inside our per-frame work is logged and that frame is skipped, instead of taking
@@ -5302,6 +5444,7 @@ static void OnFrameInner(Human* updatedHuman) {
     static int  s_shipPassenger = 0;   // ini [Coop] ShipPassenger — read once (default OFF)
     static int  s_shipGhost     = 0;   // ini [Coop] ShipGhost — ghost-ship clone (default OFF; fragile on world travel)
     static int  s_ghostSelfTest = 0;   // ini [Coop] ShipGhostSelfTest — drive the ghost to the LOCAL ship (solo verify)
+    static int  s_transformProbe = 0;  // ini [Coop] TransformProbe — read-only transform-source probe (default OFF)
     if (!s_netStarted) {
         s_netStarted    = true;
         s_netStrictPeer = GetPrivateProfileIntA("Coop", "NetStrictPeer", 1, ".\\AC4Coop.ini");
@@ -5309,6 +5452,7 @@ static void OnFrameInner(Human* updatedHuman) {
         s_shipPassenger = GetPrivateProfileIntA("Coop", "ShipPassenger", 0, ".\\AC4Coop.ini");
         s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, ".\\AC4Coop.ini");
         s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
+        s_transformProbe = GetPrivateProfileIntA("Coop", "TransformProbe", 0, ".\\AC4Coop.ini");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
         bool netOk = Net::Init();
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
@@ -5328,6 +5472,10 @@ static void OnFrameInner(Human* updatedHuman) {
                 L("[Net] init=FALSE -> link disabled ([Net] Enabled=0, or bind/socket failure; details in net_log.txt)\n");
         }
     }
+
+    // [Coop] TransformProbe (default 0): read-only capture of the three documented transform sources,
+    // every 30 frames, local + puppet. OFF => this is one int test and nothing else runs.
+    if (s_transformProbe) ProbeTransform(updatedHuman);
 
     // Wire stats every 5 s: measured, not estimated.
     {
