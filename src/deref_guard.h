@@ -16,9 +16,13 @@
 //   guard: re-execute the stolen load, test the pointer, and if it is null skip the call that would
 //   dereference it. Non-null execution is byte-for-byte the original path.
 namespace DerefGuard {
-    // Installs six 6-byte jumps (VA 0x006797D6 / 0x006797E4 / 0x00681AE7 / 0x00681B61 /
-    // 0x00681B23 / 0x00681B49) into stubs in a single VirtualAlloc'd cave within +-2 GB of the
-    // module. Config-gated by [Coop] GuardNullTarget (default 1; 0 = install nothing).
+    // Installs six 6-byte jumps into stubs in a single VirtualAlloc'd cave within +-2 GB of the
+    // module. The two function bases (sub_679750 / sub_681980) are resolved by pattern first; every
+    // site -- and its continue/skip targets -- is then an offset from that base. The documented
+    // literals (0x006797D6 / 0x006797E4 / 0x00681AE7 / 0x00681B61 / 0x00681B23 / 0x00681B49) are
+    // used only as the fallback route when a pattern finds nothing on a KNOWN build.
+    // Config-gated by [Coop] GuardNullTarget (default 1; 0 = install nothing), and by
+    // BuildGate::Trusted(): an untrusted build installs nothing.
     // Every site is byte-verified before it is touched; a site whose bytes differ is skipped and
     // logged, never half-patched. Safe to call more than once.
     void Init();

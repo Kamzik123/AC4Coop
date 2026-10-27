@@ -1,0 +1,10 @@
+# AC4Coop known builds -- deployed next to AC4Coop.asi as known_builds.txt
+#
+# Format: one entry per line, `<64-hex-sha256> <label>`.
+# `#` comments and blank lines are ignored. A digest not listed here is UNKNOWN_BUILD:
+# the plugin stays resident, logs, and installs NO patches (unless [Coop] ForceUnknownBuild=1).
+#
+# Add a line for a new build only after tools/verify_signatures.py passes against that EXE.
+#
+# sha256                                                           label
+bc11ad7924e1eca7363ee86aa3332c05386d0a05896c0b7370131daee9ab5150 AC4BFSP 1.0 deployed-2026-10-25

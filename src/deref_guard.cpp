@@ -22,6 +22,8 @@
 
 #include "deref_guard.h"
 #include "Hook.h"
+#include "build_gate.h"
+#include "pattern_scan.h"
 
 #include <windows.h>
 #include <process.h>
@@ -53,8 +55,10 @@ const char* INI_PATH = ".\\AC4Coop.ini";
 const BYTE EXP_114[STEAL_LEN] = { 0x8B, 0x8E, 0x14, 0x01, 0x00, 0x00 };
 const BYTE EXP_118[STEAL_LEN] = { 0x8B, 0x8E, 0x18, 0x01, 0x00, 0x00 };
 
-// The six sites. `cont` is SITE+6 (the untouched instruction after the stolen load); `skip` is the
-// instruction a null pointer must resume at. Values are absolute VAs, verified from disassembly:
+// The six sites. `cont` is the instruction after the stolen load; `skip` is the instruction a null
+// pointer must resume at. The VAs quoted below are the documented values for this build (kept for the
+// offline oracle and for the comments); the table itself is expressed as offsets from the function
+// base, so no literal code address reaches the patcher:
 //
 //   0x006797E4  the +0x118 load that follows the +0x114 call
 //   0x006797F5  epilogue (`or word[esi+0xE],di`) of sub_679750
@@ -64,22 +68,54 @@ const BYTE EXP_118[STEAL_LEN] = { 0x8B, 0x8E, 0x18, 0x01, 0x00, 0x00 };
 //   0x00681B36  post-call cmp/je 0x00681B75 / jmp 0x00681B5C for case 3
 //   0x00681B5C  shared tail after case 4's call
 //   0x00681B75  phase-2 epilogue
+enum FuncId { FUNC_A = 0, FUNC_B = 1, FUNC_COUNT = 2 };
+
+// The two function bases. These literals are the ONLY literal code addresses in this unit, and they
+// are reached only as the fallback route (zero pattern matches on a KNOWN build). RVAs are
+// `VA - 0x00400000`.
+const char* const PATTERN_FUNC_A = "55 8B EC 66 8B 15 ?? ?? ?? ?? 56 8B F1 66 8B 46 12 66 23 45 08";
+const char* const PATTERN_FUNC_B = "55 8B EC 83 EC 2C 53 56 8B F1 66 8B 46 10 66 23 45 0C";
+const uintptr_t   LITERAL_FUNC_A = 0x00679750;   // sub_679750
+const uintptr_t   LITERAL_FUNC_B = 0x00681980;   // sub_681980
+
+// Site table, as offsets from the function base -- deliberately no absolute VAs, so a resolved base
+// moves every site with it.
+//
+//   func  off    contOff  skipOff   what it is
+//   A     0x86   0x8C     0x94      the [node+0x114] load in sub_679750
+//   A     0x94   0x9A     0xA5      the [node+0x118] load that follows the +0x114 call
+//   B     0x167  0x16D    0x17A     the [node+0x114] load in sub_681980
+//   B     0x1E1  0x1E7    0x1F5     the [node+0x118] load; phase-2 epilogue is the skip target
+//   B     0x1A3  0x1A9    0x1B6     case 3's [node+0x114] load; skip = post-call cmp/je, not the call
+//   B     0x1C9  0x1CF    0x1DC     case 4's [node+0x114] load; skip = shared tail after case 4
+//
+// Install order is the table order and must not change: the stubs are laid out contiguously in the
+// cave by index.
 struct SiteDesc {
-    uintptr_t    va;
-    const BYTE*  expected;
-    DWORD        off;
-    uintptr_t    cont;
-    uintptr_t    skip;
+    FuncId       func;
+    DWORD        off;        // site offset from the function base
+    const BYTE*  expected;   // per-site prologue, matched before anything is patched
+    DWORD        fieldOff;   // node field the stolen load reads (+0x114 / +0x118)
+    DWORD        contOff;    // continue offset from the function base
+    DWORD        skipOff;    // skip offset from the function base
 };
 
 const SiteDesc kSites[SITE_COUNT] = {
-    { 0x006797D6, EXP_114, 0x114, 0x006797DC, 0x006797E4 },
-    { 0x006797E4, EXP_118, 0x118, 0x006797EA, 0x006797F5 },
-    { 0x00681AE7, EXP_114, 0x114, 0x00681AED, 0x00681AFA },
-    { 0x00681B61, EXP_118, 0x118, 0x00681B67, 0x00681B75 },
-    { 0x00681B23, EXP_114, 0x114, 0x00681B29, 0x00681B36 },
-    { 0x00681B49, EXP_114, 0x114, 0x00681B4F, 0x00681B5C },
+    { FUNC_A, 0x86,  EXP_114, 0x114, 0x8C,  0x94  },
+    { FUNC_A, 0x94,  EXP_118, 0x118, 0x9A,  0xA5  },
+    { FUNC_B, 0x167, EXP_114, 0x114, 0x16D, 0x17A },
+    { FUNC_B, 0x1E1, EXP_118, 0x118, 0x1E7, 0x1F5 },
+    { FUNC_B, 0x1A3, EXP_114, 0x114, 0x1A9, 0x1B6 },
+    { FUNC_B, 0x1C9, EXP_114, 0x114, 0x1CF, 0x1DC },
 };
+
+// Documented literal VA -> address in this process. The module is not ASLR-relocated, so this is a
+// no-op today; it exists so the fallback would still be correct for a relocated image.
+uintptr_t VaLiteral(uintptr_t moduleBase, uintptr_t va)
+{
+    return moduleBase + (va - VA_IMAGE_BASE);
+}
+
 
 bool     g_installed = false;
 BYTE*    g_cave      = nullptr;
@@ -91,6 +127,9 @@ volatile LONG g_hits[SITE_COUNT];
 volatile LONG g_lastNode[SITE_COUNT];
 LONG          g_logged[SITE_COUNT];
 volatile LONG g_totalLogged = 0;
+
+// Site VAs as resolved in Init(), for the reporter's log lines (the site table itself holds offsets).
+uintptr_t     g_siteVa[SITE_COUNT];
 
 // Debugger + live-readable file, same shape as the other units' loggers. Called from the game thread
 // (install time) and from the reporter thread only.
@@ -129,7 +168,7 @@ void DrainCounters()
         }
 
         if (emit)
-            Log("[DG] null target at site 0x%08X node=%p\n", (unsigned)kSites[i].va, (void*)node);
+            Log("[DG] null target at site 0x%08X node=%p\n", (unsigned)g_siteVa[i], (void*)node);
     }
 }
 
@@ -198,7 +237,7 @@ void BuildStub(BYTE* stub, BYTE* shim, size_t i, uintptr_t cont, uintptr_t skip)
     // 8B 8E <disp32>  mov ecx,[esi+OFF]
     stub[0] = 0x8B;
     stub[1] = 0x8E;
-    *reinterpret_cast<uint32_t*>(stub + 2) = kSites[i].off;
+    *reinterpret_cast<uint32_t*>(stub + 2) = kSites[i].fieldOff;
 
     // 85 C9           test ecx,ecx
     stub[6] = 0x85;
@@ -262,6 +301,13 @@ void DerefGuard::Init()
 {
     if (g_installed) return;
 
+    // Fail closed on patching, not on loading: an unverified build keeps this module resident and
+    // silent, and the process still reaches the menu.
+    if (!BuildGate::Trusted()) {
+        OutputDebugStringA("[DG] skipped: build not trusted\n");
+        return;
+    }
+
     // Config gate: [Coop] GuardNullTarget=0 leaves the game completely unpatched (A/B without a
     // rebuild). Default 1 — the crash is fatal, not cosmetic.
     if (GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) == 0) {
@@ -277,27 +323,75 @@ void DerefGuard::Init()
         return;
     }
 
-    if (!g_log) g_log = _fsopen(".\\AC4Coop_deref_guard.log", "a", _SH_DENYWR);
+    // Game-folder log, live-readable (shared write denied) like phase1's. PID-suffixed so a stale
+    // process cannot hold it open and swallow a later run's evidence.
+    if (!g_log) {
+        char logPath[64];
+        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
+                    ".\\AC4Coop_deref_guard_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+    }
 
-    const int32_t delta = (int32_t)((uintptr_t)game - VA_IMAGE_BASE);
+    const uintptr_t moduleBase = (uintptr_t)game;
 
+    // ---- resolve the two function bases (pattern first, literal only on a KNOWN build) ----------
+    const char* const kFuncName[FUNC_COUNT]    = { "sub_679750", "sub_681980" };
+    const char* const kFuncPattern[FUNC_COUNT] = { PATTERN_FUNC_A, PATTERN_FUNC_B };
+    const uintptr_t   kFuncLiteral[FUNC_COUNT] = { LITERAL_FUNC_A, LITERAL_FUNC_B };
+
+    uintptr_t funcBase[FUNC_COUNT] = { 0, 0 };
+
+    for (int f = 0; f < FUNC_COUNT; ++f) {
+        int hits = 0;
+        const uintptr_t found = PatternScan::Find(game, kFuncPattern[f], &hits);
+
+        if (hits == 1) {
+            funcBase[f] = found;
+            Log("[SIG] %s resolved 0x%08X (pattern, 1 match)\n",
+                kFuncName[f], (unsigned)found);
+        } else if (hits == 0 && BuildGate::Trusted()) {
+            funcBase[f] = VaLiteral(moduleBase, kFuncLiteral[f]);
+            Log("[SIG] %s pattern=0 -> literal 0x%08X\n",
+                kFuncName[f], (unsigned)funcBase[f]);
+        } else if (hits == 0) {
+            // Unreachable while the Trusted() gate above holds, but kept explicit: a zero-match
+            // pattern on an unknown build must abort, never fall through to a literal.
+            Log("[SIG] %s pattern=0, build unknown -> hook aborted\n", kFuncName[f]);
+        } else {
+            // More than one match: ambiguous regardless of build. Its two sites are aborted.
+            Log("[SIG] %s pattern=%d matches -> hook aborted\n", kFuncName[f], hits);
+        }
+    }
+
+    // ---- derive the six sites from those bases --------------------------------------------------
     uintptr_t siteAddrs[SITE_COUNT];
-    for (size_t i = 0; i < SITE_COUNT; ++i)
-        siteAddrs[i] = (uintptr_t)((int32_t)kSites[i].va + delta);
+    uintptr_t contAddrs[SITE_COUNT];
+    uintptr_t skipAddrs[SITE_COUNT];
 
     // Verify every site before touching any of them: a mismatching site is skipped, never patched,
     // and the rest still install (the crash sites are independent).
     bool valid[SITE_COUNT];
     size_t validCount = 0;
     for (size_t i = 0; i < SITE_COUNT; ++i) {
+        const uintptr_t fb = funcBase[kSites[i].func];
+        siteAddrs[i] = contAddrs[i] = skipAddrs[i] = 0;
+        valid[i] = false;
+
+        if (!fb) continue;   // base unresolved; the [SIG] line above already says why
+
+        siteAddrs[i] = fb + kSites[i].off;
+        contAddrs[i] = fb + kSites[i].contOff;
+        skipAddrs[i] = fb + kSites[i].skipOff;
+        g_siteVa[i]  = siteAddrs[i];
+
         const BYTE* p = (const BYTE*)siteAddrs[i];
         if (memcmp(p, kSites[i].expected, STEAL_LEN) == 0) {
             valid[i] = true;
             ++validCount;
         } else {
-            valid[i] = false;
-            Log("[DG] site 0x%08X: unexpected bytes %02X %02X %02X %02X %02X %02X (skipped)\n",
-                (unsigned)kSites[i].va,
+            Log("[DG] site 0x%08X (base+0x%X): unexpected bytes "
+                "%02X %02X %02X %02X %02X %02X (skipped)\n",
+                (unsigned)siteAddrs[i], (unsigned)kSites[i].off,
                 p[0], p[1], p[2], p[3], p[4], p[5]);
         }
     }
@@ -320,8 +414,8 @@ void DerefGuard::Init()
         BuildStub(cave + i * STUB_SIZE,
                   cave + STUB_REGION + i * SHIM_SIZE,
                   i,
-                  siteAddrs[i] + STEAL_LEN,
-                  (uintptr_t)((int32_t)kSites[i].skip + delta));
+                  contAddrs[i],
+                  skipAddrs[i]);
     }
     FlushInstructionCache(GetCurrentProcess(), cave, STUB_REGION + SITE_COUNT * SHIM_SIZE);
 

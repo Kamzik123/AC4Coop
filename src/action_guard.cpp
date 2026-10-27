@@ -18,6 +18,8 @@
 
 #include "action_guard.h"
 #include "Hook.h"
+#include "build_gate.h"
+#include "pattern_scan.h"
 
 #include <windows.h>
 #include <stdio.h>
@@ -27,9 +29,15 @@
 
 namespace {
 
-// The module is not ASLR-relocated (see Hook.h), so these are absolute VAs; RVAs below are VA-0x400000.
-const uintptr_t VA_GATE   = 0x00679220;   // sub_679220
-const uintptr_t VA_RESUME = 0x00679227;   // `and ax, 7`, first instruction after the stolen 7 bytes
+// The module is not ASLR-relocated (see Hook.h), so a literal VA maps to `base + (VA - 0x400000)`.
+// VA_GATE / VA_RESUME are the FALLBACK route only: the site is normally found by pattern, and the
+// literal is used only when the pattern finds nothing on a build BuildGate already trusts.
+const uintptr_t VA_IMAGE_BASE = 0x00400000;
+const uintptr_t VA_GATE       = 0x00679220;   // sub_679220; resume is always gate + 7
+
+// Full prologue of the gate: `mov ax,[ecx+0FCh]` (7 bytes, stolen) then `and ax,7` / `jz +3` /
+// `mov al,1` / `ret`. Used to re-find the site, so a rebuilt EXE that moved the gate still resolves.
+const char* const PATTERN_GATE = "66 8B 81 FC 00 00 00 66 83 E0 07 75 03 B0 01 C3";
 
 const uintptr_t STEAL_LEN = 7;
 const size_t    NODE_BOUND_TARGET_A = 0x114;   // bound target #1 (null by construction when unbound)
@@ -186,10 +194,10 @@ void ActionGuard::Init()
 {
     if (g_installed) return;
 
-    // Config gate: [Coop] GuardNullActionTarget=0 leaves the game completely unpatched (A/B without a
-    // rebuild). Read the same way as the surrounding options.
-    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 0, INI_PATH) == 0) {
-        OutputDebugStringA("[AG] disabled by [Coop] GuardNullActionTarget=0\n");
+    // Fail closed on patching, not on loading: an unverified build keeps this module resident and
+    // silent, and the process still reaches the menu.
+    if (!BuildGate::Trusted()) {
+        OutputDebugStringA("[AG] skipped: build not trusted\n");
         return;
     }
 
@@ -201,29 +209,65 @@ void ActionGuard::Init()
         return;
     }
 
-    // Game-folder log, live-readable (shared write denied) like phase1's.
-    if (!g_log) g_log = _fsopen(".\\AC4Coop_action_guard.log", "a", _SH_DENYWR);
+    // Game-folder log, live-readable (shared write denied) like phase1's. The name carries the PID: a
+    // process that never exited must not be able to hold this unit's only evidence file open and make a
+    // later run's lines disappear (that is exactly what happened to AC4Coop_build.log).
+    if (!g_log) {
+        char logPath[64];
+        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
+                    ".\\AC4Coop_action_guard_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+    }
 
     uintptr_t base   = (uintptr_t)game;
-    uintptr_t gate   = base + (VA_GATE   - 0x400000);
-    uintptr_t resume = base + (VA_RESUME - 0x400000);
 
-    // Refuse to patch anything that is not the expected prologue (wrong build / already hooked).
+    // ---- resolve the gate by pattern (literal only on a KNOWN build) ----------------------------
+    // Resolution happens BEFORE the config gate on purpose: whether the site resolves is evidence about
+    // the build, not about the A/B setting, and it used to be invisible in a disabled run.
+    int hits = 0;
+    const uintptr_t found = PatternScan::Find(game, PATTERN_GATE, &hits);
+
+    uintptr_t gate = 0;
+    if (hits == 1) {
+        gate = found;
+        Log("[SIG] sub_679220 resolved 0x%08X (%s)\n", (unsigned)found, "pattern, 1 match");
+    } else if (hits == 0) {
+        // BuildGate::Trusted() was required above, so the literal route is the known-build route.
+        gate = base + (VA_GATE - VA_IMAGE_BASE);
+        Log("[SIG] sub_679220 resolved 0x%08X (%s)\n",
+            (unsigned)gate, "literal (0 matches, known build)");
+    } else {
+        Log("[SIG] sub_679220 pattern=%d matches -> hook aborted\n", hits);
+        return;
+    }
+
+    // Resume is derived from the resolved base, never a literal: base + 7.
+    const uintptr_t resume = gate + STEAL_LEN;
+
+    // Refuse to patch anything that is not the expected prologue (wrong build / already hooked). This is
+    // a read (memcmp) only, so it is part of resolution, not of installation.
     if (memcmp((const void*)gate, kPrologue, STEAL_LEN) != 0) {
-        Log("[AG] install FAILED @ 0x00679220\n");
+        Log("[AG] install FAILED @ 0x%08X: prologue mismatch\n", (unsigned)gate);
+        return;
+    }
+
+    // Config gate: [Coop] GuardNullActionTarget=0 leaves the game completely unpatched (A/B without a
+    // rebuild). No detour, no trampoline, no writes -- but the resolved address above is still logged.
+    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 0, INI_PATH) == 0) {
+        Log("[AG] disabled by GuardNullActionTarget=0 (resolved, not installed)\n");
         return;
     }
 
     BYTE* tramp = BuildTrampoline(resume);
     if (!tramp) {
-        Log("[AG] install FAILED @ 0x00679220\n");
+        Log("[AG] install FAILED @ 0x%08X: no trampoline\n", (unsigned)gate);
         return;
     }
     g_trampoline = (DWORD)(uintptr_t)tramp;
 
     // E9 rel32 + 2x 0x90 (7 bytes) via the project's detour helper, which NOP-pads the remainder.
     if (!Hook::DetourFunc((BYTE*)gate, (DWORD)(uintptr_t)&GuardDetour, (DWORD)STEAL_LEN)) {
-        Log("[AG] install FAILED @ 0x00679220\n");
+        Log("[AG] install FAILED @ 0x%08X: DetourFunc\n", (unsigned)gate);
         return;
     }
 

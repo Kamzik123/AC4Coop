@@ -12,6 +12,7 @@
 // the game. If this proves stable we upgrade to a per-frame hook in Phase 1.
 
 #include <windows.h>
+#include <process.h>
 #include <cstdio>
 #include <cstdint>
 #include <cstdarg>
@@ -20,6 +21,7 @@
 #include "net.h"
 #include "action_guard.h"
 #include "deref_guard.h"
+#include "build_gate.h"
 
 // ---- Target function RVAs (file VA - 0x400000) ---------------------------------
 static const uintptr_t RVA_GetWorld          = 0x14D4D0;
@@ -66,6 +68,18 @@ static void logline(const char* fmt, ...)
     OutputDebugStringA(buf);
 }
 
+// Local wall-clock ISO8601 with milliseconds, used by the heartbeat / ini-watch lines. A bare counter is
+// not evidence of when a process was alive; a timestamp is.
+static void localIso8601(char* out, size_t cap)
+{
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    _snprintf_s(out, cap, _TRUNCATE, "%04u-%02u-%02uT%02u:%02u:%02u.%03u",
+                (unsigned)st.wYear, (unsigned)st.wMonth, (unsigned)st.wDay,
+                (unsigned)st.wHour, (unsigned)st.wMinute, (unsigned)st.wSecond,
+                (unsigned)st.wMilliseconds);
+}
+
 // One sample of world -> player -> position. SEH-guarded: never propagates a fault.
 static bool sampleOnce(Vec4& pos, void*& outWorld, void*& outPlayer)
 {
@@ -84,12 +98,14 @@ static bool sampleOnce(Vec4& pos, void*& outWorld, void*& outPlayer)
     }
 }
 
-static DWORD WINAPI PollThread(LPVOID)
+static unsigned __stdcall PollThread(void*)
 {
     AllocConsole();
     FILE* dummy; freopen_s(&dummy, "CONOUT$", "w", stdout);
+    char leaf[64];
+    wsprintfA(leaf, "phase0_log_%u.txt", GetCurrentProcessId());
     char logPath[MAX_PATH];
-    Phase1::ModuleRelativePath(logPath, sizeof(logPath), "phase0_log.txt");
+    Phase1::ModuleRelativePath(logPath, sizeof(logPath), leaf);
     fopen_s(&g_log, logPath, "w");
 
     uintptr_t base = (uintptr_t)GetModuleHandleW(nullptr);
@@ -105,11 +121,32 @@ static DWORD WINAPI PollThread(LPVOID)
     void*    lastPlayer = nullptr;
     uint64_t ticks = 0;
 
+    // Heartbeat, first beat: the poll thread's only previous evidence of life was a file mtime. These
+    // lines prove which process was alive, when, and that the loop was still turning.
+    {
+        char ts[32];
+        localIso8601(ts, sizeof(ts));
+        logline("[AC4Coop] heartbeat pid=%u start tick=0 ts=%s\n",
+                (unsigned)GetCurrentProcessId(), ts);
+    }
+
     while (g_run)
     {
         Phase1::InstallVirtualPadHook();   // retry until xinput1_3.dll is loaded
         Sleep(50); // ~20 Hz
         ++ticks;
+
+        // Every 200 iterations (~10 s at 20 Hz): one heartbeat and one ini-watch line.
+        // The loop re-reads the ini on every iteration through InstallVirtualPadHook() ([Coop] VPadEnable,
+        // phase1.cpp:351); logging every one of those would be 20 lines/s, so the watch is reported on
+        // this slower tick instead -- the same tick on which the config re-read is known to have happened.
+        if ((ticks % 200) == 0) {
+            char ts[32];
+            localIso8601(ts, sizeof(ts));
+            logline("[AC4Coop] heartbeat pid=%u tick=%llu ts=%s\n",
+                    (unsigned)GetCurrentProcessId(), (unsigned long long)ticks, ts);
+            logline("[AC4Coop] ini-watch tick=%llu ts=%s\n", (unsigned long long)ticks, ts);
+        }
 
         // F6 (edge-triggered): request a spawn; the actual work runs on the main thread (frame hook).
         static bool f6prev = false;
@@ -239,6 +276,14 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
     if (reason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(hMod);
 
+        // Build gate FIRST: everything below patches engine code, and none of it may run against a
+        // build whose layout we have not verified. Fail closed on patching, not on loading -- an
+        // unknown build leaves this module resident (so the [BG] record reaches disk) but inert.
+        if (!BuildGate::Verify(hMod)) {
+            OutputDebugStringA("[AC4Coop] build not trusted - module inert (no patches)\n");
+            return TRUE;   // stay resident for logging; install nothing
+        }
+
         InstallMultiInstance();   // must run before WinMain's single-instance check
 
         // Windowed mode — must run now, before the engine reaches scimitar::CreateWindow.
@@ -266,7 +311,10 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // never reach a player frame, so starting the link here means only the live game binds.
         (void)0;
 
-        CreateThread(nullptr, 0, PollThread, nullptr, 0, nullptr);
+        // _beginthreadex, not CreateThread: PollThread uses the CRT (freopen_s / fopen_s /
+        // _vsnprintf_s / fputs / fflush / printf) and Phase1 callees do too. CreateThread does not
+        // initialise the CRT's per-thread state, which crashed deref_guard's reporter thread.
+        _beginthreadex(nullptr, 0, PollThread, nullptr, 0, nullptr);
     } else if (reason == DLL_PROCESS_DETACH) {
         g_run = false;
         Sleep(120);
