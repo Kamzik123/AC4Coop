@@ -9,6 +9,11 @@ It also byte-checks the stale-target guard site at 0x006795FD (Part B of src/der
 is patched at a fixed address rather than derived from a pattern: the 6-byte load, the continue point
 (0x00679603) and the engine's "no target" path (0x00679611).
 
+Finally it prints the module image window the guard's vtable test uses -- [ImageBase,
+ImageBase+SizeOfImage), read from the mapped PE at runtime -- and evaluates that test on this build for
+a set of sample vtables: a .data vtable inside the image must be accepted, the 0xFFFFFFFF sentinel and
+anything outside the image must be rejected.
+
 This is the source of truth for the pattern set, not a throwaway: run it BEFORE building, against the
 EXE that will actually be patched. If it fails, the PATTERN is wrong -- fix the pattern, never the
 expectation.
@@ -93,11 +98,27 @@ STALE_SITE_BYTES = bytes.fromhex("8B 8E 14 01 00 00")
 STALE_CONT_BYTES = bytes.fromhex("85 C9")
 STALE_SKIP_BYTES = bytes.fromhex("C6 45 08 00")
 
-# Informational only: the first bytes executed after each deref stub's `jmp SITE+6`. Printed so the
-# "EAX/EDX are dead at the continue point" assumption (the stub clobbers both) can be re-checked
-# against this build without a second tool.
+# Informational only: the first bytes executed after each deref stub's `jmp SITE+6`. The stub now
+# preserves the caller's EAX/EDX across both exits (2 pushes at entry, 2 pops per exit), so these are
+# printed for eyeball checks of the continue points only; nothing here is a clobber assumption any more.
 DEREF_CONT_VA = [0x006797DC, 0x006797EA, 0x00681AED, 0x00681B67, 0x00681B29, 0x00681B5C]
 INFO_BYTES = 6
+
+# --- the guard's vtable acceptance window (src/deref_guard.cpp, BuildStub) ----------------------
+# The stub tests `sub eax,IMAGE_BASE; cmp eax,IMAGE_SIZE; jae reject` over the MAPPED PE, so the window
+# is [ImageBase, ImageBase+SizeOfImage). These samples pin the behaviour the widening was for: a vtable
+# in .data inside the image is ACCEPTED, the sentinel and anything outside the image are REJECTED.
+# `note` says which test actually rejects (null / object bound / range), for the report.
+VTABLE_SAMPLES = [
+    ("null",                    0x00000000, False, "null test"),
+    ("0xFFFFFFFF sentinel",     0xFFFFFFFF, False, "object bound"),
+    (".rdata vtable",           0x01E3A000, True,  "accepted"),
+    (".data vtable (widened)",  0x02343000, True,  "accepted"),
+    ("last dword of image",     0x0527DFFC, True,  "accepted"),
+    ("one past image end",      0x0527E000, False, "image range"),
+    ("below image base",        0x00300000, False, "image range"),
+    ("wild heap pointer",       0x7F000000, False, "object bound"),
+]
 
 
 class PE:
@@ -229,6 +250,10 @@ def main():
     print("  sizeofimage 0x%X %s"
           % (pe.size_of_image,
              "OK" if pe.size_of_image == EXPECTED_SIZE_OF_IMAGE else "MISMATCH"))
+    image_lo = pe.image_base
+    image_hi = (pe.image_base + pe.size_of_image) & 0xFFFFFFFF
+    print("  image range 0x%08X..0x%08X (module image; the guard's accept window)"
+          % (image_lo, image_hi))
 
     text = pe.text_section()
     text_rva = text["vaddr"]
@@ -319,12 +344,31 @@ def main():
                 [10, 10, 18, 18, 22, 6]))
 
     # --- informational: bytes at each deref stub's continue target -----------------------------
-    print("\n=== deref continue targets (info: stub clobbers EAX/EDX) ===")
+    print("\n=== deref continue targets (info: stub preserves EAX/EDX) ===")
     rows = []
     for va in DEREF_CONT_VA:
         got = pe.read_rva(va - pe.image_base, INFO_BYTES)
         rows.append(("0x%08X" % va, " ".join("%02X" % b for b in got), "SITE+6"))
     print(table(["va", "first %d bytes" % INFO_BYTES, "note"], rows, [10, 20, 8]))
+
+    # --- the guard's vtable window, simulated against this image --------------------------------
+    print("\n=== vtable range test (sub eax,imagebase ; cmp eax,sizeofimage ; jae reject) ===")
+    rows = []
+    samples_ok = True
+    for label, vtable, expect_accept, note in VTABLE_SAMPLES:
+        delta = (vtable - pe.image_base) & 0xFFFFFFFF
+        accepted = delta < pe.size_of_image
+        if accepted != expect_accept:
+            samples_ok = False
+        rows.append((label, "0x%08X" % vtable, "0x%08X" % delta,
+                     "ACCEPT" if accepted else "reject", note,
+                     "OK" if accepted == expect_accept else "WRONG"))
+    print(table(["vtable", "value", "vtable-base", "stub", "rejected by", "expect"], rows,
+                [24, 10, 11, 6, 12, 6]))
+
+    window_ok = (pe.size_of_image == EXPECTED_SIZE_OF_IMAGE and
+                 image_lo == EXPECTED_IMAGE_BASE and
+                 image_hi == (EXPECTED_IMAGE_BASE + EXPECTED_SIZE_OF_IMAGE))
 
     # --- verdict --------------------------------------------------------------------------------
     print()
@@ -332,9 +376,12 @@ def main():
     print("  sites resolved==literal: %s" % ("PASS" if sites_ok else "FAIL"))
     print("  targets resolved==literal: %s" % ("PASS" if targets_ok else "FAIL"))
     print("  stale-target site bytes: %s" % ("PASS" if stale_ok else "FAIL"))
-    print("  %d sites, %d targets, 3 stale-target checks" % (len(SITES), len(TARGETS)))
+    print("  image window 0x00400000..0x0527E000: %s" % ("PASS" if window_ok else "FAIL"))
+    print("  vtable accept/reject samples: %s" % ("PASS" if samples_ok else "FAIL"))
+    print("  %d sites, %d targets, 3 stale-target checks, %d vtable samples"
+          % (len(SITES), len(TARGETS), len(VTABLE_SAMPLES)))
 
-    if pattern_ok and sites_ok and targets_ok and stale_ok:
+    if pattern_ok and sites_ok and targets_ok and stale_ok and window_ok and samples_ok:
         print("\nORACLE: PASS")
         return 0
     print("\nORACLE: FAIL")

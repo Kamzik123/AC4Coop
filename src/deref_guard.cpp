@@ -37,34 +37,46 @@ namespace {
 const uintptr_t VA_IMAGE_BASE = 0x00400000;   // module is not ASLR-relocated (see Hook.h)
 const size_t    STEAL_LEN     = 6;            // mov ecx,[esi+disp32]
 
-// Stub layout, 63 bytes. Every branch is a rel32 conditional (0F 8x) rather than rel8, so the three
-// extra checks cannot push a short jump out of range, and the recorder always sits at a fixed offset:
+// Stub layout, 72 bytes. Every branch is a rel32 conditional (0F 8x) rather than rel8, so the extra
+// checks cannot push a short jump out of range, and the recorder always sits at a fixed offset:
 //
-//   00  8B 8E <disp32>      mov  ecx,[esi+OFF]          ; the stolen instruction, re-executed verbatim
-//   06  85 C9               test ecx,ecx
-//   08  0F 84 <rel32>       jz   <record>               ; null
-//   14  81 F9 00 00 01 00   cmp  ecx,0x00010000         ; cheap wild-pointer bound, low
-//   20  0F 82 <rel32>       jb   <record>               ; below the bound
-//   26  81 F9 00 00 00 7F   cmp  ecx,0x7F000000         ; cheap wild-pointer bound, high
-//   32  0F 83 <rel32>       jae  <record>               ; at/above the bound
-//   38  8B 01               mov  eax,[ecx]              ; the object's vtable pointer
-//   40  8D 90 <disp32>      lea  edx,[eax-RDATA_START]
-//   46  81 FA <imm32>       cmp  edx,RDATA_SIZE
-//   52  0F 83 <rel32>       jae  <record>               ; unsigned: catches below-range as well
-//   58  E9 <rel32>          jmp  SITE+6                 ; pass -> original code, unchanged
+//   00  50                  push eax                    ; preserve the caller's EAX/EDX
+//   01  52                  push edx
+//   02  8B 8E <disp32>      mov  ecx,[esi+OFF]          ; the stolen instruction, re-executed verbatim
+//   08  85 C9               test ecx,ecx
+//   0A  0F 84 <rel32>       jz   <reject>               ; null
+//   10  81 F9 00 00 01 00   cmp  ecx,0x00010000         ; cheap wild-pointer bound, low
+//   16  0F 82 <rel32>       jb   <reject>               ; below the bound
+//   1C  81 F9 00 00 00 7F   cmp  ecx,0x7F000000         ; cheap wild-pointer bound, high
+//   22  0F 83 <rel32>       jae  <reject>               ; at/above the bound
+//   28  8B 01               mov  eax,[ecx]              ; the object's vtable pointer
+//   2A  2D <imm32>          sub  eax,IMAGE_BASE         ; vtable - module base, as an unsigned delta
+//   2F  3D <imm32>          cmp  eax,IMAGE_SIZE
+//   34  0F 83 <rel32>       jae  <reject>               ; outside the module image (either side)
+//   3A  5A                  pop  edx                    ; accept -> original code, registers restored
+//   3B  58                  pop  eax
+//   3C  E9 <rel32>          jmp  SITE+6
+//   41  5A                  pop  edx                    ; reject -> recorder, registers restored
+//   42  58                  pop  eax
+//   43  E9 <rel32>          jmp  <record>
 //
-// The three wild/sentinel cases (ecx=0, ecx=0xFFFFFFFF, a vtable outside .rdata) all land on the same
-// call-free recorder as before, which counts the hit and jumps to the site's documented skip target.
-const size_t    STUB_SIZE     = 63;
+// EAX and EDX are saved at entry and restored on BOTH exits, so the engine observes the same register
+// state at the continue and the skip target as it did before this guard existed; the stub's own use of
+// EAX (vtable load, range delta) cannot leak into the caller. ECX is never rewritten after the stolen
+// load, so both exits inherit exactly the value the original `mov ecx,[esi+OFF]` would have produced,
+// and the stack is balanced on every path (2 pushes, 2 pops).
+//
+// The vtable check accepts anything inside the loaded module image [ImageBase, ImageBase+SizeOfImage),
+// read from the in-memory PE rather than a baked-in section range: a legitimate engine object whose
+// vtable lives outside .rdata (e.g. in .data) must never be skipped -- that would be a silent missing
+// update, not a crash. Null, 0xFFFFFFFF and wild/heap pointers are still rejected, so the crash case
+// is fully covered; every reject lands on the call-free recorder, which counts the hit and jumps to
+// the site's documented skip target.
+const size_t    STUB_SIZE     = 72;
 const size_t    SHIM_SIZE     = 18;           // 7 + 6 + 5
-const size_t    STUB_REGION   = 384;          // 6 * 64, rounded so the shims start 16-byte aligned
-const size_t    CAVE_SIZE     = 1024;         // 6*63 + 6*18 = 486 used; the rest is headroom
+const size_t    STUB_REGION   = 448;          // 6 * 72 = 432, rounded so the shims stay 16-byte aligned
+const size_t    CAVE_SIZE     = 1024;         // 6*72 + 6*18 = 540 used; the rest is headroom
 const size_t    SITE_COUNT    = 6;
-
-// .rdata, where every real vtable lives. Documented VAs for this build; rebased onto the module in
-// Init() as `base + (VA - 0x400000)` so a relocated image still validates against its own .rdata.
-const uintptr_t VA_RDATA_START = 0x01E3A000;
-const uint32_t  RDATA_SIZE     = 0x0090874A;
 
 // Wild-pointer bound for an object pointer. Anything outside [64 KiB, 0x7F000000) is not a heap
 // object on this build; in particular 0xFFFFFFFF (the observed sentinel) fails the high test.
@@ -77,7 +89,7 @@ const uint32_t  MAX_TARGET_PTR = 0x7F000000;
 const uintptr_t LITERAL_STALE_SITE = 0x006795FD;   // mov ecx,[esi+0x114]
 const uintptr_t LITERAL_STALE_CONT = 0x00679603;   // test ecx,ecx ; je 0x679611 ; call 0x734460
 const uintptr_t LITERAL_STALE_SKIP = 0x00679611;   // mov byte ptr [ebp+8],0  (engine's "no target")
-const size_t    STALE_CAVE_SIZE    = 256;          // stub 63 + recorder 18, room to spare
+const size_t    STALE_CAVE_SIZE    = 256;          // stub 72 + recorder 18, room to spare
 
 // A rel32 patch reaches +-2 GB. Require a comfortable margin so the boundary itself is never used.
 const uintptr_t MAX_CAVE_DELTA = 0x7FFF0000;
@@ -153,15 +165,39 @@ uintptr_t VaLiteral(uintptr_t moduleBase, uintptr_t va)
     return moduleBase + (va - VA_IMAGE_BASE);
 }
 
+// SizeOfImage straight out of the MAPPED PE headers, so the guard's acceptance window is the image the
+// loader actually mapped rather than a baked-in .rdata literal. Fails closed: Init() installs nothing
+// when this cannot be read, because a zero/garbage window would reject every target (a silent missing
+// update -- exactly the failure mode this window exists to rule out).
+bool ReadSizeOfImage(uintptr_t moduleBase, uint32_t* sizeOfImage)
+{
+    __try {
+        const IMAGE_DOS_HEADER* dos = (const IMAGE_DOS_HEADER*)moduleBase;
+        if (dos->e_magic != IMAGE_DOS_SIGNATURE) return false;
+        if (dos->e_lfanew <= 0 || dos->e_lfanew > 0x1000) return false;
+
+        const IMAGE_NT_HEADERS32* nt =
+            (const IMAGE_NT_HEADERS32*)((const BYTE*)moduleBase + dos->e_lfanew);
+        if (nt->Signature != IMAGE_NT_SIGNATURE) return false;
+        if (nt->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR32_MAGIC) return false;
+        if (nt->OptionalHeader.SizeOfImage == 0) return false;
+
+        *sizeOfImage = nt->OptionalHeader.SizeOfImage;
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
 
 bool     g_entry     = false;   // Init() runs at most once, even when a config gate installs nothing
 bool     g_installed = false;
 BYTE*    g_cave      = nullptr;
 FILE*    g_log       = nullptr;
 
-// .rdata window for vtable validation, derived from the module base in Init().
-uintptr_t g_rdataStart = 0;
-uint32_t  g_rdataSize  = 0;
+// Module image window for vtable validation, read from the in-memory PE in Init().
+uintptr_t g_imageBase = 0;
+uint32_t  g_imageSize = 0;
 
 // Fire counters written by the cave (absolute imm32 data stores; must outlive the cave, so they live
 // in this translation unit's data rather than in the executable cave).
@@ -300,73 +336,96 @@ BYTE* AllocateCave(const uintptr_t* siteAddrs, const bool* valid)
 // which are computed once the cave address is final. `hits` / `lastNode` are the recorder's storage
 // (per-site for Part A, a single pair for Part B).
 //
-// Register contract: the stub clobbers EAX and EDX only. ECX (the tested pointer), ESI (the node the
-// field offset is relative to), EDI and EBX are untouched. EAX holds the validated vtable pointer and
-// EDX the range delta at the moment the stub jumps to `cont`; every continue target re-loads or
-// overwrites both before reading them (`mov edx,[ecx]` / `mov eax,[ecx]`), which is asserted offline
-// by tools/verify_signatures.py.
+// Register contract: the stub touches EAX/EDX/ECX/flags internally but preserves the caller's EAX and
+// EDX across BOTH exits (2 pushes at entry, 2 pops before each jump), and never rewrites ECX after the
+// stolen load. ESI, EDI and EBX are untouched. So every continue/skip target sees exactly the register
+// state the pre-guard build produced; the internal EAX/EDX use is invisible to the engine.
 void BuildStub(BYTE* stub, BYTE* shim, DWORD fieldOff, uintptr_t cont, uintptr_t skip,
-               uintptr_t rdataStart, uint32_t rdataSize,
+               uintptr_t imageBase, uint32_t imageSize,
                volatile LONG* hits, volatile LONG* lastNode)
 {
-    // 00  8B 8E <disp32>  mov ecx,[esi+OFF]
-    stub[0] = 0x8B;
-    stub[1] = 0x8E;
-    *reinterpret_cast<uint32_t*>(stub + 2) = fieldOff;
+    // The reject trampoline sits after the accept jump: every conditional reject hops there, pops the
+    // saved pair and then jumps to the recorder, so the stack is balanced on every path.
+    BYTE* reject = stub + 65;   // 41
 
-    // 06  85 C9           test ecx,ecx
-    stub[6] = 0x85;
-    stub[7] = 0xC9;
+    // 00  50              push eax       -- preserve the caller's EAX
+    stub[0] = 0x50;
 
-    // 08  0F 84 <rel32>   jz <record>
-    stub[8]  = 0x0F;
-    stub[9]  = 0x84;
-    *reinterpret_cast<int32_t*>(stub + 10) = Rel32(stub + 14, shim);
+    // 01  52              push edx       -- preserve the caller's EDX
+    stub[1] = 0x52;
 
-    // 14  81 F9 <imm32>   cmp ecx,MIN_TARGET_PTR
-    stub[14] = 0x81;
-    stub[15] = 0xF9;
-    *reinterpret_cast<uint32_t*>(stub + 16) = MIN_TARGET_PTR;
+    // 02  8B 8E <disp32>  mov ecx,[esi+OFF]
+    stub[2] = 0x8B;
+    stub[3] = 0x8E;
+    *reinterpret_cast<uint32_t*>(stub + 4) = fieldOff;
 
-    // 20  0F 82 <rel32>   jb <record>      (ecx < MIN_TARGET_PTR)
-    stub[20] = 0x0F;
-    stub[21] = 0x82;
-    *reinterpret_cast<int32_t*>(stub + 22) = Rel32(stub + 26, shim);
+    // 08  85 C9           test ecx,ecx
+    stub[8] = 0x85;
+    stub[9] = 0xC9;
 
-    // 26  81 F9 <imm32>   cmp ecx,MAX_TARGET_PTR
-    stub[26] = 0x81;
-    stub[27] = 0xF9;
-    *reinterpret_cast<uint32_t*>(stub + 28) = MAX_TARGET_PTR;
+    // 0A  0F 84 <rel32>   jz <reject>
+    stub[10] = 0x0F;
+    stub[11] = 0x84;
+    *reinterpret_cast<int32_t*>(stub + 12) = Rel32(stub + 16, reject);
 
-    // 32  0F 83 <rel32>   jae <record>     (ecx >= MAX_TARGET_PTR, unsigned)
-    stub[32] = 0x0F;
-    stub[33] = 0x83;
-    *reinterpret_cast<int32_t*>(stub + 34) = Rel32(stub + 38, shim);
+    // 10  81 F9 <imm32>   cmp ecx,MIN_TARGET_PTR
+    stub[16] = 0x81;
+    stub[17] = 0xF9;
+    *reinterpret_cast<uint32_t*>(stub + 18) = MIN_TARGET_PTR;
 
-    // 38  8B 01           mov eax,[ecx]    -- the vtable pointer; ecx is a readable object by now
-    stub[38] = 0x8B;
-    stub[39] = 0x01;
+    // 16  0F 82 <rel32>   jb <reject>      (ecx < MIN_TARGET_PTR)
+    stub[22] = 0x0F;
+    stub[23] = 0x82;
+    *reinterpret_cast<int32_t*>(stub + 24) = Rel32(stub + 28, reject);
 
-    // 40  8D 90 <disp32>  lea edx,[eax-RDATA_START]
-    // The displacement is -(int32)RDATA_START, so EDX is a small unsigned distance when EAX is in
-    // .rdata and a wrapped/huge value when it is below the section (the unsigned compare rejects both).
-    stub[40] = 0x8D;
-    stub[41] = 0x90;
-    *reinterpret_cast<int32_t*>(stub + 42) = (int32_t)(-(int64_t)rdataStart);
+    // 1C  81 F9 <imm32>   cmp ecx,MAX_TARGET_PTR
+    stub[28] = 0x81;
+    stub[29] = 0xF9;
+    *reinterpret_cast<uint32_t*>(stub + 30) = MAX_TARGET_PTR;
 
-    // 46  81 FA <imm32>   cmp edx,RDATA_SIZE
-    stub[46] = 0x81;
-    stub[47] = 0xFA;
-    *reinterpret_cast<uint32_t*>(stub + 48) = rdataSize;
+    // 22  0F 83 <rel32>   jae <reject>     (ecx >= MAX_TARGET_PTR, unsigned)
+    stub[34] = 0x0F;
+    stub[35] = 0x83;
+    *reinterpret_cast<int32_t*>(stub + 36) = Rel32(stub + 40, reject);
 
-    // 52  0F 83 <rel32>   jae <record>     (vtable outside .rdata)
+    // 28  8B 01           mov eax,[ecx]    -- the vtable pointer; ecx is a readable object by now
+    stub[40] = 0x8B;
+    stub[41] = 0x01;
+
+    // 2A  2D <imm32>      sub eax,IMAGE_BASE
+    // EAX becomes the unsigned distance from the module base: a vtable below the image wraps to a huge
+    // value and is rejected by the compare below, so one test covers both sides of the range.
+    stub[42] = 0x2D;
+    *reinterpret_cast<uint32_t*>(stub + 43) = (uint32_t)imageBase;
+
+    // 2F  3D <imm32>      cmp eax,IMAGE_SIZE
+    stub[47] = 0x3D;
+    *reinterpret_cast<uint32_t*>(stub + 48) = imageSize;
+
+    // 34  0F 83 <rel32>   jae <reject>     (vtable outside the module image, either side)
     stub[52] = 0x0F;
     stub[53] = 0x83;
-    *reinterpret_cast<int32_t*>(stub + 54) = Rel32(stub + 58, shim);
+    *reinterpret_cast<int32_t*>(stub + 54) = Rel32(stub + 58, reject);
 
-    // 58  E9 <rel32>      jmp SITE+6
-    stub[58] = 0xE9;
-    *reinterpret_cast<int32_t*>(stub + 59) = Rel32(stub + 63, (const void*)cont);
+    // 3A  5A              pop edx         -- accept: restore the caller's EDX
+    stub[58] = 0x5A;
+
+    // 3B  58              pop eax         -- ... and EAX
+    stub[59] = 0x58;
+
+    // 3C  E9 <rel32>      jmp SITE+6
+    stub[60] = 0xE9;
+    *reinterpret_cast<int32_t*>(stub + 61) = Rel32(stub + 65, (const void*)cont);
+
+    // 41  5A              pop edx         -- reject: restore the caller's EDX
+    stub[65] = 0x5A;
+
+    // 42  58              pop eax         -- ... and EAX
+    stub[66] = 0x58;
+
+    // 43  E9 <rel32>      jmp <record>
+    stub[67] = 0xE9;
+    *reinterpret_cast<int32_t*>(stub + 68) = Rel32(stub + 72, shim);
 
     // F0 FF 05 <imm32>  lock inc dword ptr [hits]
     shim[0] = 0xF0;
@@ -501,8 +560,8 @@ static bool InstallNullGuards(HMODULE game, uintptr_t moduleBase)
                   kSites[i].fieldOff,
                   contAddrs[i],
                   skipAddrs[i],
-                  g_rdataStart,
-                  g_rdataSize,
+                  g_imageBase,
+                  g_imageSize,
                   &g_hits[i],
                   &g_lastNode[i]);
     }
@@ -571,9 +630,11 @@ static BYTE* AllocCaveNear(uintptr_t site, size_t size)
 //   0x00679611  C6 45 08 00         mov  byte ptr [ebp+8],0
 //
 // The 6-byte load is replaced with `E9 rel32` + 0x90 into a private cave stub that re-executes it and
-// applies the same three Part A checks. Every reject goes through the call-free recorder (count the
-// hit, latch ESI) and then the engine's own 0x00679611; a pass jumps to 0x00679603, so the original
-// test/je/call still run in their original order.
+// applies the same checks as Part A, including the EAX/EDX save/restore on both exits. Every reject
+// goes through the call-free recorder (count the hit, latch ESI) and then the engine's own 0x00679611;
+// a pass jumps to 0x00679603, so the original test/je/call still run in their original order. The
+// reject path inherits ECX from the re-executed load, which is exactly the value the original
+// `mov ecx,[esi+0x114]` produced before the engine's own test at 0x00679603.
 static bool InstallStaleTarget(uintptr_t moduleBase)
 {
     const uintptr_t site = VaLiteral(moduleBase, LITERAL_STALE_SITE);
@@ -607,10 +668,10 @@ static bool InstallStaleTarget(uintptr_t moduleBase)
         return false;
     }
 
-    // Recorder immediately after the 63-byte stub: both live in this cave, nothing is shared with
+    // Recorder immediately after the 72-byte stub: both live in this cave, nothing is shared with
     // the six-site cave.
     BuildStub(cave, cave + STUB_SIZE, 0x114, cont, skip,
-              g_rdataStart, g_rdataSize, &g_staleHits, &g_staleNode);
+              g_imageBase, g_imageSize, &g_staleHits, &g_staleNode);
     FlushInstructionCache(GetCurrentProcess(), cave, STUB_SIZE + SHIM_SIZE);
 
     if (!PatchSite((BYTE*)site, cave)) {
@@ -668,12 +729,17 @@ void DerefGuard::Init()
 
     const uintptr_t moduleBase = (uintptr_t)game;
 
-    // .rdata window for vtable validation, derived from THIS module base rather than baked in, so a
-    // relocated image still validates against its own .rdata.
-    g_rdataStart = VaLiteral(moduleBase, VA_RDATA_START);
-    g_rdataSize  = RDATA_SIZE;
-    Log("[DG] vtable range 0x%08X..0x%08X (.rdata)\n",
-        (unsigned)g_rdataStart, (unsigned)(g_rdataStart + g_rdataSize));
+    // Image window for vtable validation, read from the in-memory PE rather than baked in, so a
+    // relocated or re-laid-out image still validates against its own [ImageBase, ImageBase+Size).
+    uint32_t sizeOfImage = 0;
+    if (!ReadSizeOfImage(moduleBase, &sizeOfImage)) {
+        Log("[DG] install FAILED: cannot read SizeOfImage from the module PE headers\n");
+        return;
+    }
+    g_imageBase = moduleBase;
+    g_imageSize = sizeOfImage;
+    Log("[DG] vtable range 0x%08X..0x%08X (module image)\n",
+        (unsigned)g_imageBase, (unsigned)(g_imageBase + g_imageSize));
 
     bool installedAny = false;
     if (nullGuard)  installedAny |= InstallNullGuards(game, moduleBase);
