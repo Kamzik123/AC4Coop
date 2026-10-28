@@ -5403,6 +5403,117 @@ static void ProbeTransform(Human* localHuman) {
     }
 }
 
+// ---- [Coop] IdentityBand: read-only identity-band logger (default OFF) --------------------------
+// Weekend instrumentation for the two-machine test: once per second it logs the local player's OWN
+// entity plus the 32 nearest entities within 30 m, nearest first. Distance-sorted so the two clients'
+// logs line up positionally and a human can pair the same NPC across them.
+//
+// READ-ONLY: no engine writes, no allocation (all state is static), no behaviour change, default 0.
+// Deliberately independent of EntitySync / EntityHost and of Net::Enabled(): the first weekend run has
+// entity sync switched off and this data still has to be produced.
+//
+// Ids come from GetObjectID64 (0x9F0B50, a pure thunk to sub_A200D0; thiscall, object in ECX, u64 back
+// in EDX:EAX). It is called with arg_4 = 0, which gates the minting path, so a read can never allocate
+// or renumber anything. Bands: 0xFFFFFFFF is the null sentinel; [0xF0000000, 0xF8000000) is the local
+// mint counter; only ids < 0xF0000000 are wire-portable.
+static int g_identityBand = -1;   // ini [Coop] IdentityBand (read once, with the other [Coop] keys)
+
+#define IB_MAX_ROWS  33           // local player + 32 neighbours
+#define IB_RADIUS_M  30.0f
+
+// One id read, SEH-isolated: a bad object costs one line (id=0), never the whole block.
+static uint64_t IdentityIdOf(void* obj) {
+    if (!obj || !readable(obj, 8)) return 0;
+    __try {
+        return Hook::CallClassMethod<uint64_t, void*>(0x9F0B50, obj, 0u);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return 0;
+    }
+}
+
+static void IdentityBandTick() {
+    static uint32_t s_frame = 0;        // player frames seen (same idiom as ProbeTransform)
+    ++s_frame;
+
+    static uint64_t s_lastMs = 0;       // real-time 1 Hz gate, independent of frame rate
+    uint64_t nowMs = GetTickCount64();
+    if (s_lastMs && nowMs - s_lastMs < 1000) return;
+    s_lastMs = nowMs;
+
+    struct IBRow { float d2; Entity* ent; };
+    static IBRow s_rows[IB_MAX_ROWS];   // static: never allocate on the game thread
+
+    int n = 0;
+    uint32_t frame = s_frame;
+
+    __try {
+        World* world = World::GetCurrentWorld();
+        Entity* player = world ? world->GetPlayer() : nullptr;
+        if (!player || !readable(player, 0x70)) return;
+
+        const float px = player->m_GlobalMatrix.M41;
+        const float py = player->m_GlobalMatrix.M42;
+        const float pz = player->m_GlobalMatrix.M43;
+
+        s_rows[n].d2 = 0.0f; s_rows[n].ent = player; ++n;   // own entity is always row 1
+        const float r2 = IB_RADIUS_M * IB_RADIUS_M;
+
+        // Reuse the entity lane's enumeration (World::m_EntityManager.m_Entities, stride via
+        // GetElement) - no new enumerator, no new engine call.
+        BaseBigArray<Reference>& ents = world->m_EntityManager.m_Entities;
+        int nobj = ents.GetSize();
+        if (nobj < 0 || nobj > 100000) nobj = 0;   // header is engine-owned: bound it before the walk
+
+        for (int i = 0; i < nobj; ++i) {
+            Reference* ref = ents.GetElement(i);
+            if (!ref || !readable(ref, 4)) break;              // same invariant as CaptureGuards
+            HandleContainer* hc = ref->m_HandleContainer;
+            if (!hc || !readable(hc, 4)) continue;
+            Entity* e = (Entity*)hc->m_Object;
+            if (!e || e == player || !readable(e, 0x70)) continue;
+            // "Is this really an entity?" - the same component-array shape test CaptureGuards uses.
+            // Props/dev objects that fail it never reach the id call.
+            Component** data = *(Component***)((char*)e + 0x60);
+            int nc = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+            if (nc <= 0 || nc > 96) nc = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            if (!data || nc <= 0 || nc > 96 || !readable(data, 4)) continue;
+
+            const float dx = e->m_GlobalMatrix.M41 - px;
+            const float dy = e->m_GlobalMatrix.M42 - py;
+            const float dz = e->m_GlobalMatrix.M43 - pz;
+            const float d2 = dx * dx + dy * dy + dz * dz;
+            if (!(d2 <= r2)) continue;                          // NaN-safe radius test
+
+            // Insertion by ascending distance into the fixed 33-row table; the current 33rd row is
+            // the worst kept, so anything farther is dropped without touching memory.
+            int pos = n;
+            while (pos > 1 && s_rows[pos - 1].d2 > d2) --pos;
+            if (pos >= IB_MAX_ROWS) continue;
+            int last = (n < IB_MAX_ROWS) ? n : (IB_MAX_ROWS - 1);
+            for (int k = last; k > pos; --k) s_rows[k] = s_rows[k - 1];
+            s_rows[pos].d2 = d2; s_rows[pos].ent = e;
+            if (n < IB_MAX_ROWS) ++n;
+        }
+
+        L("[IB] f=%u n=%d\n", frame, n);
+        for (int r = 0; r < n; ++r) {
+            Entity* e = s_rows[r].ent;
+            uint64_t id = IdentityIdOf(e);
+            uint32_t handle = 0;
+            if (readable((char*)e + 4, 4)) handle = *(uint32_t*)((char*)e + 4);
+            const char* band = "null";
+            if (id != 0 && id != 0xFFFFFFFFull)
+                band = (id >= 0xF0000000ull) ? "minted" : "portable";
+            L("[IB] %3d ent=0x%08X h=0x%05X reg=%d id=0x%08X%08X band=%s d=%6.1f\n",
+              r + 1, (unsigned)(uintptr_t)e, handle & 0x3FFFFu,
+              (handle & 0x10000000u) ? 1 : 0,
+              (unsigned)(id >> 32), (unsigned)(id & 0xFFFFFFFFu), band, sqrtf(s_rows[r].d2));
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[IB] EXCEPTION 0x%08X (block skipped, frame %u)\n", GetExceptionCode(), frame);
+    }
+}
+
 static void OnFrameInner(Human* updatedHuman);
 
 // Any access violation inside our per-frame work is logged and that frame is skipped, instead of taking
@@ -5453,6 +5564,7 @@ static void OnFrameInner(Human* updatedHuman) {
         s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, ".\\AC4Coop.ini");
         s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
         s_transformProbe = GetPrivateProfileIntA("Coop", "TransformProbe", 0, ".\\AC4Coop.ini");
+        g_identityBand   = GetPrivateProfileIntA("Coop", "IdentityBand",   0, ".\\AC4Coop.ini");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
         bool netOk = Net::Init();
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
@@ -5476,6 +5588,11 @@ static void OnFrameInner(Human* updatedHuman) {
     // [Coop] TransformProbe (default 0): read-only capture of the three documented transform sources,
     // every 30 frames, local + puppet. OFF => this is one int test and nothing else runs.
     if (s_transformProbe) ProbeTransform(updatedHuman);
+
+    // [Coop] IdentityBand (default 0): read-only 1 Hz identity-band log. Deliberately OUTSIDE
+    // Net::Enabled() and independent of g_entHost/EntitySync: it must produce data with entity sync
+    // switched off. OFF => a single int test per player frame and nothing else runs.
+    if (g_identityBand > 0) IdentityBandTick();
 
     // Wire stats every 5 s: measured, not estimated.
     {
