@@ -3410,6 +3410,8 @@ static volatile long g_enumReq = 0;      // set by hotkey (F14): entity-enumerat
 static volatile long g_inputReq = 0;     // set by hotkey (F3): input-state probe next frame
 static volatile long g_healthReq = 0;    // set by hotkey (F2): health heap-scan probe next frame
 static volatile long g_mapReq = 0;       // set by hotkey (F1): guard->CSrvNPCHealth mapping probe next frame
+static volatile long g_ctReq  = 0;       // set by hotkey (F15): combat kill/watch test next frame
+static int g_combatTest = -1;            // ini [Coop] CombatTest (read once, with the other [Coop] keys)
 static volatile long g_holdShip = 0;      // F5 toggle: pin the ship's position EVERY frame (drive test)
 static void*  g_holdShipEnt = nullptr;    // the ship entity being held
 static void*  g_holdShipRB = nullptr;     // the ship's RigidBodyComponent, driving mode flipped to Fixed
@@ -3426,6 +3428,13 @@ void Phase1::RequestEntityEnum()  { g_enumReq = 1; }         // any thread: queu
 void Phase1::RequestInputProbe()  { g_inputReq = 1; }        // any thread: queue the F3 input-state probe for the main thread
 void Phase1::RequestHealthProbe() { g_healthReq = 1; }       // any thread: queue the F2 health heap-scan probe for the main thread
 void Phase1::RequestGuardHealthMap() { g_mapReq = 1; }      // any thread: queue the F1 guard->health mapping probe
+// any thread: queue the F15 kill/watch test. Refused when [Coop] CombatTest=0, so the key is inert
+// (no frame work, no log line) in the default configuration.
+bool Phase1::RequestCombatTest() {
+    if (g_combatTest <= 0) return false;
+    g_ctReq = 1;
+    return true;
+}
 
 // ---- Guard -> CSrvNPCHealth mapping probe (F1) ------------------------------------------------
 // sub_1371140(owner) resolves CSrvNPCHealth out of owner->[+0x0C]'s service array at [+0x70]
@@ -5514,6 +5523,204 @@ static void IdentityBandTick() {
     }
 }
 
+// ---- [Coop] CombatTest: one-press kill-and-watch go/no-go (default OFF) -------------------------
+// With [Coop] CombatTest=1, F15 picks the nearest LIVE guard-type entity within 25 m, prints its
+// entity pointer / object id / handle / distance, reads its health service BEFORE the write, applies
+// the dead encoding the user-verified reference implementation used (combat_sync.cpp apply_kill):
+//     Life  u16 @ +0x5C := 0xFFFF
+//     Flags u32 @ +0x60 |= 0x01000000
+// then watches THAT SAME object every 0.5 s for 10 s and prints one answer line:
+//     [CT] RESULT stayed_dead=1 resurrected=0 lost=0
+//
+// This is a raw-state experiment, not a combat-sync feature: no engine method is called, nothing is
+// sent, and the entire write set is those two fields. `alive` is the engine's own dead encoding
+// (Life==0xFFFF && flags bit 0x01000000) - the state the game leaves on a real death - and hp is the
+// raw Life value, so 65535.0 IS "dead". Every dereference is bounds-checked (readable) and the whole
+// body is SEH-wrapped; a freed/recycled object ends the window with [CT] lost.
+#define CT_RADIUS_M   25.0f
+#define CT_WINDOW_MS  10000
+#define CT_STEP_MS     500
+#define CT_SAMPLES     (CT_WINDOW_MS / CT_STEP_MS)
+
+struct CombatTestRun {
+    int                active;
+    unsigned           ent;
+    unsigned           hp;
+    unsigned long long id;
+    float              dist;
+    unsigned           step;
+    int                after_dead;   // sample taken immediately after the write
+    int                resurrected;  // any later sample read alive again
+    int                lost;         // pointer went unreadable / slot recycled
+};
+static CombatTestRun s_ctRun;
+
+// One guarded read of the health service. False = the object is gone (entity or service unreadable,
+// or the slot was recycled by the allocator) - never "alive".
+static bool CombatTestSample(unsigned ent, unsigned hp, int* alive, float* hpv) {
+    if (!ent || !readable((void*)ent, 0x70)) return false;
+    if (!hp || !readable((void*)hp, 0x70)) return false;
+    if (*(unsigned int*)hp != 0x02712F60u) return false;        // recycled slot: no longer our service
+    const unsigned short life  = *(unsigned short*)(hp + 0x5C);
+    const unsigned short maxl  = *(unsigned short*)(hp + 0x5E);
+    const unsigned int   flags = *(unsigned int*)(hp + 0x60);
+    if (maxl == 0 || maxl > 2000) return false;                 // same plausibility gate as combat_sync.cpp
+    *alive = (life != 0xFFFF && (flags & 0x01000000u) == 0) ? 1 : 0;
+    *hpv   = (float)life;
+    return true;
+}
+
+static void CombatTestVerdict() {
+    const int stayed = (s_ctRun.after_dead && !s_ctRun.resurrected && !s_ctRun.lost) ? 1 : 0;
+    L("[CT] RESULT stayed_dead=%d resurrected=%d lost=%d\n",
+      stayed, s_ctRun.resurrected ? 1 : 0, s_ctRun.lost ? 1 : 0);
+    s_ctRun.active     = 0;
+    s_ctRun.after_dead = 0;
+}
+
+// 2 Hz observation of the same object. Runs on the game thread from the frame hook and never blocks.
+static void CombatTestObserve() {
+    static unsigned long long s_nextMs = 0;
+    if (!s_ctRun.active) return;
+    unsigned long long now = GetTickCount64();
+    if (!s_nextMs) s_nextMs = now + CT_STEP_MS;
+    while (s_ctRun.active && now >= s_nextMs) {
+        ++s_ctRun.step;
+        const float t = (float)s_ctRun.step * (CT_STEP_MS / 1000.0f);
+        int alive = 0; float hpv = 0.0f; bool ok = false;
+        __try { ok = CombatTestSample(s_ctRun.ent, s_ctRun.hp, &alive, &hpv); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { ok = false; }
+        if (!ok) {
+            s_ctRun.lost = 1;
+            L("[CT] lost at t=%.1f (ent=0x%08X hp=0x%08X unreadable/recycled)\n",
+              t, s_ctRun.ent, s_ctRun.hp);
+            s_nextMs = 0;
+            CombatTestVerdict();
+            return;
+        }
+        if (alive != 0) s_ctRun.resurrected = 1;
+        L("[CT] t=%.1f alive=%d hp=%.1f\n", t, alive, hpv);
+        s_nextMs += CT_STEP_MS;
+        if (s_ctRun.step >= CT_SAMPLES) {
+            s_nextMs = 0;
+            CombatTestVerdict();
+            return;
+        }
+    }
+}
+
+// Pick the nearest live guard, apply the reference's dead encoding to its own health service, then
+// arm the observation window. Called on the game thread only (frame hook).
+static void CombatTestKill() {
+    World* world = World::GetCurrentWorld();
+    if (!world) { L("[CT] no world\n"); return; }
+    Entity* player = world->GetPlayer();
+    if (!player || !readable(player, 0x70)) { L("[CT] no player\n"); return; }
+    const float px = player->m_GlobalMatrix.M41;
+    const float py = player->m_GlobalMatrix.M42;
+    const float pz = player->m_GlobalMatrix.M43;
+
+    Entity* best = 0; unsigned bestHp = 0; float bestD = CT_RADIUS_M * CT_RADIUS_M;
+    int nobjSeen = 0, humans = 0, liveNear = 0;
+    __try {
+        // Same walk as CaptureGuards / IdentityBandTick: the entity manager's reference list.
+        BaseBigArray<Reference>& ents = world->m_EntityManager.m_Entities;
+        int nobj = ents.GetSize();
+        if (nobj < 0 || nobj > 100000) nobj = 0;
+        nobjSeen = nobj;
+        for (int i = 0; i < nobj; ++i) {
+            Reference* ref = ents.GetElement(i);
+            if (!ref || !readable(ref, 4)) break;              // same invariant as CaptureGuards
+            HandleContainer* hc = ref->m_HandleContainer;
+            if (!hc || !readable(hc, 4)) continue;
+            Entity* e = (Entity*)hc->m_Object;
+            if (!e || e == player || !readable(e, 0x70)) continue;
+            Component** data = *(Component***)((char*)e + 0x60);
+            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
+            bool skel = false; Component* bhvC = 0;
+            for (int k = 0; k < n; ++k) {
+                Component* c = data[k];
+                uint32_t vt = (c && readable(c, 4)) ? *(uint32_t*)c : 0;
+                if (vt == 0x01E41E58) skel = true;
+                if (vt == 0x026E34D8) bhvC = c;                // BhvGenericNPC = the guard lane
+            }
+            if (!skel || !bhvC) continue;
+            ++humans;
+            const float dx = e->m_GlobalMatrix.M41 - px;
+            const float dy = e->m_GlobalMatrix.M42 - py;
+            const float dz = e->m_GlobalMatrix.M43 - pz;
+            const float d2 = dx * dx + dy * dy + dz * dz;
+            if (!(d2 <= bestD)) continue;                      // NaN-safe; keeps the nearest
+            const unsigned hp = FindHealthInAI((unsigned)AIEntityHelper::GetEntityAI(e));
+            if (!hp) continue;                                 // no health service -> nothing to judge
+            int alive = 0; float cur = 0.0f;
+            if (!CombatTestSample((unsigned)e, hp, &alive, &cur)) continue;
+            ++liveNear;
+            if (!alive) continue;                              // already dead: never a target
+            bestD = d2; best = e; bestHp = hp;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[CT] EXC scan 0x%08X\n", GetExceptionCode());
+    }
+    if (!best || !bestHp) {
+        L("[CT] no live guard within %.0fm (entities=%d humans=%d with-health=%d)\n",
+          CT_RADIUS_M, nobjSeen, humans, liveNear);
+        return;
+    }
+
+    const unsigned long long id = IdentityIdOf(best);
+    unsigned handle = readable((char*)best + 4, 4) ? *(unsigned*)((char*)best + 4) : 0;
+    L("[CT] target ent=0x%08X id=0x%08X%08X h=0x%05X d=%.1f\n",
+      (unsigned)best, (unsigned)(id >> 32), (unsigned)(id & 0xFFFFFFFFu),
+      handle & 0x3FFFFu, sqrtf(bestD));
+
+    int alive0 = 0; float hp0 = 0.0f;
+    if (!CombatTestSample((unsigned)best, bestHp, &alive0, &hp0)) { L("[CT] lost\n"); return; }
+    L("[CT] before alive=%d hp=%.1f\n", alive0, hp0);
+
+    // ---- the kill: exactly combat_sync.cpp apply_kill() (Life := 0xFFFF, Flags |= 0x01000000) ----
+    int wrote = 0;
+    __try {
+        const unsigned int flags = *(unsigned int*)(bestHp + 0x60);
+        *(unsigned short*)(bestHp + 0x5C) = (unsigned short)0xFFFF;
+        *(unsigned int*)(bestHp + 0x60)   = flags | 0x01000000u;
+        wrote = 1;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[CT] EXC write 0x%08X\n", GetExceptionCode());
+    }
+
+    int alive1 = 0; float hp1 = 0.0f;
+    const bool afterOk = CombatTestSample((unsigned)best, bestHp, &alive1, &hp1);
+    L("[CT] applied write=%d after_alive=%d hp=%.1f\n",
+      wrote, afterOk ? alive1 : -1, afterOk ? hp1 : -1.0f);
+
+    s_ctRun.ent         = (unsigned)best;
+    s_ctRun.hp          = bestHp;
+    s_ctRun.id          = id;
+    s_ctRun.dist        = sqrtf(bestD);
+    s_ctRun.step        = 0;
+    s_ctRun.resurrected = 0;
+    s_ctRun.lost        = 0;
+    s_ctRun.after_dead  = (wrote && afterOk && alive1 == 0) ? 1 : 0;
+    s_ctRun.active      = 1;
+    if (!wrote || !afterOk) { s_ctRun.lost = 1; CombatTestVerdict(); return; }
+}
+
+static void CombatTestTick() {
+    const bool req = (g_ctReq != 0);
+    if (req) g_ctReq = 0;
+    if (s_ctRun.active) {
+        if (req) L("[CT] busy: window open (step %u/%d)\n", s_ctRun.step, (int)CT_SAMPLES);
+        CombatTestObserve();
+        return;
+    }
+    if (!req) return;
+    __try { CombatTestKill(); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { L("[CT] EXC test 0x%08X\n", GetExceptionCode()); }
+}
+
 static void OnFrameInner(Human* updatedHuman);
 
 // Any access violation inside our per-frame work is logged and that frame is skipped, instead of taking
@@ -5565,6 +5772,10 @@ static void OnFrameInner(Human* updatedHuman) {
         s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
         s_transformProbe = GetPrivateProfileIntA("Coop", "TransformProbe", 0, ".\\AC4Coop.ini");
         g_identityBand   = GetPrivateProfileIntA("Coop", "IdentityBand",   0, ".\\AC4Coop.ini");
+        g_combatTest     = GetPrivateProfileIntA("Coop", "CombatTest",     0, ".\\AC4Coop.ini");
+        // Log the hotkey only when the test is armed: with CombatTest=0 the default run stays silent.
+        if (g_combatTest > 0)
+            L("[CT] CombatTest=1 hotkey=F15 (VK 0x7E) radius=25m window=10s step=0.5s\n");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
         bool netOk = Net::Init();
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
@@ -5593,6 +5804,10 @@ static void OnFrameInner(Human* updatedHuman) {
     // Net::Enabled() and independent of g_entHost/EntitySync: it must produce data with entity sync
     // switched off. OFF => a single int test per player frame and nothing else runs.
     if (g_identityBand > 0) IdentityBandTick();
+
+    // [Coop] CombatTest (default 0): one press = one kill + one 10 s window. OFF => one int test
+    // per frame and nothing else runs, so behaviour is bit-identical to the previous build.
+    if (g_combatTest > 0) CombatTestTick();
 
     // Wire stats every 5 s: measured, not estimated.
     {

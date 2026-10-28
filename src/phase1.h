@@ -21,6 +21,9 @@ namespace Phase1 {
     void RequestInputProbe();     // hotkey handler (F3, any thread): queue an input-state probe next frame
     void RequestHealthProbe();    // hotkey handler (F2, any thread): queue a health heap-scan probe next frame
     void RequestGuardHealthMap(); // hotkey handler (F1, any thread): queue a guard->health mapping probe
+    // hotkey handler (F15, any thread): [Coop] CombatTest=1 -> kill the nearest live guard within 25 m
+    // and watch that object for 10 s. Returns false (and does nothing) when CombatTest=0.
+    bool RequestCombatTest();
     void DumpPlayerInfo();     // main-thread: print player Human* + the swim context->FSM->scope chain
 
     // Executed on the main thread by the frame hook:

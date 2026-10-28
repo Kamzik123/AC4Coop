@@ -247,6 +247,17 @@ static unsigned __stdcall PollThread(void*)
         if (f14 && !f14prev) { logline("[AC4Coop] F4 -> entity-enumeration probe\n"); Phase1::RequestEntityEnum(); }
         f14prev = f14;
 
+        // F15 (edge-triggered): [Coop] CombatTest=1 -> kill the nearest guard inside 25 m and watch it
+        // for 10 s. With CombatTest=0 the request is refused and NOTHING is logged or queued, so the
+        // default build behaves exactly as before (F15 is the only free F-key left: F1-F14 and V are
+        // already bound above).
+        static bool f15prev = false;
+        bool f15 = (GetAsyncKeyState(VK_F15) & 0x8000) != 0;
+        if (f15 && !f15prev) {
+            if (Phase1::RequestCombatTest()) logline("[AC4Coop] F15 -> combat kill/watch test\n");
+        }
+        f15prev = f15;
+
         // (Phase 0 position logging removed — Phase 1 uses the main-thread frame hook.)
         (void)lastPlayer;
     }
