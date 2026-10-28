@@ -247,16 +247,21 @@ static unsigned __stdcall PollThread(void*)
         if (f14 && !f14prev) { logline("[AC4Coop] F4 -> entity-enumeration probe\n"); Phase1::RequestEntityEnum(); }
         f14prev = f14;
 
-        // F15 (edge-triggered): [Coop] CombatTest=1 -> kill the nearest guard inside 25 m and watch it
-        // for 10 s. With CombatTest=0 the request is refused and NOTHING is logged or queued, so the
-        // default build behaves exactly as before (F15 is the only free F-key left: F1-F14 and V are
-        // already bound above).
-        static bool f15prev = false;
-        bool f15 = (GetAsyncKeyState(VK_F15) & 0x8000) != 0;
-        if (f15 && !f15prev) {
-            if (Phase1::RequestCombatTest()) logline("[AC4Coop] F15 -> combat kill/watch test\n");
+        // Ctrl+Alt+K (edge-triggered): [Coop] CombatTest=1 -> kill the nearest guard inside 25 m and
+        // watch it for 10 s. With CombatTest=0 the request is refused and NOTHING is logged or queued,
+        // so the default build behaves exactly as before. Both modifiers are required AT THE EDGE on K;
+        // because the F-key handlers above test their key alone (no modifier check), a modifier combo
+        // on an existing F-key would double-fire, hence a free letter key (no letter is bound above).
+        static bool kprev = false;
+        bool k = (GetAsyncKeyState('K') & 0x8000) != 0;
+        if (k && !kprev) {
+            const bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            const bool alt  = (GetAsyncKeyState(VK_MENU)    & 0x8000) != 0;
+            if (ctrl && alt) {
+                if (Phase1::RequestCombatTest()) logline("[AC4Coop] Ctrl+Alt+K -> combat kill/watch test\n");
+            }
         }
-        f15prev = f15;
+        kprev = k;
 
         // (Phase 0 position logging removed — Phase 1 uses the main-thread frame hook.)
         (void)lastPlayer;

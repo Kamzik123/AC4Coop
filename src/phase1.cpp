@@ -3410,7 +3410,7 @@ static volatile long g_enumReq = 0;      // set by hotkey (F14): entity-enumerat
 static volatile long g_inputReq = 0;     // set by hotkey (F3): input-state probe next frame
 static volatile long g_healthReq = 0;    // set by hotkey (F2): health heap-scan probe next frame
 static volatile long g_mapReq = 0;       // set by hotkey (F1): guard->CSrvNPCHealth mapping probe next frame
-static volatile long g_ctReq  = 0;       // set by hotkey (F15): combat kill/watch test next frame
+static volatile long g_ctReq  = 0;       // set by hotkey (Ctrl+Alt+K): combat kill/watch test next frame
 static int g_combatTest = -1;            // ini [Coop] CombatTest (read once, with the other [Coop] keys)
 static volatile long g_holdShip = 0;      // F5 toggle: pin the ship's position EVERY frame (drive test)
 static void*  g_holdShipEnt = nullptr;    // the ship entity being held
@@ -3428,7 +3428,7 @@ void Phase1::RequestEntityEnum()  { g_enumReq = 1; }         // any thread: queu
 void Phase1::RequestInputProbe()  { g_inputReq = 1; }        // any thread: queue the F3 input-state probe for the main thread
 void Phase1::RequestHealthProbe() { g_healthReq = 1; }       // any thread: queue the F2 health heap-scan probe for the main thread
 void Phase1::RequestGuardHealthMap() { g_mapReq = 1; }      // any thread: queue the F1 guard->health mapping probe
-// any thread: queue the F15 kill/watch test. Refused when [Coop] CombatTest=0, so the key is inert
+// any thread: queue the Ctrl+Alt+K kill/watch test. Refused when [Coop] CombatTest=0, so the combo is inert
 // (no frame work, no log line) in the default configuration.
 bool Phase1::RequestCombatTest() {
     if (g_combatTest <= 0) return false;
@@ -5524,7 +5524,7 @@ static void IdentityBandTick() {
 }
 
 // ---- [Coop] CombatTest: one-press kill-and-watch go/no-go (default OFF) -------------------------
-// With [Coop] CombatTest=1, F15 picks the nearest LIVE guard-type entity within 25 m, prints its
+// With [Coop] CombatTest=1, Ctrl+Alt+K picks the nearest LIVE guard-type entity within 25 m, prints its
 // entity pointer / object id / handle / distance, reads its health service BEFORE the write, applies
 // the dead encoding the user-verified reference implementation used (combat_sync.cpp apply_kill):
 //     Life  u16 @ +0x5C := 0xFFFF
@@ -5775,7 +5775,7 @@ static void OnFrameInner(Human* updatedHuman) {
         g_combatTest     = GetPrivateProfileIntA("Coop", "CombatTest",     0, ".\\AC4Coop.ini");
         // Log the hotkey only when the test is armed: with CombatTest=0 the default run stays silent.
         if (g_combatTest > 0)
-            L("[CT] CombatTest=1 hotkey=F15 (VK 0x7E) radius=25m window=10s step=0.5s\n");
+            L("[CT] CombatTest=1 hotkey=Ctrl+Alt+K radius=25m window=10s step=0.5s\n");
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
         bool netOk = Net::Init();
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
