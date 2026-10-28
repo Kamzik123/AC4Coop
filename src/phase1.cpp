@@ -3412,6 +3412,10 @@ static volatile long g_healthReq = 0;    // set by hotkey (F2): health heap-scan
 static volatile long g_mapReq = 0;       // set by hotkey (F1): guard->CSrvNPCHealth mapping probe next frame
 static volatile long g_ctReq  = 0;       // set by hotkey (Ctrl+Alt+K): combat kill/watch test next frame
 static int g_combatTest = -1;            // ini [Coop] CombatTest (read once, with the other [Coop] keys)
+static volatile long g_wtReq = 0;        // set by hotkey (Ctrl+Alt+J): [TD] target-address dump next frame
+static volatile long g_wbReq = 0;        // set by hotkey (Ctrl+Alt+L): [WB] dead-bit write trap next frame
+static int g_watchTarget  = -1;          // ini [Coop] WatchTarget  (default 0, read once)
+static int g_watchDeadBit = -1;          // ini [Coop] WatchDeadBit (default 0, read once)
 static volatile long g_holdShip = 0;      // F5 toggle: pin the ship's position EVERY frame (drive test)
 static void*  g_holdShipEnt = nullptr;    // the ship entity being held
 static void*  g_holdShipRB = nullptr;     // the ship's RigidBodyComponent, driving mode flipped to Fixed
@@ -3433,6 +3437,18 @@ void Phase1::RequestGuardHealthMap() { g_mapReq = 1; }      // any thread: queue
 bool Phase1::RequestCombatTest() {
     if (g_combatTest <= 0) return false;
     g_ctReq = 1;
+    return true;
+}
+// any thread: queue the Ctrl+Alt+J address dump / Ctrl+Alt+L write trap. Both refuse when their key is 0,
+// so the combos are inert (no frame work, no log line, no VEH handler) in the default configuration.
+bool Phase1::RequestWatchTarget() {
+    if (g_watchTarget <= 0) return false;
+    g_wtReq = 1;
+    return true;
+}
+bool Phase1::RequestWatchDeadBit() {
+    if (g_watchDeadBit <= 0) return false;
+    g_wbReq = 1;
     return true;
 }
 
@@ -4094,6 +4110,317 @@ static Entity* FindNearestSoldierTo(float x, float y, float z, float radius) {
     } __except (EXCEPTION_EXECUTE_HANDLER) { L("[Kill] EXC scan 0x%08X\n", GetExceptionCode()); }
     return best;
 }
+
+// ---- [Coop] WatchTarget / WatchDeadBit: hand the dead bit to a human and to a debugger ------------
+// The engine's combat-dead predicate is sub_133F550(entity):
+//     (sub_10EF8C0(entity)[+4] & 0x1000) != 0  &&  (sub_7025F0(entity)[+0xB8] & 0xC) == 4
+// We can already SET the first half by hand (KillGuardEntityInner), but we do not know what the game
+// writes it from, so a replicated kill has no engine-side landing point. These two default-OFF probes
+// answer that, in ascending order of invasiveness:
+//
+//   Ctrl+Alt+J  WatchTarget  -- log the addresses (entity, health, is-alive service, its flags word).
+//                  Read-only; the numbers are pasted into the debugger. Nothing else happens.
+//   Ctrl+Alt+L  WatchDeadBit -- arm a PAGE_GUARD trap on the page holding svc+4. PAGE_GUARD is
+//                  process-wide, so unlike the DR trap above it catches the Scimitar job threads. Only
+//                  accesses inside [svc+4, svc+8) are reported; everything else just re-arms.
+//
+// Both are gated on their ini key (read once), so with WatchTarget=0 / WatchDeadBit=0 there is no frame
+// work, no log line, and no VEH handler installed -- identical behaviour to the previous build.
+static void WatchTargetDump();          // Ctrl+Alt+J (main thread)
+static void WatchDeadBitArm();          // Ctrl+Alt+L (main thread)
+static void WatchDeadBitDisarm(const char* why);
+
+static void WatchTargetTick() {
+    const bool req = (g_wtReq != 0);
+    if (req) g_wtReq = 0;
+    if (req) __try { WatchTargetDump(); }
+             __except (EXCEPTION_EXECUTE_HANDLER) { L("[TD] EXC 0x%08X (dump aborted)\n", GetExceptionCode()); }
+}
+
+static void WatchDeadBitTick() {
+    const bool req = (g_wbReq != 0);
+    if (req) g_wbReq = 0;
+    if (req) __try { WatchDeadBitArm(); }
+             __except (EXCEPTION_EXECUTE_HANDLER) { L("[WB] EXC 0x%08X (arm aborted)\n", GetExceptionCode()); }
+}
+
+// Nearest live soldier within 25 m of the player, as an address triple. All three are validated before
+// they are printed, so a line is either complete or says what is missing.
+// Returns 0 = no world, 1 = target found, 2 = no soldier in range. It logs nothing itself: the two
+// callers use different tags ([TD] / [WB]) and must not emit each other's lines.
+struct WatchTargetInfo {
+    unsigned ent, ai, health, svc, svcFlags;
+    unsigned life, maxLife, flags;
+    int haveEnt, haveSvc, haveHealth;
+};
+
+static int WatchTargetProbe(WatchTargetInfo* out) {
+    memset(out, 0, sizeof(*out));
+    World* world = World::GetCurrentWorld();
+    if (!world) return 0;
+    Entity* player = world->GetPlayer();
+    float px = 0, py = 0, pz = 0;
+    if (player && readable(player, 0x70)) {
+        px = player->m_GlobalMatrix.M41; py = player->m_GlobalMatrix.M42; pz = player->m_GlobalMatrix.M43;
+    }
+    Entity* e = FindNearestSoldierTo(px, py, pz, 25.0f);
+    if (!e) return 2;
+
+    out->ent = (unsigned)e;
+    out->haveEnt = 1;
+    out->ai = (unsigned)AIEntityHelper::GetEntityAI(e);
+    out->health = FindHealthInAI(out->ai);
+    if (out->health && readable((void*)out->health, 0x70)) {
+        out->life    = *(unsigned short*)(out->health + 0x5C);
+        out->maxLife = *(unsigned short*)(out->health + 0x5E);
+        out->flags   = *(unsigned int*)(out->health + 0x60);
+        out->haveHealth = 1;
+    } else out->health = 0;
+
+    // The is-alive service object: the one whose +4 word holds the 0x1000 combat-dead bit.
+    out->svc = ((unsigned int (__cdecl*)(int))0x10EF8C0)((int)e);
+    if (out->svc && readable((void*)out->svc, 8)) {
+        out->svcFlags = *(unsigned int*)(out->svc + 4);
+        out->haveSvc  = 1;
+    } else out->svc = 0;
+    return 1;
+}
+
+// [TD] one line: the addresses a debugger needs, and nothing else. Deliberately does not say whether
+// the entity is dead -- this is a lookup, not a verdict; the debugger answers the question.
+static void WatchTargetDump() {
+    WatchTargetInfo t;
+    const int st = WatchTargetProbe(&t);
+    if (st == 0) { L("[TD] no world\n"); return; }
+    if (st == 2) { L("[TD] no soldier within 25m\n"); return; }
+    L("[TD] ent=%08X health=%08X svc=%08X svcFlags=%08X life=%u/%u flags=%08X\n",
+      t.ent, t.health, t.svc, t.svcFlags, t.life, t.maxLife, t.flags);
+    if (!t.haveSvc)  L("[TD] warning: 0x10EF8C0(ent) returned nothing readable - no svc to trap\n");
+    if (!t.haveHealth) L("[TD] warning: no health service in the AI service table (ai=%08X)\n", t.ai);
+}
+
+// ---- PAGE_GUARD writer trap on the dead bit ------------------------------------------------------
+// Why this shape:
+//  * PAGE_GUARD is process-wide, so it sees writes from any Scimitar job thread (the DR trap only ever
+//    fired on the arming thread -- debug registers are per-thread).
+//  * The OS clears the guard bit BEFORE dispatching STATUS_GUARD_PAGE_VIOLATION so the faulting
+//    instruction can be retried. Re-applying the guard inside that handler would therefore re-fault on
+//    the very same retried instruction, forever. The re-arm is deferred instead: the handler sets the
+//    trap flag (TF) and returns; the instruction executes; the resulting EXCEPTION_SINGLE_STEP on that
+//    thread (thread-local, correct by construction) re-applies VirtualProtect and clears TF.
+//  * Every handled exception counts against WB_MAX_EXC, matched or not, so a hot page can never turn
+//    into an unbounded exception storm.
+#define WB_MAX_EXC 2000
+
+static unsigned int g_wbSvc = 0;          // 0x10EF8C0(ent); the guard covers [svc+4, svc+8)
+static unsigned int g_wbPage = 0;         // svc & ~0xFFF
+static unsigned int g_wbOrigProt = 0;     // protection to restore on disarm / rebuild the guard value
+static volatile LONG g_wbArmed = 0;
+static volatile LONG g_wbExcCount = 0;    // every guard-page exception handled (the hard cap)
+static int g_wbHits = 0;                  // accesses inside [svc+4, svc+8)
+static unsigned int g_wbEips[8];          // distinct faulting EIPs reported
+static int g_wbEipN = 0;
+static DWORD g_wbArmTick = 0;
+
+// Threads we set the trap flag on and still owe a re-arm. A single step is thread-local, so the tid is
+// the ownership token: without it we could clear a debugger's trap flag (or our single step could be
+// mistaken for someone else's and left set, which would single step that thread forever).
+static DWORD g_wbTfTid[8];
+
+static bool WbTfClaim(DWORD tid) {
+    for (int i = 0; i < 8; ++i)
+        if (InterlockedCompareExchange((volatile LONG*)&g_wbTfTid[i], (LONG)tid, 0) == 0) return true;
+    return false;   // 8 threads at once: skip this re-arm, any claimed single step re-arms the page
+}
+static bool WbTfRelease(DWORD tid) {
+    for (int i = 0; i < 8; ++i)
+        if (g_wbTfTid[i] == tid) {
+            InterlockedCompareExchange((volatile LONG*)&g_wbTfTid[i], 0, (LONG)tid);
+            return true;
+        }
+    return false;
+}
+
+static bool WbApplyGuard() {
+    if (!g_wbPage) return false;
+    const unsigned int base = g_wbOrigProt ? (g_wbOrigProt & 0xFFu) : PAGE_READWRITE;
+    DWORD old = 0;
+    return VirtualProtect((void*)g_wbPage, 0x1000, base | PAGE_GUARD, &old) != 0;
+}
+
+static void WatchDeadBitDisarm(const char* why) {
+    // Clear the guard bit BEFORE the armed flag: a guard fault that arrives with the flag already clear
+    // would fall through to EXCEPTION_CONTINUE_SEARCH and take the process down.
+    int restored = 1;
+    if (g_wbPage) {
+        DWORD old = 0;
+        if (!VirtualProtect((void*)g_wbPage, 0x1000, g_wbOrigProt ? g_wbOrigProt : PAGE_READWRITE, &old)) {
+            DWORD old2 = 0;
+            if (!VirtualProtect((void*)g_wbPage, 0x1000, PAGE_READWRITE, &old2)) restored = 0;
+        }
+    }
+    if (restored) InterlockedExchange(&g_wbArmed, 0);
+    else {
+        // Keep the trap armed rather than leave a guarded page nobody handles; the exception cap still
+        // bounds it, and every further exception retries the restore.
+        if (why && *why) L("[WB] %s\n", why);
+        L("[WB] WARNING: could not clear the guard on page %08X (err %u) - trap stays armed\n",
+          g_wbPage, GetLastError());
+        return;
+    }
+    // NOTE: the TF slots are NOT cleared here. A thread may be between its guard fault and its single
+    // step; it must release its own slot or it would keep TF set and single step forever. With the trap
+    // disarmed that branch just clears TF and continues.
+    if (why && *why) L("[WB] %s\n", why);
+    L("[WB] disarmed after %d hits, %d distinct eip(s)\n", g_wbHits, g_wbEipN);
+}
+
+static LONG WINAPI WbTrap(PEXCEPTION_POINTERS ep) {
+    if (!ep || !ep->ExceptionRecord || !ep->ContextRecord) return EXCEPTION_CONTINUE_SEARCH;
+    const DWORD code = ep->ExceptionRecord->ExceptionCode;
+    CONTEXT* c = ep->ContextRecord;
+
+    // Second half of the re-arm. Only ours: a trap flag we set on THIS thread (tid slot) and haven't
+    // cleared yet. Anyone else's single step is left alone.
+    if (code == EXCEPTION_SINGLE_STEP) {
+        // Do NOT test TF here. The CPU clears TF before dispatching the single-step exception, so the
+        // delivered EFlags always has TF=0 and such a test rejects our own step (proved with a harness:
+        // the process died with 0x80000004). Ownership is the tid slot alone.
+        if (!WbTfRelease(GetCurrentThreadId())) return EXCEPTION_CONTINUE_SEARCH;
+        c->EFlags &= ~0x100u;                       // clear it FIRST, whatever happens next
+        if (g_wbArmed) WbApplyGuard();               // TF does not retry, so this cannot re-fault
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+
+    if (code != STATUS_GUARD_PAGE_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
+    if (!g_wbArmed || !g_wbSvc) return EXCEPTION_CONTINUE_SEARCH;
+
+    const unsigned int addr = (unsigned int)(ULONG_PTR)ep->ExceptionRecord->ExceptionInformation[1];
+    const unsigned int eip  = (unsigned int)(ULONG_PTR)c->Eip;
+
+    // Not our page (some other component's guard page): leave it entirely alone, including its trap
+    // flag semantics. Only the page we armed is ours to handle and re-arm.
+    if ((addr & ~0xFFFu) != g_wbPage) return EXCEPTION_CONTINUE_SEARCH;
+
+    // Hard cap first: this is the only thing that stops a hot page from spinning the process.
+    const LONG n = InterlockedIncrement(&g_wbExcCount);
+    if (n > WB_MAX_EXC) {
+        WatchDeadBitDisarm("exception cap reached - page is too hot, stopping");
+        return EXCEPTION_CONTINUE_EXECUTION;     // guard already cleared by the OS, this access proceeds
+    }
+    if ((n % 500) == 0) L("[WB] progress exc=%d hits=%d (hot page: slow but bounded)\n", (int)n, g_wbHits);
+
+    // A page that holds code cannot be guarded: the retried instruction fetch would fault forever.
+    if ((eip & ~0xFFFu) == g_wbPage) {
+        WatchDeadBitDisarm("faulting EIP is on the target page (code page) - refusing to re-arm");
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+
+    const bool match = (addr >= g_wbSvc + 4 && addr < g_wbSvc + 8);
+    if (match) {
+        // val is the word BEFORE the write: a guard page faults on the access, so the store has not
+        // happened yet. That is the state the engine is reacting to, which is what we want to see.
+        unsigned int val = 0;
+        __try { val = *(unsigned int*)(g_wbSvc + 4); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { val = 0; }
+        ++g_wbHits;
+        L("[WB] hit eip=%08X addr=svc+%X val=%08X\n", eip, addr - g_wbSvc, val);
+
+        // EBP chain: 4 frames of return addresses, each validated before it is read.
+        unsigned int ebp = (unsigned int)(ULONG_PTR)c->Ebp;
+        for (int i = 0; i < 4; ++i) {
+            if (!ebp || !readable((void*)ebp, 8)) break;
+            const unsigned int ret  = *(unsigned int*)(ebp + 4);
+            const unsigned int next = *(unsigned int*)ebp;
+            if (!ret) break;
+            L("[WB] caller=%08X\n", ret);
+            if (next <= ebp) break;                  // stack walks up; anything else is not a frame
+            ebp = next;
+        }
+
+        bool seen = false;
+        for (int i = 0; i < g_wbEipN; ++i) if (g_wbEips[i] == eip) { seen = true; break; }
+        if (!seen && g_wbEipN < 8) g_wbEips[g_wbEipN++] = eip;
+
+        // Three distinct writers is enough to identify the path: stop before the game is slowed.
+        if (g_wbEipN >= 3) {
+            WatchDeadBitDisarm(0);
+            return EXCEPTION_CONTINUE_EXECUTION;
+        }
+    }
+
+    if (!g_wbArmed) return EXCEPTION_CONTINUE_EXECUTION;
+
+    // Deferred re-arm (see the header comment): arm TF, let this instruction retire, and rebuild the
+    // guard from the single-step that follows. Without this the trap fires exactly once, on whatever
+    // unrelated read happens to touch the page first.
+    if (WbTfClaim(GetCurrentThreadId())) {
+        c->EFlags |= 0x100u;
+    } else {
+        // No free ownership slot: leave the guard for a thread that does have one. The page is already
+        // unguarded for this access, so nothing here can fault.
+        L("[WB] warning: no TF slot free, re-arm deferred to another thread\n");
+    }
+    return EXCEPTION_CONTINUE_EXECUTION;
+}
+
+static void WatchDeadBitArm() {
+    static volatile LONG s_veh = 0;
+    if (!s_veh) { AddVectoredExceptionHandler(1, WbTrap); InterlockedExchange(&s_veh, 1); }
+
+    // The hotkey fires twice per press (down + repeat). Same rule as ArmGuardPage: ignore the repeat,
+    // and let a second real press disarm.
+    if (g_wbArmed) {
+        if (GetTickCount() - g_wbArmTick < 2000) return;
+        WatchDeadBitDisarm("toggled off");
+        return;
+    }
+
+    WatchTargetInfo t;
+    const int st = WatchTargetProbe(&t);
+    if (st == 0) { L("[WB] no world\n"); return; }
+    if (st == 2) { L("[WB] no soldier within 25m\n"); return; }
+    if (!t.haveSvc) { L("[WB] no readable is-alive service for ent=%08X\n", t.ent); return; }
+
+    const unsigned int page = t.svc & ~0xFFFu;
+    MEMORY_BASIC_INFORMATION mbi;
+    memset(&mbi, 0, sizeof(mbi));
+    if (!VirtualQuery((void*)page, &mbi, sizeof(mbi)) || mbi.State != MEM_COMMIT) {
+        L("[WB] page %08X is not committed - cannot guard it\n", page);
+        return;
+    }
+    g_wbOrigProt = mbi.Protect & ~(DWORD)PAGE_GUARD;
+    if ((g_wbOrigProt & 0xFFu) == 0 || (g_wbOrigProt & PAGE_NOACCESS)) {
+        L("[WB] page %08X protection %08X is not guardable\n", page, mbi.Protect);
+        return;
+    }
+
+    // Read the flags BEFORE the guard goes on: the first access clears it, and our own read would be
+    // that access.
+    const unsigned int flagsNow = t.svcFlags;
+
+    // Publish the state and set the armed flag BEFORE the page is guarded. The other order has a window
+    // where a job thread faults on a guarded page while g_wbArmed is still 0: the handler would return
+    // EXCEPTION_CONTINUE_SEARCH and that is an unhandled exception (process death).
+    g_wbSvc = t.svc;
+    g_wbPage = page;
+    g_wbHits = 0;
+    g_wbEipN = 0;
+    g_wbExcCount = 0;
+    g_wbArmTick = GetTickCount();
+    for (int i = 0; i < 8; ++i) g_wbTfTid[i] = 0;
+    InterlockedExchange(&g_wbArmed, 1);
+    if (!WbApplyGuard()) {
+        const DWORD err = GetLastError();
+        InterlockedExchange(&g_wbArmed, 0);
+        g_wbPage = 0;
+        L("[WB] VirtualProtect failed %u (page=%08X)\n", err, page);
+        return;
+    }
+    L("[WB] armed svc=%08X page=%08X (flags now %08X) - now KILL that guard normally\n",
+      g_wbSvc, g_wbPage, flagsNow);
+}
+
 
 // Host -> peer health event. Snapshots only carry LIVING guards (dead NPCs drop out of the entity
 // enumeration), so a death or a damage tick has to be pushed explicitly on the event lane.
@@ -5776,6 +6103,11 @@ static void OnFrameInner(Human* updatedHuman) {
         // Log the hotkey only when the test is armed: with CombatTest=0 the default run stays silent.
         if (g_combatTest > 0)
             L("[CT] CombatTest=1 hotkey=Ctrl+Alt+K radius=25m window=10s step=0.5s\n");
+        // Same rule for the two dead-bit probes: silent unless armed.
+        g_watchTarget    = GetPrivateProfileIntA("Coop", "WatchTarget",    0, ".\\AC4Coop.ini");
+        g_watchDeadBit   = GetPrivateProfileIntA("Coop", "WatchDeadBit",   0, ".\\AC4Coop.ini");
+        if (g_watchTarget  > 0) L("[TD] WatchTarget=1 hotkey=Ctrl+Alt+J (address dump only)\n");
+        if (g_watchDeadBit > 0) L("[WB] WatchDeadBit=1 hotkey=Ctrl+Alt+L (PAGE_GUARD on svc+4, cap %d)\n", WB_MAX_EXC);
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
         bool netOk = Net::Init();
         L("[Net] init=%d  (bound/peer line goes to OutputDebugString)\n", netOk ? 1 : 0);
@@ -5808,6 +6140,11 @@ static void OnFrameInner(Human* updatedHuman) {
     // [Coop] CombatTest (default 0): one press = one kill + one 10 s window. OFF => one int test
     // per frame and nothing else runs, so behaviour is bit-identical to the previous build.
     if (g_combatTest > 0) CombatTestTick();
+
+    // [Coop] WatchTarget / WatchDeadBit (both default 0): [TD] address dump and the [WB] PAGE_GUARD
+    // writer trap. OFF => two int tests per frame; no VEH handler is ever installed.
+    if (g_watchTarget  > 0) WatchTargetTick();
+    if (g_watchDeadBit > 0) WatchDeadBitTick();
 
     // Wire stats every 5 s: measured, not estimated.
     {

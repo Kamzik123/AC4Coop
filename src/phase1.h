@@ -24,6 +24,10 @@ namespace Phase1 {
     // hotkey handler (Ctrl+Alt+K, any thread): [Coop] CombatTest=1 -> kill the nearest live guard within 25 m
     // and watch that object for 10 s. Returns false (and does nothing) when CombatTest=0.
     bool RequestCombatTest();
+    // hotkey handlers (Ctrl+Alt+J / Ctrl+Alt+L, any thread): the dead-bit diagnostics. Both return false
+    // (and do nothing) when [Coop] WatchTarget / WatchDeadBit is 0, which is the default.
+    bool RequestWatchTarget();   // log the nearest soldier's ent/health/svc/svcFlags + life/flags
+    bool RequestWatchDeadBit();  // arm the PAGE_GUARD trap that reports whoever writes svc+4
     void DumpPlayerInfo();     // main-thread: print player Human* + the swim context->FSM->scope chain
 
     // Executed on the main thread by the frame hook:

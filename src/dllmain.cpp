@@ -263,6 +263,32 @@ static unsigned __stdcall PollThread(void*)
         }
         kprev = k;
 
+        // Ctrl+Alt+J / Ctrl+Alt+L (edge-triggered): [Coop] WatchTarget / WatchDeadBit. J and L are the
+        // only unbound letters in this file (grep: V, K and the F-keys are the whole set), and both
+        // modifiers are required at the edge, so a plain J or L in gameplay never fires. With the keys
+        // at their default 0 the request is refused and nothing is logged or queued.
+        static bool jprev = false;
+        bool j = (GetAsyncKeyState('J') & 0x8000) != 0;
+        if (j && !jprev) {
+            const bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            const bool alt  = (GetAsyncKeyState(VK_MENU)    & 0x8000) != 0;
+            if (ctrl && alt) {
+                if (Phase1::RequestWatchTarget()) logline("[AC4Coop] Ctrl+Alt+J -> [TD] address dump\n");
+            }
+        }
+        jprev = j;
+
+        static bool lprev = false;
+        bool l = (GetAsyncKeyState('L') & 0x8000) != 0;
+        if (l && !lprev) {
+            const bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            const bool alt  = (GetAsyncKeyState(VK_MENU)    & 0x8000) != 0;
+            if (ctrl && alt) {
+                if (Phase1::RequestWatchDeadBit()) logline("[AC4Coop] Ctrl+Alt+L -> [WB] dead-bit write trap\n");
+            }
+        }
+        lprev = l;
+
         // (Phase 0 position logging removed — Phase 1 uses the main-thread frame hook.)
         (void)lastPlayer;
     }
