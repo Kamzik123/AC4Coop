@@ -4,3 +4,4 @@
 /obj
 build.bat
 HANDOFF.md
+/src/build_info.h

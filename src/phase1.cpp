@@ -26,6 +26,11 @@
 #include "Scimitar/AI/HumanSwimFSM.h"
 #include "Scimitar/Components/CharacterController.h"
 
+// Task 0.2: implemented in src\dllmain.cpp. Formats "[Build] asi=<sha256> commit=<short> tree=<clean|
+// dirty>\n" from the loaded ASI and the stamp in src\build_info.h. Declared here (not in the anonymous
+// namespace below) so this log and phase0_log_<pid>.txt report the same binary for one run.
+extern "C" int AC4Coop_FormatBuildLine(char* out, int cap);
+
 namespace {
 
 // sub_4054D0(char active): focus activate/deactivate. Inline-hook target (see InstallNoPauseHook), so it
@@ -166,6 +171,16 @@ void L(const char* fmt, ...) {
         Phase1::ModuleRelativePath(path, sizeof(path), name);
         // _SH_DENYWR: deny other writers but allow readers, so the log is readable live (no quit needed).
         f = _fsopen(path, "w", _SH_DENYWR);
+        // Task 0.2: [Build] is the first line of every phase1_log_<pid>.txt. "w" truncates, and nothing
+        // is written to `f` before this block, so this is byte 0 of a fresh file (and of the first file
+        // of each process, since `f` is static and opened once).
+        if (f) {
+            char buildLine[256];
+            if (AC4Coop_FormatBuildLine(buildLine, (int)sizeof(buildLine)) > 0) {
+                fputs(buildLine, f);
+                fflush(f);
+            }
+        }
     }
     if (f) { fputs(buf, f); fflush(f); }
 }
