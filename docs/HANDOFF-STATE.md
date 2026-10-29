@@ -18,7 +18,7 @@
 - Deploy protocol: only after build **and** the live check for the feature.
 
 ## Facts that matter
-- Wire protocol: `NET_PROTO_VER = 7`. Both machines must run the same .asi.
+- Wire protocol: `NET_PROTO_VER = 9` (netstate.h:116). Both machines must run the same .asi.
 - Kill recipe (verified live): `SetLife(hp,-1)` -> `hp+0x60 |= 0x01000000` ->
   `sub_10EF8C0(entity)[+4] |= 0x1000` (combat is-alive) -> `ai+0x8C = 1` (AI-side only) ->
   death clip `1818493434` -> `SetLayer(&cc->m_FilterInfo, 0x29)`.
