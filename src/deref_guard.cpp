@@ -91,6 +91,16 @@ const uintptr_t LITERAL_STALE_CONT = 0x00679603;   // test ecx,ecx ; je 0x679611
 const uintptr_t LITERAL_STALE_SKIP = 0x00679611;   // mov byte ptr [ebp+8],0  (engine's "no target")
 const size_t    STALE_CAVE_SIZE    = 256;          // stub 72 + recorder 18, room to spare
 
+// Part C: sub_6817C0's unchecked NULL return from sub_733FB0 (task 0.1). 0x006817FA is a 5-byte
+// `E8 rel32` call; the fix replaces it with `E9 rel32` into a 19-byte trampoline that re-issues the
+// call and, on NULL, leaves via the function's own epilogue instead of falling into the dereference
+// at 0x00681817. See InstallNullReturnFix for the full layout.
+const uintptr_t LITERAL_NR_SITE     = 0x006817FA;   // call sub_733FB0 (ECX = [esi+0x114])
+const uintptr_t LITERAL_NR_CALLEE   = 0x00733FB0;   // sub_733FB0 -- returns NULL by design
+const uintptr_t LITERAL_NR_EPILOGUE = 0x006818E6;   // pop edi; pop ebx; pop esi; mov esp,ebp; ...
+const uintptr_t LITERAL_NR_CONT     = 0x006817FF;   // mov edi,eax
+const size_t    NR_TRAMP_SIZE       = 19;           // call 5 + test 2 + jnz 2 + jmp 5 + jmp 5
+
 // A rel32 patch reaches +-2 GB. Require a comfortable margin so the boundary itself is never used.
 const uintptr_t MAX_CAVE_DELTA = 0x7FFF0000;
 
@@ -119,9 +129,9 @@ const BYTE EXP_118[STEAL_LEN] = { 0x8B, 0x8E, 0x18, 0x01, 0x00, 0x00 };
 //   0x00681B75  phase-2 epilogue
 enum FuncId { FUNC_A = 0, FUNC_B = 1, FUNC_COUNT = 2 };
 
-// The two function bases. These literals are the ONLY literal code addresses in this unit, and they
-// are reached only as the fallback route (zero pattern matches on a KNOWN build). RVAs are
-// `VA - 0x00400000`.
+// The two function bases. These literals are the ONLY literal code addresses used by the six-site
+// hook, and they are reached only as the fallback route (zero pattern matches on a KNOWN build).
+// (Part B and Part C each have their own single-site literals above.) RVAs are `VA - 0x00400000`.
 const char* const PATTERN_FUNC_A = "55 8B EC 66 8B 15 ?? ?? ?? ?? 56 8B F1 66 8B 46 12 66 23 45 08";
 const char* const PATTERN_FUNC_B = "55 8B EC 83 EC 2C 53 56 8B F1 66 8B 46 10 66 23 45 0C";
 const uintptr_t   LITERAL_FUNC_A = 0x00679750;   // sub_679750
@@ -593,16 +603,16 @@ static bool CaveReachable(const BYTE* cave, uintptr_t site)
     return d < MAX_CAVE_DELTA;
 }
 
-static BYTE* AllocCaveNear(uintptr_t site, size_t size)
+static BYTE* AllocCaveNear(uintptr_t site, size_t size, const char* what = "stale")
 {
     BYTE* cave = (BYTE*)VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE,
                                      PAGE_EXECUTE_READWRITE);
     if (cave && CaveReachable(cave, site)) {
-        Log("[DG] stale cave (unhinted) = %p\n", cave);
+        Log("[DG] %s cave (unhinted) = %p\n", what, cave);
         return cave;
     }
     if (cave) {
-        Log("[DG] stale cave %p out of rel32 range, retrying with hints\n", cave);
+        Log("[DG] %s cave %p out of rel32 range, retrying with hints\n", what, cave);
         VirtualFree(cave, 0, MEM_RELEASE);
     }
 
@@ -611,10 +621,10 @@ static BYTE* AllocCaveNear(uintptr_t site, size_t size)
                                    PAGE_EXECUTE_READWRITE);
         if (!cave) continue;
         if (CaveReachable(cave, site)) {
-            Log("[DG] stale cave (hint 0x%08X) = %p\n", (unsigned)CAVE_HINTS[h], cave);
+            Log("[DG] %s cave (hint 0x%08X) = %p\n", what, (unsigned)CAVE_HINTS[h], cave);
             return cave;
         }
-        Log("[DG] stale cave %p out of rel32 range, next hint\n", cave);
+        Log("[DG] %s cave %p out of rel32 range, next hint\n", what, cave);
         VirtualFree(cave, 0, MEM_RELEASE);
     }
     return nullptr;
@@ -683,6 +693,122 @@ static bool InstallStaleTarget(uintptr_t moduleBase)
     return true;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Part C: the NULL return from sub_733FB0 at 0x006817FA, inside sub_6817C0 (task 0.1).
+// ---------------------------------------------------------------------------------------------
+//
+//   0x006817DF  mov  ecx,[esi+0x114]                 ; the argument -- nothing touches ECX before the call
+//   0x006817FA  E8 rel32   call sub_733FB0           ; returns NULL by design: state not 4/5, or state 5
+//                                                    ; with a missed lookup
+//   0x006817FF  8B F8      mov  edi,eax
+//   0x00681801  85 FF      test edi,edi
+//   0x00681803  jz 0x00681817                        ; the NULL path jumps INTO the dereference below
+//   0x00681805             cmp byte ptr [edi+0x267],0
+//   0x0068180E             call [edx+0x18]
+//   0x00681817  0F B7 8F B6 02 00 00  movzx ecx,word ptr [edi+0x2B6]   <-- crash: edi == 0
+//   ...
+//   0x006818E6  5F 5B 5E 8B E5 5D C3  pop edi; pop ebx; pop esi; mov esp,ebp; pop ebp; retn
+//
+// The fix is a CALLER WRAP, not a per-site deref guard: 0x006817FA becomes `E9 rel32` into a private
+// trampoline. The trampoline is jumped to (not called), so at its entry the stack is exactly what the
+// original `call` instruction saw, and ECX still holds [esi+0x114]. It re-issues the call and, when
+// that returns NULL, leaves sub_6817C0 through the function's own epilogue -- the dereference at
+// 0x00681817 stays byte-for-byte intact and is simply never reached with edi == 0.
+//
+//   00  E8 <rel32>     call sub_733FB0        ; same callee, same argument, same stack shape
+//   05  85 C0          test eax,eax
+//   07  75 05          jnz  +5                ; 2-byte jcc: next instruction is at +9, so +9+5 = +14
+//   09  E9 <rel32>     jmp  0x006818E6        ; NULL -> pop edi/ebx/esi; mov esp,ebp; pop ebp; retn
+//   0E  E9 <rel32>     jmp  0x006817FF        ; non-NULL -> resume at `mov edi,eax`
+//
+// 19 bytes. EAX carries the callee's own return value on both paths and no other register is
+// rewritten; only the flags word differs (the `test`), and neither target reads it.
+static const BYTE NR_EXP_CONT[2]     = { 0x8B, 0xF8 };                        // mov edi,eax
+static const BYTE NR_EXP_EPILOGUE[7] = { 0x5F, 0x5B, 0x5E, 0x8B, 0xE5, 0x5D, 0xC3 };
+
+// 5-byte variant of PatchSite: `E9 rel32`, nothing else. The site is a 5-byte call instruction, so
+// unlike the 6-byte loads there is no trailing byte to NOP -- writing one would corrupt `mov edi,eax`.
+static bool PatchCallWithJump(BYTE* at, const void* target)
+{
+    BYTE patch[5];
+    patch[0] = 0xE9;
+    *reinterpret_cast<int32_t*>(patch + 1) = Rel32(at + 5, target);
+
+    DWORD oldProtect = 0;
+    if (!VirtualProtect(at, sizeof(patch), PAGE_EXECUTE_READWRITE, &oldProtect)) {
+        Log("[NR] site 0x%08X: VirtualProtect failed (%lu) (not patched)\n",
+            (unsigned)(uintptr_t)at, (unsigned long)GetLastError());
+        return false;
+    }
+
+    volatile BYTE* dst = at;
+    for (size_t k = 1; k < sizeof(patch); ++k) dst[k] = patch[k];   // tail first
+    dst[0] = patch[0];                                             // then the jump opcode
+
+    FlushInstructionCache(GetCurrentProcess(), at, sizeof(patch));
+    DWORD ignored = 0;
+    VirtualProtect(at, sizeof(patch), oldProtect, &ignored);
+    return true;
+}
+
+static bool InstallNullReturnFix(uintptr_t moduleBase)
+{
+    const uintptr_t site     = VaLiteral(moduleBase, LITERAL_NR_SITE);
+    const uintptr_t callee   = VaLiteral(moduleBase, LITERAL_NR_CALLEE);
+    const uintptr_t epilogue = VaLiteral(moduleBase, LITERAL_NR_EPILOGUE);
+    const uintptr_t cont     = VaLiteral(moduleBase, LITERAL_NR_CONT);
+
+    const BYTE* p = (const BYTE*)site;
+    const BYTE* c = (const BYTE*)cont;
+    const BYTE* e = (const BYTE*)epilogue;
+
+    // Verify the call before patching: the opcode must be E8 and its rel32 must resolve to
+    // sub_733FB0 on this build. Both jump targets are verified too, so a different build is left
+    // completely untouched rather than half-wrapped.
+    if (p[0] != 0xE8 ||
+        (uintptr_t)((intptr_t)(site + 5) + (intptr_t)*reinterpret_cast<const int32_t*>(p + 1))
+            != callee ||
+        memcmp(c, NR_EXP_CONT, sizeof(NR_EXP_CONT)) != 0 ||
+        memcmp(e, NR_EXP_EPILOGUE, sizeof(NR_EXP_EPILOGUE)) != 0) {
+        Log("[NR] site bytes mismatch/unknown build \xE2\x80\x94 not patched\n");
+        Log("[NR]   site 0x%08X: %02X %02X %02X %02X %02X | cont 0x%08X: %02X %02X | "
+            "epilogue 0x%08X: %02X %02X %02X %02X %02X %02X %02X\n",
+            (unsigned)site, p[0], p[1], p[2], p[3], p[4],
+            (unsigned)cont, c[0], c[1],
+            (unsigned)epilogue, e[0], e[1], e[2], e[3], e[4], e[5], e[6]);
+        return false;
+    }
+
+    Log("[NR] site 0x%08X call -> 0x%08X verified\n", (unsigned)site, (unsigned)callee);
+
+    BYTE* cave = AllocCaveNear(site, NR_TRAMP_SIZE + 16, "null-return");
+    if (!cave) {
+        Log("[NR] install FAILED: no cave within rel32 range\n");
+        return false;
+    }
+
+    BYTE* t = cave;
+    t[0] = 0xE8;                                              // call sub_733FB0
+    *reinterpret_cast<int32_t*>(t + 1) = Rel32(t + 5, (const void*)callee);
+    t[5] = 0x85; t[6] = 0xC0;                                 // test eax,eax
+    t[7] = 0x75; t[8] = 0x05;                                  // jnz +5  (lands on +14)
+    t[9] = 0xE9;                                               // jmp epilogue
+    *reinterpret_cast<int32_t*>(t + 10) = Rel32(t + 14, (const void*)epilogue);
+    t[14] = 0xE9;                                              // jmp cont
+    *reinterpret_cast<int32_t*>(t + 15) = Rel32(t + 19, (const void*)cont);
+
+    FlushInstructionCache(GetCurrentProcess(), cave, NR_TRAMP_SIZE);
+
+    if (!PatchCallWithJump((BYTE*)site, cave)) {
+        Log("[NR] install FAILED: patch of 0x%08X failed\n", (unsigned)site);
+        return false;
+    }
+
+    Log("[NR] trampoline 0x%08X (cave) installed; NULL now returns via 0x%08X\n",
+        (unsigned)(uintptr_t)cave, (unsigned)epilogue);
+    return true;
+}
+
 void DerefGuard::Init()
 {
     if (g_entry) return;
@@ -695,18 +821,22 @@ void DerefGuard::Init()
         return;
     }
 
-    // Two independent gates. GuardNullTarget covers the six Part A sites; GuardStaleTarget covers the
-    // separate loader at 0x006795FD. `GuardNullTarget=1 GuardStaleTarget=0` reproduces the previous
-    // build exactly; `0/1` A/Bs the stale guard on its own.
-    const bool nullGuard  = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) != 0;
-    const bool staleGuard = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, INI_PATH) != 0;
+    // Three independent gates. GuardNullTarget covers the six Part A sites; GuardStaleTarget covers the
+    // separate loader at 0x006795FD; FixNullReturn covers the sub_733FB0 caller at 0x006817FA (Part C).
+    // `GuardNullTarget=1 GuardStaleTarget=0` reproduces the previous build exactly; `0/1` A/Bs the stale
+    // guard on its own; `FixNullReturn=0` A/Bs the caller wrap on its own.
+    const bool nullGuard     = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) != 0;
+    const bool staleGuard    = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, INI_PATH) != 0;
+    const bool nullReturnFix = GetPrivateProfileIntA("Coop", "FixNullReturn", 1, INI_PATH) != 0;
 
     if (!nullGuard)
         OutputDebugStringA("[DG] null-target guards disabled by [Coop] GuardNullTarget=0\n");
     if (!staleGuard)
         OutputDebugStringA("[DG] stale-target guard disabled by [Coop] GuardStaleTarget=0\n");
-    if (!nullGuard && !staleGuard) {
-        OutputDebugStringA("[DG] disabled: both [Coop] guards are 0\n");
+    if (!nullReturnFix)
+        OutputDebugStringA("[NR] null-return fix disabled by [Coop] FixNullReturn=0\n");
+    if (!nullGuard && !staleGuard && !nullReturnFix) {
+        OutputDebugStringA("[DG] disabled: all [Coop] guards are 0\n");
         return;
     }
 
@@ -744,6 +874,11 @@ void DerefGuard::Init()
     bool installedAny = false;
     if (nullGuard)  installedAny |= InstallNullGuards(game, moduleBase);
     if (staleGuard) installedAny |= InstallStaleTarget(moduleBase);
+    if (nullReturnFix) {
+        installedAny |= InstallNullReturnFix(moduleBase);
+    } else {
+        Log("[NR] FixNullReturn=0 (skipped)\n");
+    }
 
     g_installed = installedAny;
     if (!installedAny) return;
