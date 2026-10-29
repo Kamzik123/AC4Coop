@@ -1,6 +1,7 @@
 // Windowed mode for AC4: force the display flag off and rewrite the window style at creation.
 #include "windowed.h"
 #include "scimitarCommandLineOptions.h"
+#include "paths.h"
 #include <windows.h>
 #include <cstdint>
 
@@ -97,7 +98,7 @@ void Apply(bool fullscreen, bool borderless)
 
     // 2) keep re-asserting windowed while the engine parses its command line.
     //    Duration: [Display] ForceWindowedMs (default 5000).
-    DWORD durationMs = GetPrivateProfileIntA("Display", "ForceWindowedMs", 5000, ".\\AC4Coop.ini");
+    DWORD durationMs = GetPrivateProfileIntA("Display", "ForceWindowedMs", 5000, Paths::Ini());
     CreateThread(nullptr, 0, ForceWindowedLoop, (LPVOID)(uintptr_t)durationMs, 0, nullptr);
 }
 

@@ -22,6 +22,7 @@
 // match while the record is now orderable and attributable.
 
 #include "build_gate.h"
+#include "paths.h"
 
 #include <windows.h>
 #include <bcrypt.h>
@@ -37,7 +38,7 @@
 namespace {
 
 const DWORD  CHUNK_SIZE        = 1024u * 1024u;   // HashData() call size
-const char*  INI_PATH          = ".\\AC4Coop.ini";
+// ini path: Paths::Ini() (module-relative; see src/paths.h)
 const char*  PROV_PATH         = ".\\build-provenance.txt";
 const char*  KNOWN_BUILDS_FILE = "known_builds.txt";
 
@@ -45,12 +46,12 @@ const char*  KNOWN_BUILDS_FILE = "known_builds.txt";
 // _SH_DENYWR) must not be able to block a later run from writing its own [BG] record.
 const char* BuildLogPath()
 {
-    static char path[MAX_PATH] = { 0 };
-    if (!path[0]) {
-        _snprintf_s(path, sizeof(path), _TRUNCATE, ".\\AC4Coop_build_%u.log",
+    static char leaf[64] = { 0 };
+    if (!leaf[0]) {
+        _snprintf_s(leaf, sizeof(leaf), _TRUNCATE, "AC4Coop_build_%u.log",
                     (unsigned)GetCurrentProcessId());
     }
-    return path;
+    return Paths::LogPath(leaf);
 }
 
 // Local wall-clock ISO8601 with milliseconds. Provenance records carried neither a time nor a PID, which
@@ -406,7 +407,7 @@ bool BuildGate::Verify(HMODULE self)
     WriteRecord(record);
 
     // ---- 5. verdict -------------------------------------------------------------------------
-    const int force = GetPrivateProfileIntA("Coop", "ForceUnknownBuild", 0, INI_PATH);
+    const int force = GetPrivateProfileIntA("Coop", "ForceUnknownBuild", 0, Paths::Ini());
 
     if (g_known) {
         g_trusted = true;

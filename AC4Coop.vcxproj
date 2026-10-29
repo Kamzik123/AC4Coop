@@ -122,6 +122,7 @@
     <ClCompile Include="src\deref_guard.cpp" />
     <ClCompile Include="src\combat_observe.cpp" />
     <ClCompile Include="src\pattern_scan.cpp" />
+    <ClCompile Include="src\paths.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hook.h" />
@@ -134,6 +135,7 @@
     <ClInclude Include="src\deref_guard.h" />
     <ClInclude Include="src\combat_observe.h" />
     <ClInclude Include="src\pattern_scan.h" />
+    <ClInclude Include="src\paths.h" />
     <ClInclude Include="src\Scimitar\AI\AbstractEntityAI.h" />
     <ClInclude Include="src\Scimitar\AI\AIActor.h" />
     <ClInclude Include="src\Scimitar\AI\AIEntityHelper.h" />

@@ -20,6 +20,7 @@
 #include "Hook.h"
 #include "build_gate.h"
 #include "pattern_scan.h"
+#include "paths.h"
 
 #include <windows.h>
 #include <stdio.h>
@@ -49,7 +50,7 @@ const size_t    NODE_OUTER_DELTA    = 0xE0;    // node is an embedded sub-object
 // is never half-hooked.
 const BYTE kPrologue[STEAL_LEN] = { 0x66, 0x8B, 0x81, 0xFC, 0x00, 0x00, 0x00 };
 
-const char* INI_PATH = ".\\AC4Coop.ini";
+// ini path: Paths::Ini() (module-relative; see src/paths.h)
 
 // Address of the trampoline; read by GuardDetour's inline asm (assigned from C++, so it is not folded).
 DWORD g_trampoline = 0;
@@ -213,10 +214,10 @@ void ActionGuard::Init()
     // process that never exited must not be able to hold this unit's only evidence file open and make a
     // later run's lines disappear (that is exactly what happened to AC4Coop_build.log).
     if (!g_log) {
-        char logPath[64];
-        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
-                    ".\\AC4Coop_action_guard_%u.log", (unsigned)GetCurrentProcessId());
-        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+        char leaf[64];
+        _snprintf_s(leaf, sizeof(leaf), _TRUNCATE,
+                    "AC4Coop_action_guard_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(Paths::LogPath(leaf), "a", _SH_DENYWR);
     }
 
     uintptr_t base   = (uintptr_t)game;
@@ -253,7 +254,7 @@ void ActionGuard::Init()
 
     // Config gate: [Coop] GuardNullActionTarget=0 leaves the game completely unpatched (A/B without a
     // rebuild). No detour, no trampoline, no writes -- but the resolved address above is still logged.
-    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 0, INI_PATH) == 0) {
+    if (GetPrivateProfileIntA("Coop", "GuardNullActionTarget", 0, Paths::Ini()) == 0) {
         Log("[AG] disabled by GuardNullActionTarget=0 (resolved, not installed)\n");
         return;
     }

@@ -24,6 +24,7 @@
 #include "Hook.h"
 #include "build_gate.h"
 #include "pattern_scan.h"
+#include "paths.h"
 
 #include <windows.h>
 #include <process.h>
@@ -136,7 +137,7 @@ const uintptr_t MAX_CAVE_DELTA = 0x7FFF0000;
 // Hint addresses tried, in order, if the first VirtualAlloc lands outside +-2 GB of the module.
 const uintptr_t CAVE_HINTS[] = { 0x20000000, 0x24000000, 0x30000000, 0x50000000, 0x10000000 };
 
-const char* INI_PATH = ".\\AC4Coop.ini";
+// ini path: Paths::Ini() (module-relative; see src/paths.h)
 
 // `mov ecx,[esi+0x114]` / `mov ecx,[esi+0x118]`. Matched before patching so a different build is
 // never half-hooked; a mismatch is logged and that site is left untouched.
@@ -991,11 +992,11 @@ void DerefGuard::Init()
     // separate loader at 0x006795FD; FixNullReturn covers the sub_733FB0 caller at 0x006817FA (Part C).
     // `GuardNullTarget=1 GuardStaleTarget=0` reproduces the previous build exactly; `0/1` A/Bs the stale
     // guard on its own; `FixNullReturn=0` A/Bs the caller wrap on its own.
-    const bool nullGuard     = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) != 0;
-    const bool staleGuard    = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, INI_PATH) != 0;
-    const bool nullReturnFix = GetPrivateProfileIntA("Coop", "FixNullReturn", 1, INI_PATH) != 0;
+    const bool nullGuard     = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, Paths::Ini()) != 0;
+    const bool staleGuard    = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, Paths::Ini()) != 0;
+    const bool nullReturnFix = GetPrivateProfileIntA("Coop", "FixNullReturn", 1, Paths::Ini()) != 0;
     // Part D is read-only and default ON: it observes, it never changes an engine decision.
-    const bool nullObserver  = GetPrivateProfileIntA("Coop", "NullReturnObserver", 1, INI_PATH) != 0;
+    const bool nullObserver  = GetPrivateProfileIntA("Coop", "NullReturnObserver", 1, Paths::Ini()) != 0;
 
     if (!nullGuard)
         OutputDebugStringA("[DG] null-target guards disabled by [Coop] GuardNullTarget=0\n");
@@ -1021,10 +1022,10 @@ void DerefGuard::Init()
     // Game-folder log, live-readable (shared write denied) like phase1's. PID-suffixed so a stale
     // process cannot hold it open and swallow a later run's evidence.
     if (!g_log) {
-        char logPath[64];
-        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
-                    ".\\AC4Coop_deref_guard_%u.log", (unsigned)GetCurrentProcessId());
-        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+        char leaf[64];
+        _snprintf_s(leaf, sizeof(leaf), _TRUNCATE,
+                    "AC4Coop_deref_guard_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(Paths::LogPath(leaf), "a", _SH_DENYWR);
     }
 
     const uintptr_t moduleBase = (uintptr_t)game;

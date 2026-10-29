@@ -7,6 +7,7 @@
 #include <cstring>
 #include <share.h>
 #include "net.h"
+#include "paths.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -36,7 +37,7 @@ namespace {
         printf("%s", s);
         OutputDebugStringA(s);
         static FILE* f = nullptr;
-        if (!f) f = _fsopen("net_log.txt", "a", _SH_DENYWR);   // working dir = game folder
+        if (!f) f = _fsopen(Paths::LogPath("net_log.txt"), "a", _SH_DENYWR);   // next to the ASI, not the CWD
         if (f) { fputs(s, f); fflush(f); }
     }
 
@@ -338,12 +339,12 @@ namespace {
 namespace Net {
 
 bool Init() {
-    if (GetPrivateProfileIntA("Net", "Enabled", 0, ".\\AC4Coop.ini") == 0) return false;
+    if (GetPrivateProfileIntA("Net", "Enabled", 0, Paths::Ini()) == 0) return false;
 
-    int localPort = GetPrivateProfileIntA("Net", "LocalPort", 47801, ".\\AC4Coop.ini");
-    int peerPort  = GetPrivateProfileIntA("Net", "PeerPort",  47801, ".\\AC4Coop.ini");
+    int localPort = GetPrivateProfileIntA("Net", "LocalPort", 47801, Paths::Ini());
+    int peerPort  = GetPrivateProfileIntA("Net", "PeerPort",  47801, Paths::Ini());
     char peerIp[64] = {0};
-    GetPrivateProfileStringA("Net", "PeerIP", "127.0.0.1", peerIp, sizeof(peerIp), ".\\AC4Coop.ini");
+    GetPrivateProfileStringA("Net", "PeerIP", "127.0.0.1", peerIp, sizeof(peerIp), Paths::Ini());
 
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) { dbg("[Net] WSAStartup failed\n"); return false; }

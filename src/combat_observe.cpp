@@ -78,6 +78,7 @@
 #include "Hook.h"
 #include "build_gate.h"
 #include "pattern_scan.h"
+#include "paths.h"
 
 #include <windows.h>
 #include <stdio.h>
@@ -89,7 +90,7 @@
 namespace {
 
 const uintptr_t VA_IMAGE_BASE = 0x00400000;   // the module is not ASLR-relocated (see Hook.h)
-const char*     INI_PATH      = ".\\AC4Coop.ini";
+// ini path: Paths::Ini() (module-relative; see src/paths.h)
 
 const size_t    SITE_COUNT         = 4;
 const size_t    PATTERN_MAX        = 32;
@@ -383,7 +384,7 @@ void CombatObserve::Init()
     // ---- config gate FIRST ---------------------------------------------------------------
     // One GetPrivateProfileIntA and one int test. With the switch off there is no log file, no
     // allocation, no VirtualProtect, no detour and no thread: this unit has no other entry point.
-    if (GetPrivateProfileIntA("Coop", "CombatObserve", 0, INI_PATH) == 0) {
+    if (GetPrivateProfileIntA("Coop", "CombatObserve", 0, Paths::Ini()) == 0) {
         OutputDebugStringA("[CO] disabled by [Coop] CombatObserve=0\n");
         return;
     }
@@ -408,10 +409,10 @@ void CombatObserve::Init()
     // Game-folder log, live-readable (shared write denied). PID-suffixed so a stale process cannot
     // hold the file and swallow a later run's evidence.
     if (!g_log) {
-        char logPath[64];
-        _snprintf_s(logPath, sizeof(logPath), _TRUNCATE,
-                    ".\\AC4Coop_combat_observe_%u.log", (unsigned)GetCurrentProcessId());
-        g_log = _fsopen(logPath, "a", _SH_DENYWR);
+        char leaf[64];
+        _snprintf_s(leaf, sizeof(leaf), _TRUNCATE,
+                    "AC4Coop_combat_observe_%u.log", (unsigned)GetCurrentProcessId());
+        g_log = _fsopen(Paths::LogPath(leaf), "a", _SH_DENYWR);
     }
 
     Log("[CO] stage 2A observer starting (byte-patch hook; observe only, args logged as values)\n");

@@ -24,6 +24,7 @@
 #include "deref_guard.h"
 #include "combat_observe.h"
 #include "build_gate.h"
+#include "paths.h"
 #include <bcrypt.h>
 #include <cstring>
 
@@ -215,7 +216,7 @@ static unsigned __stdcall PollThread(void*)
     char leaf[64];
     wsprintfA(leaf, "phase0_log_%u.txt", GetCurrentProcessId());
     char logPath[MAX_PATH];
-    Phase1::ModuleRelativePath(logPath, sizeof(logPath), leaf);
+    Paths::LogPath(logPath, sizeof(logPath), leaf);
     // "a" + _SH_DENYWR, not fopen_s "w": this file is the heartbeat evidence and must be readable WHILE
     // the game runs. fopen_s opened it with a share mode that denied readers, so the one check that proves
     // PollThread is alive could not be performed during the 2026-10-27 solo run (0 B, unreadable, process
@@ -230,6 +231,13 @@ static unsigned __stdcall PollThread(void*)
         char buildLine[256];
         if (AC4Coop_FormatBuildLine(buildLine, (int)sizeof(buildLine)) > 0) {
             fputs(buildLine, g_log);
+            fflush(g_log);
+        }
+        // Second line: which ini the CWD-independent resolution picked, and where logs land. Written
+        // before the first ini read so a tester's phase0 file answers it even when phase1 never starts.
+        char pathsLine[1024];
+        if (Paths::FormatStartupLine(pathsLine, sizeof(pathsLine)) > 0) {
+            fputs(pathsLine, g_log);
             fflush(g_log);
         }
     }
@@ -484,8 +492,8 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
 
         // Windowed mode — must run now, before the engine reaches scimitar::CreateWindow.
         // Config from .\AC4Coop.ini  [Display] Fullscreen=0  Borderless=0   (defaults: windowed, bordered)
-        bool fullscreen = GetPrivateProfileIntA("Display", "Fullscreen", 0, ".\\AC4Coop.ini") != 0;
-        bool borderless = GetPrivateProfileIntA("Display", "Borderless", 0, ".\\AC4Coop.ini") != 0;
+        bool fullscreen = GetPrivateProfileIntA("Display", "Fullscreen", 0, Paths::Ini()) != 0;
+        bool borderless = GetPrivateProfileIntA("Display", "Borderless", 0, Paths::Ini()) != 0;
         Windowed::Apply(fullscreen, borderless);
 
         // Phase 1: hook the per-frame Human update so spawns/drives run on the game's main thread.

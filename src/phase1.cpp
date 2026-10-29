@@ -1,6 +1,7 @@
 // Phase 1 — spawn a second Human from the player's cached EntityBuilder + RowSelector, bind to pad 1.
 #define _CRT_SECURE_NO_WARNINGS
 #include "phase1.h"
+#include "paths.h"
 #include "net.h"
 #include "Hook.h"
 #include <windows.h>
@@ -166,9 +167,9 @@ void L(const char* fmt, ...) {
     // Also append to a per-process file, flushed each line, so the trail survives a crash.
     static FILE* f = nullptr;
     if (!f) {
-        char name[64], path[MAX_PATH];
+        char name[64];
         wsprintfA(name, "phase1_log_%u.txt", GetCurrentProcessId());
-        Phase1::ModuleRelativePath(path, sizeof(path), name);
+        const char* path = Paths::LogPath(name);
         // _SH_DENYWR: deny other writers but allow readers, so the log is readable live (no quit needed).
         f = _fsopen(path, "w", _SH_DENYWR);
         // Task 0.2: [Build] is the first line of every phase1_log_<pid>.txt. "w" truncates, and nothing
@@ -180,6 +181,13 @@ void L(const char* fmt, ...) {
                 fputs(buildLine, f);
                 fflush(f);
             }
+            // Second line, before any [Paths]-dependent decision is logged: says which ini was used and
+            // where the logs go, so a tester's file answers "did it read my ini?" on its own.
+            char pathsLine[1024];
+            if (Paths::FormatStartupLine(pathsLine, sizeof(pathsLine)) > 0) {
+                fputs(pathsLine, f);
+                fflush(f);
+            }
         }
     }
     if (f) { fputs(buf, f); fflush(f); }
@@ -188,15 +196,9 @@ void L(const char* fmt, ...) {
 } // namespace
 
 void Phase1::ModuleRelativePath(char* out, size_t cap, const char* fileName) {
-    HMODULE self = nullptr;
-    GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                       (LPCSTR)&Phase1::ModuleRelativePath, &self);
-    char dir[MAX_PATH] = {};
-    DWORD n = self ? GetModuleFileNameA(self, dir, MAX_PATH) : 0;
-    char* slash = (n > 0 && n < MAX_PATH) ? strrchr(dir, '\\') : nullptr;
-    if (slash) slash[1] = 0;
-    else       dir[0] = 0;   // fall back to the current directory
-    _snprintf_s(out, cap, _TRUNCATE, "%s%s", dir, fileName);
+    // Kept for callers that want a plain module-relative file name; the ini decision lives in Paths::Ini().
+    if (!out || cap == 0) return;
+    _snprintf_s(out, cap, _TRUNCATE, "%s\\%s", Paths::ModuleDir(), fileName ? fileName : "");
 }
 
 namespace {
@@ -361,9 +363,7 @@ void Phase1::InstallVirtualPadHook() {
     // Test scaffolding only: advertising a phantom pad at index 1 from process start is not something a
     // normal build should do. Opt in with [Coop] VPadEnable=1.
     {
-        char ini[MAX_PATH];
-        Phase1::ModuleRelativePath(ini, sizeof(ini), "AC4Coop.ini");
-        if (GetPrivateProfileIntA("Coop", "VPadEnable", 0, ini) == 0) return;
+        if (GetPrivateProfileIntA("Coop", "VPadEnable", 0, Paths::Ini()) == 0) return;
     }
     HMODULE xi = GetModuleHandleA("xinput1_3.dll");
     if (!xi) xi = GetModuleHandleA("xinput1_4.dll");
@@ -373,11 +373,10 @@ void Phase1::InstallVirtualPadHook() {
     if (!p) return;
     s_realXInputGetState = (XInputGetStateFn)p;
     {
-        // Read the ini by absolute path: at ASI-load time the CWD is not the game folder yet.
-        char ini[MAX_PATH];
-        Phase1::ModuleRelativePath(ini, sizeof(ini), "AC4Coop.ini");
-        s_vpadTest = GetPrivateProfileIntA("Coop", "VPadTest", 0, ini);
-        L("[VPad] ini=%s VPadTest=%d\n", ini, s_vpadTest);
+        // Ini path comes from Paths::Ini(): module-relative when the ini sits next to the ASI, otherwise
+        // the legacy CWD-relative path. At ASI-load time the CWD is often not the game folder.
+        s_vpadTest = GetPrivateProfileIntA("Coop", "VPadTest", 0, Paths::Ini());
+        L("[VPad] ini=%s VPadTest=%d\n", Paths::Ini(), s_vpadTest);
     }
     PatchXInputIAT(p, (void*)VPadGetState);
     InterlockedExchange(&s_vpadEnabled, 1);
@@ -492,7 +491,7 @@ void* Phase1::TrySpawnPuppet() {
 
         // builder object was released after the player spawned -> reload it by ID
         if (!readable(builder, 8) && builderID) {
-            bool doReload = GetPrivateProfileIntA("Coop", "ReloadBuilder", 1, ".\\AC4Coop.ini") != 0;
+            bool doReload = GetPrivateProfileIntA("Coop", "ReloadBuilder", 1, Paths::Ini()) != 0;
             if (doReload) {
                 L("[Phase1] builder released; reloading by ID...\n");
                 builder = reloadBuilder(builderID);
@@ -535,7 +534,7 @@ void* Phase1::TrySpawnPuppet() {
 
     // Steps below mutate world state — gate behind ini so we can test build-only first.
     bool doIntegrate = Net::Enabled() ||
-                       GetPrivateProfileIntA("Coop", "IntegratePuppet", 0, ".\\AC4Coop.ini") != 0;
+                       GetPrivateProfileIntA("Coop", "IntegratePuppet", 0, Paths::Ini()) != 0;
     if (!doIntegrate) {
         // Not in world -> do NOT register it for driving (SetGlobalMatrixInternal on a
         // non-integrated entity is unsafe). Just report the successful build.
@@ -559,7 +558,7 @@ void* Phase1::TrySpawnPuppet() {
         newEntity->SetPosition(ppos + g_offset);
 
         // 7) OPTIONAL: bind to pad 1 (local only; a networked puppet is a remote proxy, never a pad player)
-        if (!Net::Enabled() && GetPrivateProfileIntA("Coop", "RegisterPad1", 0, ".\\AC4Coop.ini") != 0) {
+        if (!Net::Enabled() && GetPrivateProfileIntA("Coop", "RegisterPad1", 0, Paths::Ini()) != 0) {
             PlayerPadManager* pm = PlayerPadManager::FromWorld(world);
             L("[Phase1] padManager=%p\n", pm);
             if (readable(pm, 0x20)) {
@@ -695,7 +694,7 @@ void* Phase1::TryCrowdProbe() {
 
         // Live-key path (default ON): enumerate the spawn manager's LIVE template table and pass real
         // pointers. Legacy hardcoded-hash sweep (CrowdProbeLiveKeys=0) is the instant revert.
-        int useLiveKeys = GetPrivateProfileIntA("Coop", "CrowdProbeLiveKeys", 1, ".\\AC4Coop.ini");
+        int useLiveKeys = GetPrivateProfileIntA("Coop", "CrowdProbeLiveKeys", 1, Paths::Ini());
         if (useLiveKeys != 0) {
             // ---- 2a) live template-key path ----
             // The spawn manager holds a live template table. The observed layout is an MSVC std::vector<T>
@@ -861,7 +860,7 @@ void* Phase1::TryCrowdProbe() {
         }
 
         // ---- 4) integrate (observation only): add to world unless already present, then place ----
-        if (GetPrivateProfileIntA("Coop", "CrowdProbeIntegrate", 1, ".\\AC4Coop.ini") != 0) {
+        if (GetPrivateProfileIntA("Coop", "CrowdProbeIntegrate", 1, Paths::Ini()) != 0) {
             bool already = false;                                   // bounded membership scan
             int  n = world->m_CharacterList.GetSize();
             if (n < 0 || n > 4096) n = 0;
@@ -2349,7 +2348,7 @@ static void MarkPeerApplied(unsigned int e) {
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
 static void CaptureGuards(EntityPacket& pkt) {
-    if (s_adLog < 0) s_adLog = GetPrivateProfileIntA("Coop", "ActionDeathLog", 0, ".\\AC4Coop.ini");
+    if (s_adLog < 0) s_adLog = GetPrivateProfileIntA("Coop", "ActionDeathLog", 0, Paths::Ini());
     ObjMapReset();                       // rebuild the objId table for this capture
     World* world = World::GetCurrentWorld();
     if (!world) return;
@@ -2705,7 +2704,7 @@ static void TrackMirrorDeathForRelay(Entity* e, const EntityState& es) {
 // as visible jitter. Self-test therefore keeps the AI disable but skips the transform write.
 static bool SelfTestModeActive() {
     static int s = -1;
-    if (s < 0) s = GetPrivateProfileIntA("Coop", "EntitySelfTest", 0, ".\\AC4Coop.ini");
+    if (s < 0) s = GetPrivateProfileIntA("Coop", "EntitySelfTest", 0, Paths::Ini());
     return s != 0;
 }
 
@@ -3143,9 +3142,9 @@ static void DriveCachedMirrors() {
 
 // Runs each frame inside OnFrame's net path (main thread). Host captures+broadcasts; peer applies.
 static void EntitySyncTick() {
-    if (g_entSync < 0) g_entSync = GetPrivateProfileIntA("Coop", "EntitySync", 0, ".\\AC4Coop.ini");
+    if (g_entSync < 0) g_entSync = GetPrivateProfileIntA("Coop", "EntitySync", 0, Paths::Ini());
     if (g_entHost < 0) {
-        g_entHost = GetPrivateProfileIntA("Coop", "EntityHost", 0, ".\\AC4Coop.ini");
+        g_entHost = GetPrivateProfileIntA("Coop", "EntityHost", 0, Paths::Ini());
         // Same-PC 2nd instance (instance-slot mutex marker) = the mirror/guest, regardless of the ini.
         if (Net::IsSecondInstance()) { g_entHost = 0; L("[Net] instance slot=2 not host (g_entHost=0)\n"); }
     }
@@ -3210,7 +3209,7 @@ static void EntitySyncTick() {
     // Self-test (single machine): clone the local NPC ships into ghosts and drive them at +offset X,
     // so the user sees the duplicate ships (proves the deep-copy + render override with no peer).
     static int s_selfTest = -1;
-    if (s_selfTest < 0) s_selfTest = GetPrivateProfileIntA("Coop", "EntitySelfTest", 0, ".\\AC4Coop.ini");
+    if (s_selfTest < 0) s_selfTest = GetPrivateProfileIntA("Coop", "EntitySelfTest", 0, Paths::Ini());
 
     // Poll incoming packets BEFORE the self-test branch (D-019). The old order returned early with
     // EntitySelfTest=1, so every incoming entity and kill packet was dropped.
@@ -3223,10 +3222,10 @@ static void EntitySyncTick() {
         CaptureShips(pkt);
         CaptureGuards(pkt);   // guards too: verify the mirror pipeline (capture -> drive) in one instance
         static int s_selfMax = -1;
-        if (s_selfMax < 0) s_selfMax = GetPrivateProfileIntA("Coop", "EntitySelfTestMax", 1, ".\\AC4Coop.ini");
+        if (s_selfMax < 0) s_selfMax = GetPrivateProfileIntA("Coop", "EntitySelfTestMax", 1, Paths::Ini());
         if ((int)pkt.count > s_selfMax) pkt.count = (uint32_t)s_selfMax;
         static float s_off = -1e9f;
-        if (s_off == -1e9f) s_off = (float)GetPrivateProfileIntA("Coop", "EntitySelfTestOffset", 0, ".\\AC4Coop.ini");
+        if (s_off == -1e9f) s_off = (float)GetPrivateProfileIntA("Coop", "EntitySelfTestOffset", 0, Paths::Ini());
         for (uint32_t i = 0; i < pkt.count; ++i) pkt.ents[i].pos[0] += s_off;
         ApplyShips(pkt);
         ApplyGuards(pkt);   // guards: disable AI + drive to the offset position
@@ -6294,20 +6293,20 @@ static void OnFrameInner(Human* updatedHuman) {
     static int  s_transformProbe = 0;  // ini [Coop] TransformProbe — read-only transform-source probe (default OFF)
     if (!s_netStarted) {
         s_netStarted    = true;
-        s_netStrictPeer = GetPrivateProfileIntA("Coop", "NetStrictPeer", 1, ".\\AC4Coop.ini");
-        s_sceneAware    = GetPrivateProfileIntA("Coop", "SceneAware",    1, ".\\AC4Coop.ini");
-        s_shipPassenger = GetPrivateProfileIntA("Coop", "ShipPassenger", 0, ".\\AC4Coop.ini");
-        s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, ".\\AC4Coop.ini");
-        s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, ".\\AC4Coop.ini");
-        s_transformProbe = GetPrivateProfileIntA("Coop", "TransformProbe", 0, ".\\AC4Coop.ini");
-        g_identityBand   = GetPrivateProfileIntA("Coop", "IdentityBand",   0, ".\\AC4Coop.ini");
-        g_combatTest     = GetPrivateProfileIntA("Coop", "CombatTest",     0, ".\\AC4Coop.ini");
+        s_netStrictPeer = GetPrivateProfileIntA("Coop", "NetStrictPeer", 1, Paths::Ini());
+        s_sceneAware    = GetPrivateProfileIntA("Coop", "SceneAware",    1, Paths::Ini());
+        s_shipPassenger = GetPrivateProfileIntA("Coop", "ShipPassenger", 0, Paths::Ini());
+        s_shipGhost     = GetPrivateProfileIntA("Coop", "ShipGhost",     0, Paths::Ini());
+        s_ghostSelfTest = GetPrivateProfileIntA("Coop", "ShipGhostSelfTest", 0, Paths::Ini());
+        s_transformProbe = GetPrivateProfileIntA("Coop", "TransformProbe", 0, Paths::Ini());
+        g_identityBand   = GetPrivateProfileIntA("Coop", "IdentityBand",   0, Paths::Ini());
+        g_combatTest     = GetPrivateProfileIntA("Coop", "CombatTest",     0, Paths::Ini());
         // Log the hotkey only when the test is armed: with CombatTest=0 the default run stays silent.
         if (g_combatTest > 0)
             L("[CT] CombatTest=1 hotkey=Ctrl+Alt+K radius=25m window=10s step=0.5s\n");
         // Same rule for the two dead-bit probes: silent unless armed.
-        g_watchTarget    = GetPrivateProfileIntA("Coop", "WatchTarget",    0, ".\\AC4Coop.ini");
-        g_watchDeadBit   = GetPrivateProfileIntA("Coop", "WatchDeadBit",   0, ".\\AC4Coop.ini");
+        g_watchTarget    = GetPrivateProfileIntA("Coop", "WatchTarget",    0, Paths::Ini());
+        g_watchDeadBit   = GetPrivateProfileIntA("Coop", "WatchDeadBit",   0, Paths::Ini());
         if (g_watchTarget  > 0) L("[TD] WatchTarget=1 hotkey=Ctrl+Alt+J (address dump only)\n");
         if (g_watchDeadBit > 0) L("[WB] WatchDeadBit=1 hotkey=Ctrl+Alt+L (PAGE_GUARD on svc+4, cap %d)\n", WB_MAX_EXC);
         Net::SetStrictPeer(s_netStrictPeer != 0);   // before Init: the recv thread filters from the start
@@ -6318,12 +6317,12 @@ static void OnFrameInner(Human* updatedHuman) {
         // missing from the game folder). Same keys/defaults as net.cpp.
         {
             char cfgPeer[64] = {0};
-            GetPrivateProfileStringA("Net", "PeerIP", "127.0.0.1", cfgPeer, sizeof(cfgPeer), ".\\AC4Coop.ini");
+            GetPrivateProfileStringA("Net", "PeerIP", "127.0.0.1", cfgPeer, sizeof(cfgPeer), Paths::Ini());
             L("[Net] cfg enabled=%d peer=%s local=%d peerPort=%d strictPeer=%d\n",
-              GetPrivateProfileIntA("Net", "Enabled",   0, ".\\AC4Coop.ini"),
+              GetPrivateProfileIntA("Net", "Enabled",   0, Paths::Ini()),
               cfgPeer,
-              GetPrivateProfileIntA("Net", "LocalPort", 47801, ".\\AC4Coop.ini"),
-              GetPrivateProfileIntA("Net", "PeerPort",  47801, ".\\AC4Coop.ini"),
+              GetPrivateProfileIntA("Net", "LocalPort", 47801, Paths::Ini()),
+              GetPrivateProfileIntA("Net", "PeerPort",  47801, Paths::Ini()),
               s_netStrictPeer);
             if (!netOk)
                 L("[Net] init=FALSE -> link disabled ([Net] Enabled=0, or bind/socket failure; details in net_log.txt)\n");
@@ -6990,45 +6989,45 @@ void Phase1::DumpPlayerInfo() {
 }
 
 void Phase1::InstallFrameHook() {
-    g_driveLoco = GetPrivateProfileIntA("Coop", "DriveLocomotion", 0, ".\\AC4Coop.ini");
-    g_snapHz = GetPrivateProfileIntA("Net", "SnapshotHz", 20, ".\\AC4Coop.ini");
+    g_driveLoco = GetPrivateProfileIntA("Coop", "DriveLocomotion", 0, Paths::Ini());
+    g_snapHz = GetPrivateProfileIntA("Net", "SnapshotHz", 20, Paths::Ini());
     if (g_snapHz < 1) g_snapHz = 1;
     if (g_snapHz > 60) g_snapHz = 60;
-    g_driveContext = GetPrivateProfileIntA("Coop", "DriveContext", 0, ".\\AC4Coop.ini");
-    g_driveActions = GetPrivateProfileIntA("Coop", "DriveActions", 1, ".\\AC4Coop.ini");
-    g_disablePuppetAI = GetPrivateProfileIntA("Coop", "DisablePuppetAI", 1, ".\\AC4Coop.ini");
-    g_hybridLoco = GetPrivateProfileIntA("Coop", "HybridLoco", 1, ".\\AC4Coop.ini");
+    g_driveContext = GetPrivateProfileIntA("Coop", "DriveContext", 0, Paths::Ini());
+    g_driveActions = GetPrivateProfileIntA("Coop", "DriveActions", 1, Paths::Ini());
+    g_disablePuppetAI = GetPrivateProfileIntA("Coop", "DisablePuppetAI", 1, Paths::Ini());
+    g_hybridLoco = GetPrivateProfileIntA("Coop", "HybridLoco", 1, Paths::Ini());
     // Test-only: shift the puppet sideways so a single machine can test AI reaction to it.
     // 0 (default) = off, production behaviour unchanged. Read as an int in centimetres.
-    g_puppetParkX = (float)GetPrivateProfileIntA("Coop", "PuppetParkX", 0, ".\\AC4Coop.ini");
-    g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, ".\\AC4Coop.ini");
-    g_minBlendIn = GetPrivateProfileIntA("Coop", "MinBlendInMs", 100, ".\\AC4Coop.ini") / 1000.0f;
+    g_puppetParkX = (float)GetPrivateProfileIntA("Coop", "PuppetParkX", 0, Paths::Ini());
+    g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, Paths::Ini());
+    g_minBlendIn = GetPrivateProfileIntA("Coop", "MinBlendInMs", 100, Paths::Ini()) / 1000.0f;
     // DriveContextMask: read as a string so hex ("0x440") or decimal both parse. Empty -> keep the safe
     // default (InAir+Swim). strtoul base 0 auto-detects the 0x prefix.
     {
         char maskStr[32] = {0};
-        GetPrivateProfileStringA("Coop", "DriveContextMask", "", maskStr, sizeof(maskStr), ".\\AC4Coop.ini");
+        GetPrivateProfileStringA("Coop", "DriveContextMask", "", maskStr, sizeof(maskStr), Paths::Ini());
         if (maskStr[0]) g_ctxMask = (unsigned)strtoul(maskStr, nullptr, 0);
         L("[Phase1] DriveContext=%d ctxMask=0x%X\n", g_driveContext, g_ctxMask);
     }
     // DisableSpawns is the new key; fall back to the old DisableCrowd for back-compat.
-    g_disableSpawns = GetPrivateProfileIntA("Coop", "DisableSpawns", 0, ".\\AC4Coop.ini")
-                   || GetPrivateProfileIntA("Coop", "DisableCrowd", 0, ".\\AC4Coop.ini");
-    g_interpEnabled = GetPrivateProfileIntA("Net", "Interpolation", 1, ".\\AC4Coop.ini");
-    g_interpDelayMs = GetPrivateProfileIntA("Net", "InterpDelayMs", 100, ".\\AC4Coop.ini");
-    g_interpMaxExtrapMs = GetPrivateProfileIntA("Net", "InterpMaxExtrapMs", 100, ".\\AC4Coop.ini");
+    g_disableSpawns = GetPrivateProfileIntA("Coop", "DisableSpawns", 0, Paths::Ini())
+                   || GetPrivateProfileIntA("Coop", "DisableCrowd", 0, Paths::Ini());
+    g_interpEnabled = GetPrivateProfileIntA("Net", "Interpolation", 1, Paths::Ini());
+    g_interpDelayMs = GetPrivateProfileIntA("Net", "InterpDelayMs", 100, Paths::Ini());
+    g_interpMaxExtrapMs = GetPrivateProfileIntA("Net", "InterpMaxExtrapMs", 100, Paths::Ini());
     if (g_interpMaxExtrapMs < 0)   g_interpMaxExtrapMs = 0;
     if (g_interpMaxExtrapMs > 300) g_interpMaxExtrapMs = 300;
     // [Relevance] Character radius (250 m default) and ship radius (1000 m default; ships are sparse).
-    g_relevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "RelevanceRadiusM", 250, ".\\AC4Coop.ini");
-    g_shipRelevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "ShipRelevanceRadiusM", 1000, ".\\AC4Coop.ini");
+    g_relevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "RelevanceRadiusM", 250, Paths::Ini());
+    g_shipRelevanceRadiusM = (float)GetPrivateProfileIntA("Coop", "ShipRelevanceRadiusM", 1000, Paths::Ini());
     if (g_relevanceRadiusM < 0.0f) g_relevanceRadiusM = 0.0f;
     if (g_shipRelevanceRadiusM < 0.0f) g_shipRelevanceRadiusM = 0.0f;
     L("[Phase1] RelevanceRadiusM=%.0f (characters), ShipRelevanceRadiusM=%.0f (ships); peer-relative, 0 = off\n",
       g_relevanceRadiusM, g_shipRelevanceRadiusM);
     // [IdRes] Resolve mirrored entities through the engine's id registry first; the legacy scan +
     // position match stays as the fallback, so 0 reproduces the previous behaviour exactly.
-    g_idResolver = GetPrivateProfileIntA("Coop", "IdResolver", 1, ".\\AC4Coop.ini") != 0;
+    g_idResolver = GetPrivateProfileIntA("Coop", "IdResolver", 1, Paths::Ini()) != 0;
     L("[IdRes] entity identity: %s\n", g_idResolver ? "registry first, scan fallback" : "scan only");
     // --------------------------------------------------------------------------------------------
     // [Coop] LegacyPadIdHook (default 1) — gates the GetUnusedPadID detour ONLY.
@@ -7046,7 +7045,7 @@ void Phase1::InstallFrameHook() {
     // entirely, so the puppet enrols onto the real player's pad+gamer and puppet spawning will likely
     // break. Leave at 1 for normal play.
     // --------------------------------------------------------------------------------------------
-    const bool legacyPadIdHook = GetPrivateProfileIntA("Coop", "LegacyPadIdHook", 1, ".\\AC4Coop.ini") != 0;
+    const bool legacyPadIdHook = GetPrivateProfileIntA("Coop", "LegacyPadIdHook", 1, Paths::Ini()) != 0;
     if (legacyPadIdHook) {
         InstallGetUnusedPadHook();
         L("[Hook] GetUnusedPadID detour: installed\n");
