@@ -14,6 +14,11 @@ namespace Net {
     // Entity sync (host-authoritative "synced worlds"): a separate packet type on the same socket.
     void SendEntities(const EntityPacket& p);   // sendto peer (no-op if disabled)
     bool GetEntities(EntityPacket& out);        // copy latest received entity list; false if none yet
+    // Drain the received death entries (kind=3) that were queued by the recv thread. Returns the number
+    // of entries copied into `out` (0 = none). Deaths are queued separately because the single
+    // "latest entity list" slot is last-writer-wins and a one-entry death packet would otherwise be
+    // overwritten by the next snapshot before the frame could read it.
+    uint32_t GetKillEntities(EntityPacket& out, uint32_t max);
 
     // Session-lifecycle hardening (Feature #3, ini [Coop] NetStrictPeer):
     void     SetStrictPeer(bool strict); // accept datagrams only from the configured PeerIP (default true)

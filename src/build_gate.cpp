@@ -39,8 +39,14 @@ namespace {
 
 const DWORD  CHUNK_SIZE        = 1024u * 1024u;   // HashData() call size
 // ini path: Paths::Ini() (module-relative; see src/paths.h)
-const char*  PROV_PATH         = ".\\build-provenance.txt";
 const char*  KNOWN_BUILDS_FILE = "known_builds.txt";
+
+// Append-only provenance trail, in the resolved log directory (Paths::LogDir(); may be
+// %LOCALAPPDATA%\AC4Coop\logs when the module directory itself is not writable).
+const char* ProvPath()
+{
+    return Paths::LogPath("build-provenance.txt");
+}
 
 // This unit's log is per-PID: a process that never exited (a zombie holding AC4Coop_build.log with
 // _SH_DENYWR) must not be able to block a later run from writing its own [BG] record.
@@ -84,6 +90,7 @@ void Log(const char* fmt, ...)
 
     OutputDebugStringA(buf);
     if (!g_log) g_log = _fsopen(BuildLogPath(), "a", _SH_DENYWR);
+    if (!g_log) Paths::NoteOpenFailure(BuildLogPath());
     if (g_log) { fputs(buf, g_log); fflush(g_log); }
 }
 
@@ -132,11 +139,13 @@ void AppendProvenance(const char* line)
     _snprintf_s(buf, sizeof(buf), _TRUNCATE, "%.*s\r\n", (int)n, line);
     const size_t len = strlen(buf);
 
-    if (AppendRaw(PROV_PATH, buf, len)) return;
+    if (AppendRaw(ProvPath(), buf, len)) return;
 
-    char fallback[MAX_PATH] = { 0 };
-    _snprintf_s(fallback, sizeof(fallback), _TRUNCATE, ".\\build-provenance-fallback_%u.txt",
+    char leaf[96] = { 0 };
+    _snprintf_s(leaf, sizeof(leaf), _TRUNCATE, "build-provenance-fallback_%u.txt",
                 (unsigned)GetCurrentProcessId());
+    char fallback[MAX_PATH] = { 0 };
+    Paths::LogPath(fallback, sizeof(fallback), leaf);
 
     char msg[320];
     if (AppendRaw(fallback, buf, len)) {
@@ -154,6 +163,7 @@ void WriteRecord(const char* line)
 {
     OutputDebugStringA(line);
     if (!g_log) g_log = _fsopen(BuildLogPath(), "a", _SH_DENYWR);
+    if (!g_log) Paths::NoteOpenFailure(BuildLogPath());
     if (g_log) { fputs(line, g_log); fflush(g_log); }
     AppendProvenance(line);
 }

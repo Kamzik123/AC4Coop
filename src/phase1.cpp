@@ -172,6 +172,7 @@ void L(const char* fmt, ...) {
         const char* path = Paths::LogPath(name);
         // _SH_DENYWR: deny other writers but allow readers, so the log is readable live (no quit needed).
         f = _fsopen(path, "w", _SH_DENYWR);
+        if (!f) Paths::NoteOpenFailure(path);   // visible on the debugger + beacon, not silently absent
         // Task 0.2: [Build] is the first line of every phase1_log_<pid>.txt. "w" truncates, and nothing
         // is written to `f` before this block, so this is byte 0 of a fresh file (and of the first file
         // of each process, since `f` is static and opened once).
@@ -184,7 +185,7 @@ void L(const char* fmt, ...) {
             // Second line, before any [Paths]-dependent decision is logged: says which ini was used and
             // where the logs go, so a tester's file answers "did it read my ini?" on its own.
             char pathsLine[1024];
-            if (Paths::FormatStartupLine(pathsLine, sizeof(pathsLine)) > 0) {
+            if (Paths::Describe(pathsLine, sizeof(pathsLine)) > 0) {
                 fputs(pathsLine, f);
                 fflush(f);
             }
@@ -2056,6 +2057,20 @@ struct SyncTarget {
 static SyncTarget g_syncTargets[MAX_SYNC_ENTITIES];
 static int        g_syncCount = 0;
 
+// [Coop] ShipSync (default 1): master kill switch for the whole NPC-ship lane — capture AND apply.
+// Read once, so a live run cannot flip it mid-session. When 0 the host sends no ship entries and the
+// peer's ApplyShips empties g_syncCount, which also clears any stale render override.
+static int s_shipSync = -1;
+static bool ShipSyncEnabled() {
+    if (s_shipSync < 0) s_shipSync = GetPrivateProfileIntA("Coop", "ShipSync", 1, Paths::Ini());
+    return s_shipSync != 0;
+}
+
+// Nearest-position fallback tolerance for a ship whose objId is unknown/zero (old peer, or a ship the
+// host listed before its object id was readable). Ships are ~20 m long; this is a new matching
+// parameter, not an engine offset.
+static const float SHIP_MATCH_TOL_M = 15.0f;
+
 // NavalManager = GetWorldComponentByType(*(void**)0x028b168c). VERIFIED live (descriptor classID AC23FDEE).
 static void* GetNavalManager() {
     __try {
@@ -2066,12 +2081,20 @@ static void* GetNavalManager() {
     } __except (EXCEPTION_EXECUTE_HANDLER) { return nullptr; }
 }
 
-// The i-th ship ENTITY from [mgr+0x3E8] (entry = handle container -> +0x00 = entity).
-static Entity* GetShipEntity(void* mgr, int i) {
+// The HANDLE CONTAINER of the i-th ship from [mgr+0x3E8] (stride 0xD0) — the same container shape the
+// guard path uses (hc->m_Object at +0x00, hc->GetObjectID() for stable identity, phase1.cpp:3200-3217).
+static void* GetShipHandle(void* mgr, int i) {
     void* list = *(void**)((char*)mgr + 0x3E8);
     if (!list || !readable((char*)list + i * 0xD0, 4)) return nullptr;
     void* hc = *(void**)((char*)list + i * 0xD0);
     if (!hc || !readable(hc, 4)) return nullptr;
+    return hc;
+}
+
+// The i-th ship ENTITY from [mgr+0x3E8] (entry = handle container -> +0x00 = entity).
+static Entity* GetShipEntity(void* mgr, int i) {
+    void* hc = GetShipHandle(mgr, i);
+    if (!hc) return nullptr;
     Entity* ent = (Entity*)*(void**)hc;   // HandleContainer->m_Object
     if (!ent || !readable(ent, 4)) return nullptr;
     return ent;
@@ -2091,8 +2114,11 @@ static Entity* GetLocalShip() {
     } __except (EXCEPTION_EXECUTE_HANDLER) { return nullptr; }
 }
 
-static void fillShipState(EntityState& es, Entity* ent, uint32_t key) {
+static void fillShipState(EntityState& es, Entity* ent, uint32_t key, uint64_t objId) {
     es.key = key; es.kind = 1;
+    // Real identity, from the same HandleContainer accessor the guard lane uses (phase1.cpp:3217).
+    // 0 when the container could not be read -> the peer falls back to nearest-position matching.
+    es.objId = objId;
     HookMath::Transform* m = &ent->m_GlobalMatrix;
     es.pos[0] = m->M41; es.pos[1] = m->M42; es.pos[2] = m->M43;
     HookMath::Quaternion q; HookMath::FromMatrix(m, &q);
@@ -2105,11 +2131,15 @@ static void fillShipState(EntityState& es, Entity* ent, uint32_t key) {
 
 static void CaptureShips(EntityPacket& pkt) {
     pkt.magic = NET_ENTITY_MAGIC; pkt.protoVer = NET_PROTO_VER; pkt.count = 0;
+    // [Coop] ShipSync=0 -> the header above still has to be written (CaptureGuards appends after us),
+    // but no ship entry and no packet is produced.
+    if (!ShipSyncEnabled()) return;
     void* mgr = GetNavalManager();
     if (!mgr || !readable((char*)mgr + 0x3E8, 8)) return;
     unsigned short n = *(unsigned short*)((char*)mgr + 0x3EE);
     Entity* localShip = GetLocalShip();
     uint32_t count = 0;
+    uint32_t withId = 0;
     __try {
         for (int i = 0; i < (int)n && count < (uint32_t)MAX_SYNC_ENTITIES; ++i) {
             Entity* ent = GetShipEntity(mgr, i);
@@ -2118,31 +2148,100 @@ static void CaptureShips(EntityPacket& pkt) {
             // [Relevance] Same combined rule as the guards, but with the (wider) ship radius.
             if (!IsRelevantToPeer(ent->m_GlobalMatrix.M41, ent->m_GlobalMatrix.M42, ent->m_GlobalMatrix.M43,
                                   g_shipRelevanceRadiusM)) continue;
-            fillShipState(pkt.ents[count], ent, (uint32_t)i);
+            // Stable identity: the ship's handle container exposes GetObjectID exactly like a guard's.
+            uint64_t objId = 0;
+            void* hc = GetShipHandle(mgr, i);
+            if (hc) objId = ((HandleContainer*)hc)->GetObjectID();
+            if (objId) ++withId;
+            fillShipState(pkt.ents[count], ent, (uint32_t)i, objId);
             ++count;
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) { count = 0; }
     pkt.count = count;
     pkt.seq = ++g_entSeq;
     static bool logged = false;
-    if (!logged) { logged = true; L("[ShipSync] ship list count=%u captured=%u\n", (unsigned)n, count); }
+    if (!logged) { logged = true; L("[ShipSync] ship list count=%u captured=%u withObjId=%u\n", (unsigned)n, count, withId); }
+}
+
+// (a) Resolve a ship by its stable object id through the handle container (same accessor as the guard
+// lane, phase1.cpp:3217). Returns nullptr when no local ship carries that id.
+static Entity* FindLocalShipByObjId(void* mgr, int n, uint64_t objId) {
+    for (int i = 0; i < n; ++i) {
+        void* hc = GetShipHandle(mgr, i);
+        if (!hc) continue;
+        uint64_t id = 0;
+        __try { id = ((HandleContainer*)hc)->GetObjectID(); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { id = 0; }
+        if (id != objId) continue;
+        Entity* e = (Entity*)*(void**)hc;
+        if (e && readable(e, 4)) return e;
+    }
+    return nullptr;
 }
 
 // Option 3: mirror the ORIGINAL ship's render (no deep-copy). For each received ship, drive the local
 // matching ship's RENDER matrix to the host's transform via the SetGlobalMatrixInternal hook. The ship's
 // own physics/AI keeps running (its logic position stays local), but the visual follows the host.
+//
+// Identity: the host's naval-manager index (es.key) means NOTHING on this machine — the two managers
+// enumerate different ships in different orders. Matching is therefore (a) es.objId, (b) nearest local
+// ship of the same vtable within SHIP_MATCH_TOL_M, (c) skip + count. The LOCAL ship (the Jackdaw), the
+// ghost and the player entity are never targets: driving the local hull with an NPC ship's transform is
+// what put the player's Jackdaw underwater.
 static void ApplyShips(const EntityPacket& pkt) {
+    if (!ShipSyncEnabled()) { g_syncCount = 0; return; }
     void* mgr = GetNavalManager();
     if (!mgr || !readable((char*)mgr + 0x3E8, 8)) return;
-    Entity* player = World::GetCurrentWorld() ? World::GetCurrentWorld()->GetPlayer() : nullptr;
+    unsigned short n = *(unsigned short*)((char*)mgr + 0x3EE);
+    World* world = World::GetCurrentWorld();
+    Entity* player = world ? world->GetPlayer() : nullptr;
+    Entity* localShip = GetLocalShip();
     int count = 0;
+    uint32_t nObj = 0, nNear = 0, nUnresolved = 0, nDup = 0;
+    Entity* used[MAX_SYNC_ENTITIES];
+    int usedN = 0;
     __try {
         for (uint32_t i = 0; i < pkt.count && i < (uint32_t)MAX_SYNC_ENTITIES; ++i) {
             const EntityState& es = pkt.ents[i];
             if (es.kind != 1) continue;
-            Entity* ent = GetShipEntity(mgr, (int)es.key);   // the ORIGINAL ship (no deep-copy)
-            if (!ent || !readable(ent, 4)) continue;
-            if (ent == player || ent == (Entity*)g_ghostShip) continue;
+
+            Entity* ent = nullptr;
+            // (a) stable identity from the host
+            if (es.objId) {
+                ent = FindLocalShipByObjId(mgr, (int)n, es.objId);
+                if (ent) ++nObj;
+            }
+            // (b) nearest local ship of the same archetype within tolerance
+            if (!ent) {
+                float bestD2 = SHIP_MATCH_TOL_M * SHIP_MATCH_TOL_M;
+                for (int s = 0; s < (int)n; ++s) {
+                    Entity* c = GetShipEntity(mgr, s);
+                    if (!c || c == localShip || c == player || c == (Entity*)g_ghostShip) continue;
+                    if (*(uint32_t*)c != 0x01E4A128u) continue;   // same ship vtable used at capture
+                    bool taken = false;
+                    for (int u = 0; u < usedN; ++u) if (used[u] == c) { taken = true; break; }
+                    if (taken) continue;
+                    float dx = c->m_GlobalMatrix.M41 - es.pos[0];
+                    float dy = c->m_GlobalMatrix.M42 - es.pos[1];
+                    float dz = c->m_GlobalMatrix.M43 - es.pos[2];
+                    float d2 = dx*dx + dy*dy + dz*dz;
+                    if (d2 <= bestD2) { bestD2 = d2; ent = c; }
+                }
+                if (ent) ++nNear;
+            }
+            // (c) no identity, no plausible local ship -> drop the entry
+            if (!ent || !readable(ent, 4)) { ++nUnresolved; continue; }
+
+            // NEVER drive the local ship / ghost / player, whatever id or position resolved to them.
+            if (ent == localShip || ent == player || ent == (Entity*)g_ghostShip) { ++nUnresolved; continue; }
+
+            // Dedupe: one target entry per local ship per packet. Two host entries resolving to the same
+            // local hull used to be written into g_syncTargets twice with different transforms.
+            bool dup = false;
+            for (int u = 0; u < usedN; ++u) if (used[u] == ent) { dup = true; break; }
+            if (dup) { ++nDup; continue; }
+            if (usedN < MAX_SYNC_ENTITIES) used[usedN++] = ent;
+
             SyncTarget& t = g_syncTargets[count];
             t.ent = (uint32_t)ent;
             t.pos[0] = es.pos[0]; t.pos[1] = es.pos[1]; t.pos[2] = es.pos[2];
@@ -2151,6 +2250,12 @@ static void ApplyShips(const EntityPacket& pkt) {
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
     g_syncCount = count;
+
+    // One line per stats window (~10 s at 60 fps) and only when something was actually skipped.
+    static int s_applyCalls = 0;
+    if ((++s_applyCalls % 600) == 0 && (nDup || nUnresolved))
+        L("[ShipSync] apply targets=%d byObjId=%u byPos=%u unresolved=%u dupSkipped=%u\n",
+          count, nObj, nNear, nUnresolved, nDup);
 }
 
 // ---- guard/character sync (G1) -------------------------------------------------
@@ -2231,6 +2336,41 @@ static bool ObjMapFind(uint64_t objId, unsigned int* ent, unsigned int* hp) {
     return false;
 }
 
+// LAST-KNOWN objId per entity address, deliberately NOT reset per capture.
+// ObjMapReset() (called at the head of every CaptureGuards) drops the whole objId table, so any lookup
+// made AFTER a guard has left m_EntityManager.m_Entities - which is what a real death or an
+// engine-side kill does - answered 0 and the caller bailed on its `!objId` gate without a word. That is
+// exactly the silent drop ObjIdForEntity -> SendHealthEvent could produce. This table keeps the newest
+// objId ever observed for an entity address, is bounded to the same 256 entries as s_objMap, and
+// reports the overflow ONCE instead of forgetting silently.
+static uint64_t     s_entObjId[256];
+static unsigned int s_entObjIdEnt[256];
+static int          s_entObjIdN = 0;
+static bool         s_entObjIdFullLogged = false;
+
+static void EntObjIdRemember(unsigned int ent, uint64_t objId) {
+    if (!ent || !objId) return;
+    for (int i = 0; i < s_entObjIdN; ++i)
+        if (s_entObjIdEnt[i] == ent) { s_entObjId[i] = objId; return; }
+    if (s_entObjIdN >= 256) {
+        if (!s_entObjIdFullLogged) {
+            s_entObjIdFullLogged = true;
+            L("[Obj] ent->objId table FULL (256) - further bindings are NOT remembered\n");
+        }
+        return;
+    }
+    s_entObjIdEnt[s_entObjIdN] = ent;
+    s_entObjId[s_entObjIdN]    = objId;
+    ++s_entObjIdN;
+}
+
+static uint64_t EntObjIdLast(unsigned int ent) {
+    if (!ent) return 0;
+    for (int i = 0; i < s_entObjIdN; ++i)
+        if (s_entObjIdEnt[i] == ent) return s_entObjId[i];
+    return 0;
+}
+
 // ---- host -> guest death lane -------------------------------------------------------------------
 // A killed NPC drops out of m_EntityManager.m_Entities, so a dead=1 snapshot entry is usually never
 // produced and the peer's mirror stays alive. The host therefore watches each soldier's Life and
@@ -2302,50 +2442,201 @@ static HostLifeWatch* HostLifeFor(uint64_t objId) {
     return w;
 }
 
-static void EmitHostDeath(EntityPacket& pkt, uint32_t& count, uint64_t objId, const float* pos) {
-    if (!objId || count >= (uint32_t)MAX_SYNC_ENTITIES) return;
-    EntityState& es = pkt.ents[count];
-    memset(&es, 0, sizeof(es));
-    es.kind = KIND_KILL;
-    es.objId = objId;
-    es.hp = 0xFFFF;
-    if (pos) { es.pos[0] = pos[0]; es.pos[1] = pos[1]; es.pos[2] = pos[2]; }
-    ++count;
-    L("[Relay] host DEATH objId=%llu -> peer\n", (unsigned long long)objId);
+// ---- [KT] kill-lane trace (ini [Coop] KillTrace, default 1) --------------------------------------
+// One line per gate per stage, hard-capped at 10 lines PER GATE so a live run cannot flood the log.
+// These helpers are called ONLY from event sites (a death transition, a kill push, a kill packet) -
+// never from a per-frame path, and they never dereference a pointer.
+enum KtGate { KT_LOCAL = 0, KT_RESOLVE = 1, KT_PUSH = 2, KT_RECV = 3, KT_GATE_N = 4 };
+static int  s_ktLines[KT_GATE_N] = { 0, 0, 0, 0 };
+static int  s_ktEnabled = -1;                      // ini [Coop] KillTrace, read once
+static bool KtOn(KtGate g) {
+    if (s_ktEnabled < 0) s_ktEnabled = GetPrivateProfileIntA("Coop", "KillTrace", 1, Paths::Ini());
+    if (!s_ktEnabled || (int)g < 0 || g >= KT_GATE_N) return false;
+    if (s_ktLines[g] >= 10) return false;
+    ++s_ktLines[g];
+    return true;
 }
+
+// A death that the lane decided NOT to put on the wire used to disappear without a trace. This is the
+// one place that says so: at most 10 lines per process, naming the gate that returned. Called only from
+// a death event, never from a per-frame path.
+static int s_ktSkip = 0;
+static void KtSkipPush(uint64_t objId, unsigned int ent, const char* why) {
+    if (s_ktEnabled == 0) return;                 // KillTrace=0 => no diagnostic
+    if (s_ktSkip >= 10) return;
+    ++s_ktSkip;
+    L("[KT] death push SKIPPED objId=%llu ent=%08X reason=%s\n",
+      (unsigned long long)objId, ent, why ? why : "?");
+}
+
+// Host -> peer death push. Declared here, called from the two death sites at the end of CaptureGuards
+// (the live 0xFFFF read and the vanish lane); defined next to SendHealthEvent, which owns the wire
+// format and the per-objId tombstone.
+//
+// It used to be EmitHostDeath(pkt, count, ...): the death was appended to the SAME snapshot packet as
+// the guards, and it silently returned when that packet already held MAX_SYNC_ENTITIES (128) entries -
+// captured ships take the first slots, guards fill the rest, so in a dense scene a death could be
+// dropped with no log at all. A death now gets its own one-entry packet on the same KIND_KILL lane.
+static void PushHostDeath(uint64_t objId, unsigned int ent, const float* pos);
 
 
 // Guest-side map: host-assigned objId -> local mirror entity, filled from the snapshots.
+//
+// B-1 (silent-saturation fix): this table used to be append-only - `if (s_guestObjN >= 256) return;`,
+// no eviction, no overwrite. The host mirrors every guard that enters the relevance radius, i.e.
+// thousands of bindings per session, so the array saturated within the first minutes AND STAYED FULL:
+// from that point on every new objId was silently dropped. That is exactly the live symptom - host ->
+// guest deaths worked early in the session (the table still had room) and later every host kill
+// resolved to ent=0 on the guest ("[KT] death push" on the host, no "[Kill] peer DEATH" on the guest),
+// leaving the guard standing on the guest's screen. Insertion now evicts instead of refusing.
+//
+// `s_guestObjStamp` is a monotonic recency clock, bumped on every hit (GuestObjFind), on every refresh
+// (GuestObjAdd of an already-known objId) and on insert. It is a PARALLEL array on purpose: ObjEntry is
+// shared with the host-side s_objMap (:2314) and its layout is not worth changing for this.
 static ObjEntry s_guestObj[256];
+static unsigned int s_guestObjStamp[256];
 static int s_guestObjN = 0;
-static void GuestObjAdd(uint64_t objId, unsigned int ent) {
-    if (!objId || s_guestObjN >= 256) return;
-    for (int i = 0; i < s_guestObjN; ++i)
-        if (s_guestObj[i].objId == objId) { s_guestObj[i].ent = ent; return; }
-    s_guestObj[s_guestObjN].objId = objId;
-    s_guestObj[s_guestObjN].ent   = ent;
-    s_guestObj[s_guestObjN].hp    = 0;
-    ++s_guestObjN;
+static unsigned int s_guestObjClock = 0;
+static int s_guestObjEvicted = 0;         // bindings displaced so far (diagnostic)
+static int s_guestObjEvictedShown = 0;    // value at the last log line => one line per 256-eviction window
+
+// A binding is stale when the body it points at is no longer a character entity: the heap address was
+// freed (and possibly reused). Same vtable test the death path already trusts (:5302); only ever run
+// inside SEH, and only from GuestObjAdd/GuestObjPickVictim - never from a per-frame path.
+static bool GuestObjEntGone(unsigned int ent) {
+    if (!ent) return true;                        // explicitly forgotten (GuestObjForget sets ent=0)
+    __try {
+        if (!readable((void*)ent, 8)) return true;
+        return *(uint32_t*)ent != 0x01E4CE90u;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return true;
+    }
 }
+
+// Eviction policy, in order of preference:
+//   1. an explicitly forgotten slot (ent == 0): free, and cannot hurt anything;
+//   2. a binding whose body is gone (rotating cursor, so the cost is amortised over inserts and the
+//      probe never restarts at slot 0 - a live guard, refreshed on every snapshot, is never the pick);
+//   3. least-recently-refreshed (the stamp): pure array compare, no dereference.
+// The victim selection only ever runs at insert time and only while the table is full.
+static int GuestObjPickVictim() {
+    for (int i = 0; i < s_guestObjN; ++i)
+        if (!s_guestObj[i].ent) return i;
+    static int cursor = 0;
+    if (s_guestObjN > 0) {
+        for (int p = 0; p < s_guestObjN; ++p) {
+            const int i = (cursor + p) % s_guestObjN;
+            if (GuestObjEntGone(s_guestObj[i].ent)) { cursor = (i + 1) % s_guestObjN; return i; }
+        }
+    }
+    int lru = 0; unsigned int oldest = 0xFFFFFFFFu;
+    for (int i = 0; i < s_guestObjN; ++i)
+        if (s_guestObjStamp[i] < oldest) { oldest = s_guestObjStamp[i]; lru = i; }
+    return lru;
+}
+
+static void GuestObjStore(int slot, uint64_t objId, unsigned int ent) {
+    s_guestObj[slot].objId = objId;
+    s_guestObj[slot].ent   = ent;
+    s_guestObj[slot].hp    = 0;
+    s_guestObjStamp[slot]  = ++s_guestObjClock;
+}
+
+static void GuestObjAdd(uint64_t objId, unsigned int ent) {
+    if (!objId) return;
+    for (int i = 0; i < s_guestObjN; ++i)
+        if (s_guestObj[i].objId == objId) {
+            s_guestObj[i].ent  = ent;
+            s_guestObjStamp[i] = ++s_guestObjClock;      // refresh: a live mirror is never the LRU victim
+            return;
+        }
+    if (s_guestObjN < 256) {
+        GuestObjStore(s_guestObjN, objId, ent);
+        ++s_guestObjN;
+        return;
+    }
+    GuestObjStore(GuestObjPickVictim(), objId, ent);
+    ++s_guestObjEvicted;
+    if (!s_guestObjEvictedShown || (s_guestObjEvicted - s_guestObjEvictedShown) >= 256) {
+        s_guestObjEvictedShown = s_guestObjEvicted;
+        L("[Mirror] objId table evicted n=%d (cap 256)\n", s_guestObjEvicted);
+    }
+}
+
 static unsigned int GuestObjFind(uint64_t objId) {
-    for (int i = 0; i < s_guestObjN; ++i) if (s_guestObj[i].objId == objId) return s_guestObj[i].ent;
+    for (int i = 0; i < s_guestObjN; ++i)
+        if (s_guestObj[i].objId == objId) {
+            s_guestObjStamp[i] = ++s_guestObjClock;      // hit => most recently used
+            return s_guestObj[i].ent;
+        }
     return 0;
 }
 
+// Miss path that asks the engine's registry for the id (ResolveEntityById, defined with the ApplyGuards
+// helpers below at :3137) and re-binds on a hit. Deliberately NOT folded into GuestObjFind: that is
+// called once per scanned body per frame from ApplyGuards (:3240), where a registry call per miss would
+// be a frame-path engine query. This variant is only reached from event paths, where a miss costs a
+// death. Defined after ResolveEntityById (:3137).
+static unsigned int GuestObjFindResolve(uint64_t objId);
+
 // Entities whose health came FROM the host. Never report those back (prevents an event ping-pong).
+//
+// B-2: same silent-saturation shape as the objId table above - the array stopped recording at 64
+// entries and never recovered, so the "never echo this back" protection decayed mid-session. It is now
+// a recency-stamped set that evicts its least-recently-seen member instead of refusing the new one.
 static unsigned int s_peerApplied[64];
+static unsigned int s_peerAppliedStamp[64];
 static int s_peerAppliedN = 0;
+static unsigned int s_peerAppliedClock = 0;
+static int s_peerAppliedEvicted = 0;
+static int s_peerAppliedEvictedShown = 0;
 static bool PeerApplied(unsigned int e) {
-    for (int i = 0; i < s_peerAppliedN; ++i) if (s_peerApplied[i] == e) return true;
+    for (int i = 0; i < s_peerAppliedN; ++i)
+        if (s_peerApplied[i] == e) { s_peerAppliedStamp[i] = ++s_peerAppliedClock; return true; }
     return false;
 }
 static void MarkPeerApplied(unsigned int e) {
+    if (!e) return;
     if (PeerApplied(e)) return;
-    if (s_peerAppliedN < 64) s_peerApplied[s_peerAppliedN++] = e;
+    if (s_peerAppliedN < 64) {
+        s_peerApplied[s_peerAppliedN] = e;
+        s_peerAppliedStamp[s_peerAppliedN] = ++s_peerAppliedClock;
+        ++s_peerAppliedN;
+        return;
+    }
+    int lru = 0; unsigned int oldest = 0xFFFFFFFFu;
+    for (int i = 0; i < 64; ++i)
+        if (s_peerAppliedStamp[i] < oldest) { oldest = s_peerAppliedStamp[i]; lru = i; }
+    s_peerApplied[lru] = e;
+    s_peerAppliedStamp[lru] = ++s_peerAppliedClock;
+    ++s_peerAppliedEvicted;
+    if (!s_peerAppliedEvictedShown || (s_peerAppliedEvicted - s_peerAppliedEvictedShown) >= 256) {
+        s_peerAppliedEvictedShown = s_peerAppliedEvicted;
+        L("[Mirror] peerApplied table evicted n=%d (cap 64)\n", s_peerAppliedEvicted);
+    }
 }
 
 // (the archetype whitelist that used to live here was removed: the inventory probe proved the +0x14 id is
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
+
+// ---- sync scope (TASK: enemies only) ---------------------------------------------------------
+// The capture used to accept EVERY Skeleton + BhvGenericNPC + health-service entity, i.e. the whole
+// civilian crowd. That is why a session shipped thousands of bodies and why guest matching drifted.
+// [Coop] SyncEnemiesOnly (default 1) narrows the capture to soldiers using the ALREADY-PROVEN
+// discriminator from the guard-enumeration probe (ProbeEntityEnum, src/phase1.cpp:3944-3982):
+//   WeaponComponent 0x027106A8  -> soldier
+//   MapIconBehaviorGuard 0x0269E9D0 -> soldier
+// The component walk that tests them is the one the capture loop already runs (:2647-2652), so this
+// adds no second walk. SyncEnemiesOnly=0 restores the previous "every human NPC" behaviour exactly.
+// Read once (lazy, -1 = not read yet) from the ini, like the other [Coop] flags.
+static int      s_syncEnemiesOnly = -1;
+static unsigned s_scopeCand    = 0;   // characters that passed skeleton+bhv+health this window
+static unsigned s_scopeEnemies = 0;   // of those, the ones that passed the weapon/icon test
+static unsigned s_scopeSent    = 0;   // character states actually packed into a snapshot
+static inline int SyncEnemiesOnly() {
+    if (s_syncEnemiesOnly < 0) s_syncEnemiesOnly = GetPrivateProfileIntA("Coop", "SyncEnemiesOnly", 1, Paths::Ini());
+    return s_syncEnemiesOnly;
+}
 
 static void CaptureGuards(EntityPacket& pkt) {
     if (s_adLog < 0) s_adLog = GetPrivateProfileIntA("Coop", "ActionDeathLog", 0, Paths::Ini());
@@ -2371,12 +2662,16 @@ static void CaptureGuards(EntityPacket& pkt) {
             int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
             if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
-            bool skel=false; Component* bhvC=0;
+            bool skel=false, weapon=false, guardIcon=false; Component* bhvC=0;
             for (int k = 0; k < n; ++k) {
                 Component* c = data[k];
                 uint32_t vt = (c && readable(c,4)) ? *(uint32_t*)c : 0;
                 if (vt == 0x01E41E58) skel = true;
                 if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only (excludes BhvAssassin player/puppet)
+                // Same soldier predicate the guard-enumeration probe proved (:3968-3969). Collected on
+                // the walk we already do, so it costs two compares and no extra memory access.
+                if (vt == 0x027106A8) weapon = true;      // WeaponComponent        -> soldier
+                if (vt == 0x0269E9D0) guardIcon = true;   // MapIconBehaviorGuard   -> soldier
             }
             // ---- class inventory ----
             // The binary carries no class names (RTTI is stripped), so the NPC taxonomy has to be measured.
@@ -2428,6 +2723,15 @@ static void CaptureGuards(EntityPacket& pkt) {
                 unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
                 if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
             }
+            // ---- [Coop] SyncEnemiesOnly scope gate ----
+            // Candidates = every body that survived skeleton + BhvGenericNPC + the health service, i.e.
+            // exactly what the capture shipped before this flag existed. Enemies = the subset carrying
+            // WeaponComponent or MapIconBehaviorGuard. Counted before the relevance test on purpose: the
+            // numbers must describe the SCOPE, not the radius, so `sent` can be read against `enemies`.
+            const bool isEnemy = weapon || guardIcon;
+            ++s_scopeCand;
+            if (isEnemy) ++s_scopeEnemies;
+            if (SyncEnemiesOnly() && !isEnemy) continue;
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             // [Relevance] Replicate a character if it is near the HOST's player (the original 80 m cap)
             // or anywhere within RelevanceRadiusM of the PEER. Without the peer term, a partner a few
@@ -2455,6 +2759,9 @@ static void CaptureGuards(EntityPacket& pkt) {
             if (hpSvcOk) RememberEntityHealth((unsigned int)e, hpSvc);
             else { hpSvc = CachedHealthForEntity((unsigned int)e); hpSvcOk = HostHpSvcValid(hpSvc); }
             es.objId = hc->GetObjectID();
+            // B: keep the wire identity alive past the next ObjMapReset, so a death looked up after the
+            // guard left m_Entities still resolves its objId instead of 0.
+            EntObjIdRemember((unsigned int)e, es.objId);
             if (hpSvcOk) {
                 es.hp = *(unsigned short*)(hpSvc + 0x5C);
                 // Dead = the engine's own answer. Primary: the health dead flag (set by the engine on a
@@ -2491,6 +2798,7 @@ static void CaptureGuards(EntityPacket& pkt) {
             if (s_adLog && es.objId) AdAliasPut(es.objId, es.actionAlias);   // A1 (OFF => no work)
 
             uint64_t deathId = 0;
+            float deathPos[3] = { 0, 0, 0 };
             if (es.objId) {
                 HostLifeWatch* w = HostLifeFor(es.objId);
                 if (w) {
@@ -2500,6 +2808,14 @@ static void CaptureGuards(EntityPacket& pkt) {
                         if (es.hp == 0xFFFFu) {
                             if (w->seen && w->lastLife >= 1 && w->lastLife <= 2000) {
                                 deathId = es.objId;
+                                // The wire id was resolved at capture time from the entity still in
+                                // hand (hc->GetObjectID()), and the position likewise - neither depends
+                                // on the objId map, which ObjMapReset() has just rebuilt.
+                                deathPos[0] = x; deathPos[1] = y; deathPos[2] = z;
+                                if (KtOn(KT_LOCAL))
+                                    L("[KT] local death detected objId=%llu ent=%08X hp=%u->%u\n",
+                                      (unsigned long long)es.objId, (unsigned)e,
+                                      (unsigned)w->lastLife, (unsigned)es.hp);
                                 // A1: one line per death transition, emitted here — there is exactly one
                                 // such site. Single-shot is structural: this needs a watch that already
                                 // had a plausible Life and now reads 0xFFFF, and the tombstone is set on
@@ -2544,7 +2860,8 @@ static void CaptureGuards(EntityPacket& pkt) {
                 }
             }
             ++count;
-            if (deathId) EmitHostDeath(pkt, count, deathId, nullptr);
+            ++s_scopeSent;
+            if (deathId) PushHostDeath(deathId, (unsigned int)e, deathPos);
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
 
@@ -2606,7 +2923,17 @@ static void CaptureGuards(EntityPacket& pkt) {
             }
             w.life = 0xFFFFu;
             w.tombstoned = true;
-            EmitHostDeath(pkt, count, w.objId, nullptr);
+            if (KtOn(KT_LOCAL))
+                L("[KT] local death detected objId=%llu ent=%08X hp=%u->%u (vanish)\n",
+                  (unsigned long long)w.objId, w.lastEnt, (unsigned)w.lastLife, (unsigned)life);
+            // B-3: the vanish lane used to pass nullptr, i.e. (0,0,0) went out as the KIND_KILL
+            // position. The receiver's only fallback for an unresolvable objId is a 4 m proximity match
+            // around that position (ApplyPeerHealth :5271), so a nil position made the fallback
+            // impossible by construction. The watch already remembers where the victim last stood
+            // alive (:2706, from the capture's x/y/z) - and this lane only runs for a watch that was
+            // `seen`, so those values are always populated. EntObjIdLast/hpSvc are not needed here.
+            float vanishPos[3] = { w.lastX, w.lastY, w.lastZ };
+            PushHostDeath(w.objId, w.lastEnt, vanishPos);
         }
     }
     ++s_hostLifeGen;
@@ -2642,61 +2969,163 @@ static void ProcessKillEvents(const EntityPacket& pkt) {
     }
 }
 
+// ---- guest -> host death lane ([GKT]) ----------------------------------------------------------
+// The guest owns no CaptureGuards - it is reached only under `if (g_entHost)` (phase1.cpp:3415) - so it
+// owns no HostLifeWatch either, and before this lane nothing on this peer looked at the Life of a guard
+// IT was fighting. The only sampler was TrackMirrorDeathForRelay, which was reachable solely from
+// ApplyGuards for a body a host snapshot had matched, demanded an ALREADY-recorded alive baseline (a
+// guard first seen while dying was "baseline only; no event"), went silent for good once the host had
+// sent any health event for that body (the PeerApplied gate), and dropped every mirror past the 64th
+// without a word. All four are silent losses; the host log shows the result (ZERO "[KT] death recv").
+//
+// This lane is the guest's own watch, shaped on the host's decision (D-016, phase1.cpp:2664/2789): a
+// death is a TRANSITION of a Life that was once plausible, tombstoned once per objId, sent on the same
+// kind=3 lane the host already consumes (ProcessKillEvents -> ApplyPeerHealth).
+struct GuestLifeWatch {
+    unsigned int   ent;
+    unsigned int   hpSvc;
+    unsigned short lastLife;
+    unsigned int   gen;
+    float          x, y, z;          // last place the body was seen alive (a death de-registers it)
+    bool           seen;
+    bool           tombstoned;
+};
+static GuestLifeWatch  s_gktWatch[256];
+static int             s_gktWatchN = 0;
+static unsigned int    s_gktGen = 0;
+static bool            s_gktWatchFullLogged = false;
+
+struct GktPushed { uint64_t objId; unsigned int ent; };
+static GktPushed s_gktPushed[256];
+static int       s_gktPushedN = 0;
+static int       s_gktPushedNext = 0;      // overwrite cursor once full (B-4: evict, never refuse)
+static int       s_gktSkip = 0;
+
+static void GktSkip(uint64_t objId, unsigned int ent, const char* why) {
+    if (s_gktSkip >= 10) return;                  // never flood a live log
+    ++s_gktSkip;
+    L("[GKT] push SKIPPED objId=%llu ent=%08X reason=%s\n",
+      (unsigned long long)objId, ent, why ? why : "?");
+}
+
+static bool GktAlreadyPushed(uint64_t objId, unsigned int ent) {
+    for (int i = 0; i < s_gktPushedN; ++i) {
+        if (objId) { if (s_gktPushed[i].objId == objId) return true; }
+        else       { if (s_gktPushed[i].objId == 0 && s_gktPushed[i].ent == ent) return true; }
+    }
+    return false;
+}
+
+// Record (objId,ent) in the pushed-death tombstone. Returns the slot used, or -1 when the pair is
+// already recorded. Bounded at 256, and once full it evicts the oldest entry instead of doing what the
+// old code did ("tombstone-table-full" => this death is never remembered, silently, for the rest of the
+// session - the same saturation shape as the objId table in TASK 1). Losing a very old tombstone can at
+// worst let a long-dead body be announced once more; the already-dead / DeathAppliedRecently gates in
+// the apply paths still refuse a second kill.
+static int GktMarkPushed(uint64_t objId, unsigned int ent) {
+    if (!objId && !ent) return -1;
+    for (int i = 0; i < s_gktPushedN; ++i) {
+        if (objId) { if (s_gktPushed[i].objId == objId) return -1; }
+        else       { if (s_gktPushed[i].objId == 0 && s_gktPushed[i].ent == ent) return -1; }
+    }
+    int slot;
+    if (s_gktPushedN < 256) {
+        slot = s_gktPushedN++;
+    } else {
+        slot = s_gktPushedNext % 256;
+        ++s_gktPushedNext;
+    }
+    s_gktPushed[slot].objId = objId;
+    s_gktPushed[slot].ent   = ent;
+    return slot;
+}
+
+// objId == 0 is legal: a guard the host never described (locally spawned) has no host id, and
+// ApplyPeerHealth falls back to the 4 m position match (phase1.cpp:4944) exactly for that case.
+static void GuestPushDeath(uint64_t objId, unsigned int ent, float x, float y, float z) {
+    if (!ent)                        { GktSkip(objId, ent, "no-entity"); return; }
+    if (GktAlreadyPushed(objId, ent)){ GktSkip(objId, ent, "tombstone"); return; }
+    // Tombstone first (one record per death, evicting the oldest once the 256 entries are used) - the
+    // old "table-full => do not remember" branch is gone.
+    if (GktMarkPushed(objId, ent) < 0) { GktSkip(objId, ent, "tombstone"); return; }
+
+    EntityPacket out;
+    memset(&out, 0, sizeof(out));
+    out.magic    = NET_ENTITY_MAGIC;
+    out.protoVer = NET_PROTO_VER;
+    out.seq      = GetTickCount();
+    out.count    = 1;
+    out.ents[0].kind    = KIND_KILL;
+    out.ents[0].objId   = objId;
+    out.ents[0].hp      = 0xFFFF;
+    out.ents[0].pos[0]  = x; out.ents[0].pos[1] = y; out.ents[0].pos[2] = z;
+
+    L("[GKT] guest death push objId=%llu seq=%u ent=%08X\n",
+      (unsigned long long)objId, (unsigned)out.seq, ent);
+    Net::SendEntities(out);
+
+    // Self-test: no peer exists, so deliver it to the local apply path (what the host would do).
+    if (SelfTestModeActive() && !s_inEventLoop) {
+        s_inEventLoop = true;
+        L("[GKT] SELF-TEST loopback: delivering to the host path\n");
+        ProcessKillEvents(out);
+        s_inEventLoop = false;
+    }
+}
+
 // Guest side: remember each mirror's last Life and report the 0xFFFF transition exactly once.
 struct MirrorLifeWatch { unsigned int ent; unsigned short life; };
 static MirrorLifeWatch s_mirrLife[64];
 static int s_mirrLifeN = 0;
 
 static void TrackMirrorDeathForRelay(Entity* e, const EntityState& es) {
-    if (!e || es.dead || PeerApplied((unsigned int)e)) return;   // never echo host-originated health
+    // `es.dead` means the host's own death lane already owns this body - nothing to relay.
+    // PeerApplied() is deliberately NOT a gate any more: it is set by EVERY health event the host
+    // sends (ApplyPeerHealth), so a single host->guest damage event used to disable this relay for
+    // that body for the rest of the session. The echo is stopped where it actually happens instead:
+    // a death that came FROM the host also marked the mirror killed locally.
+    if (!e || es.dead) return;
     // Use the cached health: after a kill GetEntityAI can go blind (entity+0xE8 cleared), and then a
     // fresh FindHealthInAI would return 0 and the event would be lost.
     unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
     unsigned int hp = FindHealthInAI(ai);
     if (hp) RememberEntityHealth((unsigned int)e, hp);
     else    hp = CachedHealthForEntity((unsigned int)e);
-    if (!hp || !readable((void*)hp, 0x70)) return;
+    if (!hp || !readable((void*)hp, 0x70)) { GktSkip(es.objId, (unsigned int)e, "mirror-have-no-health"); return; }
     unsigned short life = *(unsigned short*)(hp + 0x5C);
 
     int slot = -1;
     for (int i = 0; i < s_mirrLifeN; ++i) if (s_mirrLife[i].ent == (unsigned int)e) { slot = i; break; }
     if (slot < 0) {
-        if (s_mirrLifeN >= 64) return;
+        if (s_mirrLifeN >= 64) {
+            // A full table used to mean "this body is never watched" with no trace at all.
+            GktSkip(es.objId, (unsigned int)e, "mirror-watch-table-full");
+            return;
+        }
         slot = s_mirrLifeN++;
         s_mirrLife[slot].ent = (unsigned int)e;
         s_mirrLife[slot].life = life;
-        return;                          // baseline only; no event for the initial state
+        return;                          // baseline only: a body first seen dying is not an event
     }
 
     unsigned short prev = s_mirrLife[slot].life;
     if (life == prev) return;
     s_mirrLife[slot].life = life;
-    if (life == 0xFFFFu) MarkMirrorKilledLocally(e);   // stop driving the corpse at once
 
-    // P0/P1: report ANY life change (damage as well as death) keyed by the host's objId.
-    EntityPacket out;
-    memset(&out, 0, sizeof(out));
-    out.magic = NET_ENTITY_MAGIC;
-    out.protoVer = NET_PROTO_VER;
-    out.seq = GetTickCount();
-    out.count = 1;
-    out.ents[0].kind = KIND_KILL;             // "health update" lane
-    out.ents[0].objId = es.objId;
-    out.ents[0].hp = life;
-    out.ents[0].pos[0] = es.pos[0];
-    out.ents[0].pos[1] = es.pos[1];
-    out.ents[0].pos[2] = es.pos[2];
-    L("[Relay] mirror ent=%08X objId=%llu life %u -> %u -> host\n",
-      e, (unsigned long long)es.objId, (unsigned)prev, (unsigned)life);
-    Net::SendEntities(out);
-
-    // Self-test: no peer exists, so deliver it to the local apply path (what the host would do).
-    if (SelfTestModeActive() && !s_inEventLoop) {
-        s_inEventLoop = true;
-        L("[Relay] SELF-TEST loopback: delivering to the host path\n");
-        ProcessKillEvents(out);
-        s_inEventLoop = false;
+    if (life != 0xFFFFu) {
+        // C: the absolute-hp damage lane is gone (see ApplyPeerHealth). Only the death transition
+        // crosses the wire: the two worlds do not share a max Life, so an absolute value re-applied
+        // on the other machine is meaningless - it is what kept the host's guard at hp=30 forever.
+        return;
     }
+
+    const bool fromHost = MirrorKilledLocally(e);
+    MarkMirrorKilledLocally(e);            // stop driving the corpse at once
+    if (fromHost) { GktSkip(es.objId, (unsigned int)e, "already-killed-by-peer"); return; }
+
+    L("[GKT] guest death detected objId=%llu ent=%08X life=%u->%u\n",
+      (unsigned long long)es.objId, (unsigned)e, (unsigned)prev, (unsigned)life);
+    GuestPushDeath(es.objId, (unsigned int)e, es.pos[0], es.pos[1], es.pos[2]);
 }
 
 // True when EntitySelfTest is on. In self-test the capture source and the mirror are the same world, so
@@ -2909,6 +3338,44 @@ static Component* MirrorCandidateBhv(Entity* e, Entity* player) {
     return bhvC;
 }
 
+// B-1 miss path for the guest objId table. Asks the engine's own registry for the id - the same
+// ResolveEntityById pair ApplyGuards uses at :3191 - validates the answer with the predicates this file
+// already trusts, and re-binds the objId so the next event for it is a plain table hit.
+//
+// Validation is deliberately the CHARACTER-vtable test ApplyPeerHealth itself applies to any resolved
+// entity (:5302), not MirrorCandidateBhv: the interesting case is a body the host just killed, and a
+// dead body's health service is gone, which would make MirrorCandidateBhv reject exactly that. Anything
+// accepted here still has to pass ApplyPeerHealth's own gate plus GuestKillMirrorEntity's health /
+// behaviour-component requirements before the engine is touched.
+//
+// On the host an objId IS the engine's own id, so a hit is the strongest identity evidence available.
+// On the guest the ids are host-minted; a hit is only possible when both sides agree on the id, in which
+// case the object still validated as a character entity distinct from the local player.
+static unsigned int GuestObjFindResolve(uint64_t objId) {
+    if (!objId || !g_idResolver) return 0;
+    unsigned int ent = 0;
+    __try {
+        Entity* e = ResolveEntityById(objId);
+        if (!e || !readable((void*)e, 8)) return 0;
+        if (*(uint32_t*)e != 0x01E4CE90u) return 0;                  // not a character entity
+        World* world = World::GetCurrentWorld();
+        if (world && e == world->GetPlayer()) return 0;              // never a death target
+        ent = (unsigned int)e;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return 0;
+    }
+    GuestObjAdd(objId, ent);
+    L("[Mirror] objId=%llu rebound via resolver ent=%08X\n", (unsigned long long)objId, ent);
+    return ent;
+}
+
+// Defined next to ApplyPeerHealth (:5191): the proven-mirror engine kill. ApplyGuards needs it for the
+// snapshot death path below, which runs long before the definition.
+static bool GuestKillMirrorEntity(uint64_t objId, unsigned int ent, bool viaGuestObj);
+// Defined beside GuestKillMirrorEntity (:5390): fires the deferred corpse re-disable. Driven from
+// GuestDeathScan's own per-tick generation counter (s_gktGen) - no threads, no timers.
+static void CorpseLatchTick();
+
 static void ApplyGuards(const EntityPacket& pkt) {
     World* world = World::GetCurrentWorld();
     if (!world) return;
@@ -3025,22 +3492,54 @@ static void ApplyGuards(const EntityPacket& pkt) {
             // the real guard). Skipped when the death came from the host snapshot, so it can't echo.
             GuestObjAdd(es.objId, (unsigned int)best);   // objId -> local mirror, for inbound events
             TrackMirrorDeathForRelay(best, es);
+            // B-4 (TASK 4): the SNAPSHOT is the reliable death channel. `es.dead` is the host's own
+            // engine predicate, evaluated on every capture (:2632), delta-encoded and repeated at
+            // SnapshotHz - and the live logs show it already reaching the guest. The one-shot KIND_KILL
+            // datagram is not that reliable: it can be lost in transit or overwritten on the receive side
+            // (see the death ring in net.cpp), which is exactly the observed "host pushed, guest never
+            // logged". Driving the kill from this repeated flag makes delivery independent of that packet.
+            // Dedupe: the existing pushed-death tombstone, shared with the relay lane (now bounded at 256
+            // and evicting the oldest instead of refusing), so one kill per body per session.
+            // Ordering: GuestKillMirrorEntity's own "already 0xFFFF / engine dead flag" skip runs before
+            // any engine write, so a body that is already dead is refused there and never killed twice.
+            if (es.dead && !GktAlreadyPushed(es.objId, (unsigned int)best)) {
+                GktMarkPushed(es.objId, (unsigned int)best);
+                MarkMirrorKilledLocally(best);             // stop driving the corpse, stop the echo
+                bool applied = false;
+                if (!DeathAppliedRecently((unsigned int)best)) {
+                    MarkDeathApplied((unsigned int)best);
+                    MirrorVisualDeath(best);               // visual death first, as on the packet path
+                    GuestKillMirrorEntity(es.objId, (unsigned int)best, true);
+                    applied = true;
+                }
+                static int s_snapDeathLines = 0;
+                if (s_snapDeathLines < 10) {
+                    ++s_snapDeathLines;
+                    L("[Mirror] snapshot death objId=%llu ent=%08X applied=%d\n",
+                      (unsigned long long)es.objId, (unsigned int)best, applied ? 1 : 0);
+                }
+            }
             // Visibility: log each guard the first time it becomes a playback dummy, so a live test can
             // state unambiguously whether the guard being hit was mirrored or a normal AI.
             if (MirrorFirstSight(best))
                 L("[Mirror] ent=%08X -> playback dummy objId=%llu pos=(%.1f,%.1f,%.1f) dead=%u\n",
                   best, (unsigned long long)es.objId, es.pos[0], es.pos[1], es.pos[2], (unsigned)es.dead);
+            // A body this peer has already killed is left EXACTLY as GuestKillMirrorEntity prepared it
+            // (behaviour enabled, drive flag set) until the corpse latch fires a few ticks later: the
+            // engine needs the death transition to start under a live behaviour, and re-disabling it in
+            // the very next sample is what let the statechart sit on the death clip with the body still
+            // alive. The latch re-applies both writes below, once, at ~:5400.
+            const bool locallyDead = MirrorKilledLocally(best);
             // Re-assert the disable, but only when the engine has actually re-enabled it. Calling
             // SetEnabled(false) unconditionally every tick costs an interlocked write and makes the
             // behaviour/anim graph pop.
-            if (bestBhv && readable(bestBhv, 0x40) && ((Component*)bestBhv)->GetEnabled())
+            if (!locallyDead && bestBhv && readable(bestBhv, 0x40) && ((Component*)bestBhv)->GetEnabled())
                 ((Component*)bestBhv)->SetEnabled(false);
             Human* bh = AIEntityHelper::GetHuman(best);
-            if (bh && readable(bh, 4)) {
+            if (!locallyDead && bh && readable(bh, 4)) {
                 CharacterController* cc = (CharacterController*)bh->GetCharacterComponent();
                 if (readable(cc, 0x600)) cc->m_DriveEntity = false;
             }
-            bool locallyDead = MirrorKilledLocally(best);
             if (es.dead) {
                 static void* s_deadSeen[64];
                 static int   s_deadSeenN = 0;
@@ -3106,6 +3605,124 @@ static void ApplyGuards(const EntityPacket& pkt) {
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
 }
 
+// ---- guest death scan --------------------------------------------------------------------------
+// Runs at the same throttled cadence as the rest of EntitySyncTick (~SnapshotHz), guest only. It is
+// the only place that samples the Life of guards THIS peer can see, whether or not the host ever
+// described them in a snapshot: ApplyGuards only reaches bodies it managed to match (it drops every
+// unmatched one at `if (!best) continue;`), and a guard the guest kills is frequently not one of them.
+static void GuestDeathScan() {
+    World* world = World::GetCurrentWorld();
+    if (!world) return;
+    Entity* player = world->GetPlayer();
+    BaseBigArray<Reference>& ents = world->m_EntityManager.m_Entities;
+    const int nobj = ents.GetSize();
+    __try {
+        for (int i = 0; i < nobj; ++i) {
+            Reference* ref = ents.GetElement(i);
+            if (!ref || !readable(ref, 4)) break;
+            HandleContainer* hc = ref->m_HandleContainer;
+            if (!hc || !readable(hc, 4)) continue;
+            Entity* e = (Entity*)hc->m_Object;
+            if (!e || !readable(e, 4) || e == player) continue;
+            Component** data = *(Component***)((char*)e + 0x60);
+            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
+            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
+            bool skel = false; Component* bhvC = 0;
+            for (int k = 0; k < n; ++k) {
+                Component* c = data[k];
+                uint32_t vt = (c && readable(c, 4)) ? *(uint32_t*)c : 0;
+                if (vt == 0x01E41E58) skel = true;
+                if (vt == 0x026E34D8) bhvC = c;      // BhvGenericNPC only (never the player/puppet)
+            }
+            if (!skel || !bhvC) continue;
+
+            unsigned int hpSvc = FindHealthInAI((unsigned int)AIEntityHelper::GetEntityAI(e));
+            if (hpSvc) RememberEntityHealth((unsigned int)e, hpSvc);
+            else       hpSvc = CachedHealthForEntity((unsigned int)e);
+            if (!HostHpSvcValid(hpSvc)) continue;    // same vtable+Max gate the host capture uses
+
+            unsigned short life = *(unsigned short*)(hpSvc + 0x5C);
+            const bool dead = (*(unsigned int*)(hpSvc + 0x60) & 0x01000000u) != 0;
+
+            const unsigned int ent = (unsigned int)e;
+            int slot = -1;
+            for (int q = 0; q < s_gktWatchN; ++q) if (s_gktWatch[q].ent == ent) { slot = q; break; }
+            if (slot < 0) {
+                if (s_gktWatchN >= 256) {
+                    if (!s_gktWatchFullLogged) {
+                        s_gktWatchFullLogged = true;
+                        L("[GKT] watch table FULL (256) - further local guards are NOT watched\n");
+                    }
+                    continue;
+                }
+                slot = s_gktWatchN++;
+                GuestLifeWatch& nw = s_gktWatch[slot];
+                nw.ent = ent; nw.hpSvc = hpSvc; nw.lastLife = life;
+                nw.gen = s_gktGen; nw.x = nw.y = nw.z = 0.0f;
+                nw.seen = (life >= 1 && life <= 2000);
+                nw.tombstoned = false;
+            }
+            GuestLifeWatch& w = s_gktWatch[slot];
+            w.gen = s_gktGen;
+            if (!w.hpSvc) w.hpSvc = hpSvc;
+            if (w.tombstoned) continue;
+
+            if (life == 0xFFFFu || dead) {
+                // A death is a TRANSITION of a Life that was plausible when this body was last seen
+                // alive - the host's rule (D-016). A service first seen already at 0xFFFF (recycled
+                // slot) is not an event.
+                if (w.seen && w.lastLife >= 1 && w.lastLife <= 2000) {
+                    const uint64_t objId = GuestObjOfEnt(ent);
+                    if (MirrorKilledLocally((void*)e)) {
+                        GktSkip(objId, ent, "already-killed-by-peer");
+                    } else {
+                        L("[GKT] guest death detected objId=%llu ent=%08X life=%u->%u\n",
+                          (unsigned long long)objId, ent, (unsigned)w.lastLife, (unsigned)life);
+                        GuestPushDeath(objId, ent, e->m_GlobalMatrix.M41,
+                                       e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43);
+                    }
+                    w.tombstoned = true;
+                }
+            } else if (life >= 1 && life <= 2000) {
+                w.lastLife = life;
+                w.seen = true;
+                w.x = e->m_GlobalMatrix.M41; w.y = e->m_GlobalMatrix.M42; w.z = e->m_GlobalMatrix.M43;
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {}
+
+    // The body died and left m_Entities before this scan could read its 0xFFFF - that is the normal
+    // case, a real death de-registers it. Same rule as the host's vanish lane: a still-validated
+    // service decides, and only for a watch that already had a plausible Life; a service that fails
+    // validation changes nothing and says nothing (that silence is what keeps "walked out of range"
+    // and recycled pointers from inventing deaths).
+    for (int q = 0; q < s_gktWatchN; ++q) {
+        GuestLifeWatch& w = s_gktWatch[q];
+        if (w.gen == s_gktGen || w.tombstoned || !w.hpSvc) continue;
+        if (!HostHpSvcValid(w.hpSvc)) { w.hpSvc = 0; continue; }
+        bool dead = false; unsigned short life = w.lastLife; bool ok = true;
+        __try {
+            dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0;
+            life = *(unsigned short*)(w.hpSvc + 0x5C);
+        } __except (EXCEPTION_EXECUTE_HANDLER) { ok = false; }
+        if (!ok) { w.hpSvc = 0; continue; }
+        if ((life == 0xFFFFu || dead) && w.seen && w.lastLife >= 1 && w.lastLife <= 2000) {
+            const uint64_t objId = GuestObjOfEnt(w.ent);
+            if (MirrorKilledLocally((void*)w.ent))
+                GktSkip(objId, w.ent, "already-killed-by-peer");
+            else {
+                L("[GKT] guest death detected objId=%llu ent=%08X life=%u->%u (vanish)\n",
+                  (unsigned long long)objId, w.ent, (unsigned)w.lastLife, (unsigned)life);
+                GuestPushDeath(objId, w.ent, w.x, w.y, w.z);
+            }
+            w.tombstoned = true;
+        }
+    }
+    ++s_gktGen;
+    CorpseLatchTick();      // deferred corpse re-disable, one generation per scan
+}
+
 // Per-frame drive, de-duplicated: SetGlobalMatrixInternal(...,true) is a warp (expensive + invalidates
 // the render transform), so it must NOT run every frame. Re-apply only when the target actually changed,
 // which keeps a static mirror static (no self-inflicted jitter, no cost).
@@ -3117,6 +3734,10 @@ static void DriveCachedMirrors() {
     for (int i = 0; i < s_driveN; ++i) {
         DriveEnt& d = s_drive[i];
         if (!d.e || d.dead || !readable(d.e, 4)) continue;      // never puppeteer a corpse
+        // Belt and braces: s_drive[].dead is filled from the host's is-alive bit, but a body this peer
+        // killed itself (or that the host called dead a moment ago) must never be re-posed from a stale
+        // cached entry either - otherwise the transform write overrides the death animation.
+        if (MirrorKilledLocally(d.e)) continue;
         int k = -1;
         for (int j = 0; j < s_appliedN; ++j) if (s_applied[j].ent == (unsigned int)d.e) { k = j; break; }
         if (k < 0) {
@@ -3216,6 +3837,14 @@ static void EntitySyncTick() {
     EntityPacket in;
     const bool haveIn = Net::GetEntities(in) && in.protoVer == NET_PROTO_VER;
     if (haveIn) ProcessKillEvents(in);
+    // B-4: drain the death entries the recv thread queued. A one-entry KIND_KILL packet is no longer
+    // inside `in` at all (it cannot clobber the snapshot slot, net.cpp) and could not be relied on being
+    // there even before, because the snapshot slot is last-writer-wins. This is the queue that guarantees
+    // "the death the peer sent is seen exactly once, no matter how many snapshots arrive around it".
+    {
+        EntityPacket kp{};
+        if (Net::GetKillEntities(kp, 16) > 0) ProcessKillEvents(kp);
+    }
 
     if (s_selfTest) {
         EntityPacket pkt;
@@ -3252,6 +3881,10 @@ static void EntitySyncTick() {
         ApplyGuards(in);   // apply the characters
         // ProcessKillEvents already ran above (host->guest packets carry no kill entries)
     }
+
+    // Guest: guards this peer kills are its own business - no host snapshot describes them - so the
+    // guest's death lane samples them here, on the same throttled tick the snapshots already use.
+    if (!g_entHost) GuestDeathScan();
 }
 
 
@@ -4596,6 +5229,19 @@ static void WatchDeadBitArm() {
 // enumeration), so a death or a damage tick has to be pushed explicitly on the event lane.
 static uint64_t ObjIdForEntity(unsigned int ent) {
     for (int i = 0; i < s_objMapN; ++i) if (s_objMap[i].ent == ent) return s_objMap[i].objId;
+    // The capture map is rebuilt from scratch every capture (ObjMapReset at the head of CaptureGuards),
+    // so a guard that has died / been de-registered - the normal state by the time a late kill is
+    // resolved - is NOT in it. The last objId ever seen for this address still is.
+    const uint64_t last = EntObjIdLast(ent);
+    if (last) {
+        static int s_fbLogged = 0;
+        if (s_fbLogged < 10) {
+            ++s_fbLogged;
+            L("[Relay] objId %llu for ent=%08X taken from the last-known table (not the capture map)\n",
+              (unsigned long long)last, ent);
+        }
+        return last;
+    }
     return 0;
 }
 // D-016(6): a death (life==0xFFFF) is terminal for an objId, but the peer's kill can reach the apply path
@@ -4607,10 +5253,14 @@ static uint64_t s_pushedDeathIds[256];
 static int      s_pushedDeathN = 0;
 
 static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float y, float z) {
-    if (!g_entHost || !objId) return;              // host lane only
+    if (!g_entHost) { KtSkipPush(objId, 0, "not-host"); return; }   // host lane only
+    if (!objId)     { KtSkipPush(objId, 0, "objId=0"); return; }
     if (life == 0xFFFFu) {
         for (int i = 0; i < s_pushedDeathN; ++i)
-            if (s_pushedDeathIds[i] == objId) return;   // already announced this death
+            if (s_pushedDeathIds[i] == objId) {
+                KtSkipPush(objId, 0, "tombstone");       // already announced this death
+                return;
+            }
         if (s_pushedDeathN < 256) s_pushedDeathIds[s_pushedDeathN++] = objId;
     }
     EntityPacket out;
@@ -4624,6 +5274,8 @@ static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float 
     out.ents[0].hp = life;
     out.ents[0].pos[0] = x; out.ents[0].pos[1] = y; out.ents[0].pos[2] = z;
     L("[Kill] push health event objId=%llu life=%u -> peer\n", (unsigned long long)objId, (unsigned)life);
+    if (life == 0xFFFFu && KtOn(KT_PUSH))
+        L("[KT] death push objId=%llu seq=%u\n", (unsigned long long)objId, (unsigned)out.seq);
     Net::SendEntities(out);
 
     // Self-test: there is no peer, so deliver the packet to the local apply path — exactly what the guest
@@ -4634,6 +5286,15 @@ static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float 
         ProcessKillEvents(out);
         s_inEventLoop = false;
     }
+}
+
+// One death, one dedicated packet, on the lane that already carries deaths (kind=3, life=0xFFFF).
+// Kept separate from the snapshot so it can never be lost to a full 128-entry packet, and routed
+// through SendHealthEvent so the objId tombstone still guarantees "once per death".
+static void PushHostDeath(uint64_t objId, unsigned int ent, const float* pos) {
+    if (!objId) { KtSkipPush(objId, ent, "no-objId-at-detection"); return; }
+    SendHealthEvent(objId, 0xFFFFu,
+                    pos ? pos[0] : 0.0f, pos ? pos[1] : 0.0f, pos ? pos[2] : 0.0f);
 }
 
 // The verified kill recipe, applied to one specific guard entity.
@@ -4661,16 +5322,27 @@ static void MirrorVisualDeathInner(Entity* e) {
     L("[Mirror] dead ent=%08X left in place (no flags, no teleport)\n", e);
 }
 
-static void KillGuardEntityInner(Entity* e);     // wrapped below
+// notifyPeer=false is the guest variant (KillGuardEntityQuiet below): the mirror carries a LOCAL objId,
+// so pushing it back would reach the host as an unknown id and resolve by POSITION onto whichever guard
+// stands there. Every pre-existing call site goes through KillGuardEntity(Entity*) and still notifies.
+static void KillGuardEntityInner(Entity* e, bool notifyPeer);     // wrapped below
 static void KillGuardEntity(Entity* e) {
     if (!e || !readable(e, 4)) return;
-    __try { KillGuardEntityInner(e); }
+    __try { KillGuardEntityInner(e, true); }
     __except (EXCEPTION_EXECUTE_HANDLER) {
         L("[KF] EXCEPTION 0x%08X (ent=%08X) - kill aborted\n", GetExceptionCode(), e);
     }
 }
 
-static void KillGuardEntityInner(Entity* e) {
+static void KillGuardEntityQuiet(Entity* e) {
+    if (!e || !readable(e, 4)) return;
+    __try { KillGuardEntityInner(e, false); }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        L("[KF] EXCEPTION 0x%08X (ent=%08X) - kill aborted\n", GetExceptionCode(), e);
+    }
+}
+
+static void KillGuardEntityInner(Entity* e, bool notifyPeer) {
     if (!e) return;
 
     unsigned int ai = (unsigned int)AIEntityHelper::GetEntityAI(e);
@@ -4744,8 +5416,166 @@ static void KillGuardEntityInner(Entity* e) {
 
     // Tell the peer. Dead guards disappear from the snapshot enumeration, so this push is the only way
     // a host kill can ever reach the guest.
-    SendHealthEvent(ObjIdForEntity((unsigned int)e), 0xFFFFu,
-                    e->m_GlobalMatrix.M41, e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43);
+    if (notifyPeer)
+        SendHealthEvent(ObjIdForEntity((unsigned int)e), 0xFFFFu,
+                        e->m_GlobalMatrix.M41, e->m_GlobalMatrix.M42, e->m_GlobalMatrix.M43);
+}
+
+// ini [Coop] GuestKillMirror (default 1): let the guest run the real engine kill on a mirrored guard.
+static int s_guestKillMirror = -1;
+static int GuestKillMirrorEnabled() {
+    if (s_guestKillMirror < 0)
+        s_guestKillMirror = GetPrivateProfileIntA("Coop", "GuestKillMirror", 1, Paths::Ini());
+    return s_guestKillMirror;
+}
+
+// ---- corpse latch -------------------------------------------------------------------------------
+// GuestKillMirrorEntity re-enables the behaviour component so the engine can START the death
+// transition; leaving it enabled for ever is what made the mirror play the death clip and then keep
+// standing - the statechart comes back on a later state and decides the guard is alive again, which
+// cancels the death. The tick's disable therefore has to be re-applied, but not in the same call: the
+// transition needs a few samples under a live behaviour first. The delay is counted in GuestDeathScan's
+// existing per-tick generation counter (s_gktGen, phase1.cpp:3681) - no threads, no timers - and the
+// write set is exactly the tick's (:3494 behaviour disable, :3499 drive-flag clear), so a latched body
+// ends in the same state as every other playback dummy.
+struct CorpseLatch { unsigned int ent; unsigned int bornGen; Component* bhv; };
+static CorpseLatch s_corpseLatch[64];
+static int s_corpseLatchN = 0;
+static const unsigned int CORPSE_LATCH_TICKS = 8;     // ~0.4 s at SnapshotHz: enough for the fall to start
+
+static void CorpseLatchArm(unsigned int ent, Component* bhv) {
+    if (!ent) return;
+    for (int i = 0; i < s_corpseLatchN; ++i)
+        if (s_corpseLatch[i].ent == ent) {
+            s_corpseLatch[i].bornGen = s_gktGen;
+            s_corpseLatch[i].bhv = bhv;
+            return;
+        }
+    int slot = s_corpseLatchN;
+    if (slot >= 64) slot = 0;                       // deterministic eviction, like the mirror tables
+    else ++s_corpseLatchN;
+    s_corpseLatch[slot].ent = ent;
+    s_corpseLatch[slot].bornGen = s_gktGen;
+    s_corpseLatch[slot].bhv = bhv;
+    static int s_latchLines = 0;
+    if (s_latchLines < 10) {
+        ++s_latchLines;
+        L("[Mirror] corpse latch ent=%08X after=%d ticks\n", ent, (int)CORPSE_LATCH_TICKS);
+    }
+}
+
+// Fires each armed latch once CORPSE_LATCH_TICKS generations have passed. The behaviour pointer is
+// re-validated before use: it was captured while the body was alive and the entity may have been
+// destroyed since.
+static void CorpseLatchTick() {
+    for (int i = 0; i < s_corpseLatchN; ) {
+        CorpseLatch& c = s_corpseLatch[i];
+        if ((unsigned int)(s_gktGen - c.bornGen) < CORPSE_LATCH_TICKS) { ++i; continue; }
+        int ok = 0;
+        __try {
+            if (c.bhv && readable(c.bhv, 0x40)) {
+                ((Component*)c.bhv)->SetEnabled(false);
+                ok = 1;
+            }
+            Human* h = AIEntityHelper::GetHuman((Entity*)c.ent);
+            if (h && readable(h, 4)) {
+                CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
+                if (readable(cc, 0x600)) cc->m_DriveEntity = false;
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { ok = 0; }
+        static int s_reLines = 0;
+        if (s_reLines < 10) {
+            ++s_reLines;
+            L("[Mirror] corpse re-disable ent=%08X ok=%d\n", c.ent, ok);
+        }
+        s_corpseLatch[i] = s_corpseLatch[--s_corpseLatchN];
+    }
+}
+
+// Guest path for a death the host reported. Until now this only logged a visual death, so a guard the
+// host killed stayed standing and idling on the guest's screen for ever.
+//
+// The engine recipe is run ONLY when the target is provably the mirror the host is talking about:
+//   a) the id resolved from the packet via the guest obj table - never the nearest-position fallback
+//      (`viaGuestObj`), and
+//   b) that table STILL binds this exact objId to this exact entity (GuestObjFind(objId) == ent). A
+//      forgotten binding (GuestObjForget leaves ent=0) or a stolen body cannot pass this, and
+//   c) the health service passes HostHpSvcValid - the same vtable+Max gate the capture side uses
+//      (src/phase1.cpp:2197). SetLife on a recycled service is exactly the fault this guards against.
+// Anything else touches no entity at all and only logs. A proximity kill here would be far worse than a
+// corpse that keeps standing, so the default for an unprovable target is "do nothing".
+static bool GuestKillMirrorEntity(uint64_t objId, unsigned int ent, bool viaGuestObj) {
+    const int flag = GuestKillMirrorEnabled();
+    // GuestKillMirror=0 is the escape hatch: nothing below runs at all - no health read, no
+    // re-enable, no engine call - so the crash path is unreachable with the flag off.
+    if (!flag) {
+        L("[Mirror] dead ent=%08X -> KillGuardEntity applied=0 (GuestKillMirror=%d)\n", ent, flag);
+        return false;
+    }
+    bool hpOk = false;
+    unsigned int hpSvc = 0;
+    unsigned short life = 0;
+    bool deadFlag = false;
+    if (ent && viaGuestObj && GuestObjFind(objId) == ent) {
+        __try {
+            hpSvc = CachedHealthForEntity(ent);
+            if (!HostHpSvcValid(hpSvc))
+                hpSvc = FindHealthInAI((unsigned int)AIEntityHelper::GetEntityAI((Entity*)ent));
+            hpOk = HostHpSvcValid(hpSvc);
+            if (hpOk) {
+                life     = *(unsigned short*)(hpSvc + 0x5C);                 // Life
+                deadFlag = (*(unsigned int*)(hpSvc + 0x60) & 0x01000000u) != 0;   // engine dead flag
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { hpOk = false; }
+    }
+    // D: SetLife(-1) on an ALREADY dead body is refused by the engine (live log: "rc=-1
+    // life 65535 -> 65535") but still walks the health-event path that drives the action/blend
+    // dispatcher - the state in which this->[0x114] is null (crash at 0x67B2EA, 0xC0000005).
+    // A body that is dead on any of the two proven predicates is never killed a second time.
+    if (hpOk && (life == 0xFFFFu || deadFlag)) {
+        L("[Mirror] dead ent=%08X skipped reason=already-dead life=%u\n", ent, (unsigned)life);
+        return false;
+    }
+    if (hpOk) {
+        // D: restore the state the host path runs under. Every snapshot the mirror tick disables the
+        // behaviour component (SetEnabled(false), phase1.cpp:3494) and clears the drive flag (:3499);
+        // host guards are never in that state, which is why only the guest dies here. Re-enable with
+        // the same proven calls so the engine can START the death transition, then let the corpse latch
+        // put the body back into the tick's disabled state a few ticks later. If the behaviour component
+        // cannot be reached the kill is REFUSED: a standing corpse is acceptable, a null-deref is not.
+        bool prepared = false;
+        Component* bhvForLatch = nullptr;    // handed to the corpse latch below
+        __try {
+            Entity* e = (Entity*)ent;
+            World* world = World::GetCurrentWorld();
+            Entity* player = world ? world->GetPlayer() : nullptr;
+            Component* bhv = MirrorCandidateBhv(e, player);
+            if (bhv && readable(bhv, 0x40)) {
+                ((Component*)bhv)->SetEnabled(true);
+                Human* h = AIEntityHelper::GetHuman(e);
+                if (h && readable(h, 4)) {
+                    CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
+                    if (readable(cc, 0x600)) cc->m_DriveEntity = true;   // clear the tick's disable
+                }
+                bhvForLatch = bhv;
+                L("[Mirror] kill pre-state: behaviour re-enabled ent=%08X\n", ent);
+                prepared = true;
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { prepared = false; }
+        if (!prepared) {
+            L("[Mirror] dead ent=%08X skipped reason=no-behaviour-component\n", ent);
+            return false;
+        }
+        KillGuardEntityQuiet((Entity*)ent);   // own __try/__except
+        // The enable above only buys the engine the samples it needs to start the death transition.
+        // Hand the body to the latch so the tick's disable/drive-clear are re-applied a few ticks
+        // later and the statechart cannot talk the corpse back to life.
+        CorpseLatchArm(ent, bhvForLatch);
+        L("[Mirror] dead ent=%08X -> KillGuardEntity applied=1 (GuestKillMirror=%d)\n", ent, flag);
+        return true;
+    }
+    L("[Mirror] dead ent=%08X -> KillGuardEntity applied=0 (GuestKillMirror=%d)\n", ent, flag);
+    return false;
 }
 
 // Host path: the peer reported a health change for a guard. Resolve by the host-assigned objId first;
@@ -4753,10 +5583,13 @@ static void KillGuardEntityInner(Entity* e) {
 static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float y, float z) {
     unsigned int ent = 0, hp = 0;
     bool byId = ObjMapFind(objId, &ent, &hp);
+    bool viaGuestObj = false;   // resolved through the guest mirror table, not the position fallback
     if (!byId) {
-        // Guest side: objId -> local mirror, learned from the snapshots.
-        unsigned int ge = GuestObjFind(objId);
-        if (ge) { ent = ge; byId = true; hp = CachedHealthForEntity(ge); }
+        // Guest side: objId -> local mirror, learned from the snapshots. A miss is no longer final: the
+        // resolve variant also asks the engine registry (the same id resolver ApplyGuards uses) and
+        // re-binds on a hit - see GuestObjFindResolve.
+        unsigned int ge = GuestObjFindResolve(objId);
+        if (ge) { ent = ge; byId = true; viaGuestObj = true; hp = CachedHealthForEntity(ge); }
     }
     if (!byId) {
         Entity* e = FindNearestSoldierTo(x, y, z, 4.0f);
@@ -4777,11 +5610,21 @@ static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float 
                       (unsigned long long)s_objMap[i].objId, s_objMap[i].ent, s_objMap[i].hp);
                 ++s_kd;
             }
+            if (KtOn(KT_RESOLVE))
+                L("[KT] death resolve objId=%llu -> ent=00000000 ok=0\n", (unsigned long long)objId);
             L("[Kill] event objId=%llu unresolved (no soldier within 4m)\n", (unsigned long long)objId); return;
         }
         ent = (unsigned int)e;
         hp  = CachedHealthForEntity(ent);
         L("[Kill] objId=%llu unknown -> position fallback ent=%08X\n", (unsigned long long)objId, ent);
+        // B-3 diagnostic (max 10 lines): proves the KIND_KILL entry carried a usable position. A
+        // (0.0,0.0,0.0) here means the sender had none - the host's vanish lane used to be exactly that.
+        static int s_fbLines = 0;
+        if (s_fbLines < 10) {
+            ++s_fbLines;
+            L("[Mirror] death fallback objId=%llu pos=(%.1f,%.1f,%.1f) -> ent=%08X\n",
+              (unsigned long long)objId, x, y, z, ent);
+        }
     }
     // The binding can outlive the body: an event may arrive for an objId whose mirror was freed and its
     // address reused. Every path below calls into the engine with this pointer, so prove it is still a
@@ -4803,20 +5646,45 @@ static void ApplyPeerHealth(uint64_t objId, unsigned short life, float x, float 
 
     if (life == 0xFFFFu) {
         L("[Kill] peer DEATH objId=%llu -> ent=%08X health=%08X\n", (unsigned long long)objId, ent, hp);
+        if (KtOn(KT_RESOLVE))
+            L("[KT] death resolve objId=%llu -> ent=%08X ok=%d\n",
+              (unsigned long long)objId, ent, ent ? 1 : 0);
         if (ent) {
             MarkPeerApplied(ent);                 // don't echo it back
             MarkMirrorKilledLocally((void*)ent);  // stop driving the corpse
-            // The guest's entity is a playback dummy with its behaviour disabled, so the engine's own
-            // death (SetLife) must not run here; the host keeps the full recipe.
-            if (g_entHost) KillGuardEntity((Entity*)ent);
-            else if (!DeathAppliedRecently(ent)) { MarkDeathApplied(ent); MirrorVisualDeath((Entity*)ent); }
+            // The guest's entity is a playback dummy with its behaviour disabled. Host: full recipe.
+            // Guest: the same recipe is run only when the mirror identity is provable (see
+            // GuestKillMirrorEntity); MirrorVisualDeath stays first so the "[Mirror] dead ..." line is
+            // still emitted exactly as before.
+            bool applied = false;
+            if (g_entHost) { KillGuardEntity((Entity*)ent); applied = true; }
+            else if (!DeathAppliedRecently(ent)) {
+                MarkDeathApplied(ent);
+                MirrorVisualDeath((Entity*)ent);
+                GuestKillMirrorEntity(objId, ent, viaGuestObj);
+                applied = true;
+            }
+            if (KtOn(KT_RECV))
+                L("[KT] death recv objId=%llu -> ent=%08X ok=1 applied=%d\n",
+                  (unsigned long long)objId, ent, applied ? 1 : 0);
+        } else if (KtOn(KT_RECV)) {
+            L("[KT] death recv objId=%llu -> ent=%08X ok=0 applied=0\n", (unsigned long long)objId, ent);
         }
         return;
     }
     if (!hp) { L("[Kill] peer damage objId=%llu: no health\n", (unsigned long long)objId); return; }
-    int rc = ((int (__thiscall*)(void*, int))0x19FB4C0)((void*)hp, (int)life);
-    if (ent) MarkPeerApplied(ent);
-    L("[Kill] peer damage objId=%llu hp=%u (SetLife rc=%d)\n", (unsigned long long)objId, (unsigned)life, rc);
+    // C: the absolute-hp damage lane is DISABLED on both ends. The wire carries a bare absolute Life
+    // with no max and no timestamp, and the two machines do not agree on a guard's max Life (host 36,
+    // guest 30 in the live logs), so an absolute value re-applied here can never be right - it is what
+    // pinned this guard at hp=30 and re-sent "[Kill] peer damage ... hp=30" forever. The only health
+    // fact the co-op needs is the death transition, which travels as life==0xFFFF above and is
+    // identical on both sides (SetLife(-1) leaves 0xFFFF, phase1.cpp:4835).
+    static int s_dmgIgnored = 0;
+    if (s_dmgIgnored < 10) {
+        ++s_dmgIgnored;
+        L("[Kill] peer damage objId=%llu hp=%u IGNORED (death-only lane; absolute hp is not applied)\n",
+          (unsigned long long)objId, (unsigned)life);
+    }
 }
 
 // F2: solo harness for the GUEST side of the relay. The real path can't be exercised in self-test
@@ -6373,6 +7241,13 @@ static void OnFrameInner(Human* updatedHuman) {
               st.txPackets, st.txBytes, st.txEnts, st.rxPackets, st.rxBytes,
               (st.txBytes / 1024.0) / secs, (st.rxBytes / 1024.0) / secs,
               s_covMatched, s_covNoBody, s_covStolen);
+            // Scope line, same 5 s window as the wire stats above. It exists so one run PROVES the
+            // filter: candidates minus enemies is the civilian mass that used to be shipped, sent is
+            // what actually went out (it also includes ships, which are packed before the characters).
+            // The guest never runs CaptureGuards, so candidates/enemies/sent stay 0 there by design.
+            L("[Sync] scope candidates=%u enemies=%u sent=%u (SyncEnemiesOnly=%d)\n",
+              s_scopeCand, s_scopeEnemies, s_scopeSent, SyncEnemiesOnly());
+            s_scopeCand = 0; s_scopeEnemies = 0; s_scopeSent = 0;
             // One-shot receive watchdog: counters reset every poll, so 2 polls with tx and no rx
             // means ~10 s of transmitting into the void. Say so once - silence is the failure mode
             // that cost us a whole two-machine session.
@@ -6508,11 +7383,20 @@ static void OnFrameInner(Human* updatedHuman) {
         bool peerPresent = rawSameWorld && (now - lastFreshMs) < 2000 && timerOk;
 
         // Observability: log each scene transition once so the gating is visible in the log.
+        // D-017: only an OBSERVED key may count as a change. Packets arrive at SnapshotHz (~20) while this
+        // tick runs at frame rate (~60), so using a "no packet this frame" sentinel flips the peer key
+        // dozens of times per second and re-runs the invalidation below every time (live: 3467
+        // "[Net] scene change" lines in 40 s, wiping the kill lane's accumulators mid-death).
+        // No packet this frame => no comparison and no clearing. `lastPkValid` keeps a genuine 0 key real.
         {
-            static uint32_t lastLocalKey = 0xFFFFFFFFu, lastPeerKey = 0xFFFFFFFFu;
-            uint32_t lk = localOk ? local.sceneKey : 0xFFFFFFFFu;
-            uint32_t pk = gotRaw  ? raw.sceneKey   : 0xFFFFFFFFu;
-            if (lk != lastLocalKey || pk != lastPeerKey) {
+            static uint32_t lastLocalKey = 0, lastPeerKey = 0;
+            static bool     lastLocalValid = false, lastPkValid = false;
+            const bool     localValid = localOk;
+            const uint32_t lk = localOk ? local.sceneKey : 0u;
+            const uint32_t pk = gotRaw  ? raw.sceneKey   : 0u;
+            const bool localChanged = localValid && (!lastLocalValid || lk != lastLocalKey);
+            const bool peerChanged  = gotRaw     && (!lastPkValid  || pk != lastPeerKey);
+            if (localChanged || peerChanged) {
                 // D-016(2): a scene change is the event that invalidates every cached ent->hp binding: the
                 // engine recycles the CSrvNPCHealth objects behind the pointers we stored, so +0x5C reads
                 // 0xFFFF and the host lane used to call that a death. Drop the caches BEFORE anything reads
@@ -6525,10 +7409,15 @@ static void OnFrameInner(Human* updatedHuman) {
                 s_adRingN = 0; s_adRingNext = 0; s_adLines = 0;
                 // [KH] same scope: the kill-unresolved line budget is per world, not per capture.
                 s_kd = 0;
-                if (lastLocalKey != 0xFFFFFFFFu || lastPeerKey != 0xFFFFFFFFu)
-                    L("[Net] scene change: localKey=%08X peerKey=%08X -> puppet %s\n",
-                      lk, pk, (lk == pk || s_sceneAware == 0) ? "shown" : "hidden");
-                lastLocalKey = lk; lastPeerKey = pk;
+                if (lastLocalValid || lastPkValid) {
+                    const uint32_t localShow = localValid ? lk : 0xFFFFFFFFu;
+                    const uint32_t peerShow  = gotRaw ? pk : lastPeerKey;
+                    const bool shown = (s_sceneAware == 0) || !localValid || !gotRaw || (pk == lk);
+                    L("[Net] scene change: localKey=%08X peerKey=%08X%s -> puppet %s\n",
+                      localShow, peerShow, gotRaw ? "" : " (last)", shown ? "shown" : "hidden");
+                }
+                if (localValid) { lastLocalKey = lk; lastLocalValid = true; }
+                if (gotRaw)     { lastPeerKey  = pk; lastPkValid  = true; }
             }
         }
 

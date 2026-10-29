@@ -24,6 +24,22 @@ namespace {
     bool               g_strictPeer = true;   // reject datagrams from any source but the configured peer
     uint64_t           g_lastRecvMs = 0;      // GetTickCount64() of the last ACCEPTED packet (0 = none yet)
 
+    // ---- received DEATH ring (B-4: a one-shot death packet must not be lost to the snapshot slot) --
+    // g_remoteEntities is last-writer-wins: `g_remoteEntities = decoded` below overwrites whatever the
+    // previous datagram carried. The snapshot stream runs at SnapshotHz, so a one-entry KIND_KILL packet
+    // that arrives just before a snapshot was overwritten BEFORE the main thread ever called
+    // Net::GetEntities - the host had logged "[KT] death push", the guest logged nothing at all. Death
+    // entries (kind==3) are therefore copied into this small ring as they are decoded, and the frame
+    // drains it through GetKillEntities(), so the death is seen at least once regardless of how many
+    // snapshots follow. Same idea as the player-packet ring above (FIX 4), sized far smaller because a
+    // death is rare. A kill-only packet is also kept OUT of g_remoteEntities so it cannot displace a
+    // snapshot (and cannot be processed twice).
+    #define NET_KILLQ 32
+    const uint8_t      NET_KIND_KILL = 3;     // phase1.cpp:2379 KIND_KILL (wire value, unchanged)
+    EntityState        g_killRing[NET_KILLQ];
+    int                g_killHead = 0;        // next write slot
+    int                g_killCount = 0;       // filled entries; full -> the OLDEST is overwritten
+
     // ---- received player-packet ring (FIX 4: drain every queued packet per frame) ---------------
     // g_remote is last-wins: when two player packets land between two frames the older one is lost,
     // which starves the interpolation buffer exactly when the frame rate dips. This ring keeps them
@@ -319,7 +335,23 @@ namespace {
                             g_rxqHead = (g_rxqHead + 1) % NET_RXQ;
                             if (g_rxqCount < NET_RXQ) ++g_rxqCount;
                         }
-                        else if (entityOk) { g_remoteEntities = decoded; g_haveEntities = true; }
+                        else if (entityOk) {
+                            // B-4: pull the death entries out into their own ring first. A packet made
+                            // only of them (the dedicated one-entry death push) does not touch the
+                            // snapshot slot at all, so it can neither be overwritten before the frame
+                            // reads it nor clobber a snapshot.
+                            bool hadNonKill = false;
+                            for (uint32_t ki = 0; ki < decoded.count; ++ki) {
+                                const EntityState& ks = decoded.ents[ki];
+                                if (ks.kind != NET_KIND_KILL) { hadNonKill = true; continue; }
+                                g_killRing[g_killHead] = ks;
+                                g_killHead = (g_killHead + 1) % NET_KILLQ;
+                                if (g_killCount < NET_KILLQ) ++g_killCount;
+                            }
+                            if (hadNonKill || decoded.count == 0) {
+                                g_remoteEntities = decoded; g_haveEntities = true;
+                            }
+                        }
                         g_lastRecvMs = GetTickCount64();   // heartbeat for the presence check
                         InterlockedIncrement(&g_rxPackets);
                         InterlockedAdd(&g_rxBytes, (LONG)n);
@@ -460,6 +492,30 @@ bool GetEntities(EntityPacket& out) {
     if (have) out = g_remoteEntities;
     LeaveCriticalSection(&g_lock);
     return have;
+}
+
+// B-4: drain the received DEATH ring into `out` (n = number of entries copied, 0 = nothing pending).
+// The packet is shaped like any other EntityPacket, so the caller hands it straight to
+// ProcessKillEvents. This is what makes a one-entry KIND_KILL datagram survive a snapshot arriving in
+// the same frame gap: GetEntities() only ever exposes the latest snapshot, this queue keeps the deaths.
+uint32_t GetKillEntities(EntityPacket& out, uint32_t max) {
+    if (!g_enabled) return 0;
+    if (max == 0 || max > (uint32_t)MAX_SYNC_ENTITIES) max = (uint32_t)MAX_SYNC_ENTITIES;
+    out.magic = NET_ENTITY_MAGIC;
+    out.protoVer = NET_PROTO_VER;
+    out.seq = 0;
+    out.count = 0;
+    uint32_t n = 0;
+    EnterCriticalSection(&g_lock);
+    while (n < max && g_killCount > 0) {
+        const int idx = (g_killHead - g_killCount + NET_KILLQ) % NET_KILLQ;   // oldest entry
+        out.ents[n++] = g_killRing[idx];
+        --g_killCount;
+    }
+    out.count = n;
+    LeaveCriticalSection(&g_lock);
+    if (n) out.seq = GetTickCount();
+    return n;
 }
 
 // ---- session-lifecycle hardening (Feature #3) --------------------------------------

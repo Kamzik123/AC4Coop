@@ -181,6 +181,30 @@ extern "C" int AC4Coop_FormatBuildLine(char* out, int cap)
     return n;
 }
 
+// Fixed, always-writable diagnostics trail: %LOCALAPPDATA%\AC4Coop\beacon.txt (see Paths::AppendBeacon).
+// The 2026-10-29 tester run loaded this ASI but left every log at 0 bytes -- the module directory under
+// "C:\Program Files (x86)" is not writable for the game process. The [Build] and [Paths] answers are
+// therefore also written where write access is guaranteed, one pair per process, so a tester never has to
+// ask "which build ran, and where did it think it was?".
+static void WriteBeaconOnce()
+{
+    static bool done = false;
+    if (done) return;
+    done = true;
+
+    char buildLine[256] = { 0 };
+    char pathsLine[1024] = { 0 };
+    char buf[1400] = { 0 };
+
+    if (AC4Coop_FormatBuildLine(buildLine, (int)sizeof(buildLine)) <= 0)
+        strncpy_s(buildLine, "[Build] unavailable\n", _TRUNCATE);
+    if (Paths::Describe(pathsLine, sizeof(pathsLine)) <= 0)
+        strncpy_s(pathsLine, "[Paths] unavailable\r\n", _TRUNCATE);
+
+    _snprintf_s(buf, sizeof(buf), _TRUNCATE, "%s%s", buildLine, pathsLine);
+    Paths::AppendBeacon(buf);
+}
+
 // Local wall-clock ISO8601 with milliseconds, used by the heartbeat / poll-tick lines. A bare counter is
 // not evidence of when a process was alive; a timestamp is.
 static void localIso8601(char* out, size_t cap)
@@ -222,7 +246,10 @@ static unsigned __stdcall PollThread(void*)
     // PollThread is alive could not be performed during the 2026-10-27 solo run (0 B, unreadable, process
     // alive). If the open fails we still emit through OutputDebugString, but say so in the debugger.
     g_log = _fsopen(logPath, "a", _SH_DENYWR);
-    if (!g_log) OutputDebugStringA("[AC4Coop] phase0 log open FAILED (readable heartbeat unavailable)\n");
+    if (!g_log) Paths::NoteOpenFailure(logPath);
+
+    // The beacon is written whether or not the local log opened: it is the fallback evidence trail.
+    WriteBeaconOnce();
 
     // Task 0.2: the [Build] line is the FIRST bytes written to this file. Nothing above writes to
     // g_log (it has only just been opened) and logline() is the only other writer -- its first call
@@ -233,10 +260,11 @@ static unsigned __stdcall PollThread(void*)
             fputs(buildLine, g_log);
             fflush(g_log);
         }
-        // Second line: which ini the CWD-independent resolution picked, and where logs land. Written
-        // before the first ini read so a tester's phase0 file answers it even when phase1 never starts.
+        // Second line: which ini the CWD-independent resolution picked, where logs land, and whether the
+        // module directory was actually writable. Written before the first ini read so a tester's phase0
+        // file answers it even when phase1 never starts.
         char pathsLine[1024];
-        if (Paths::FormatStartupLine(pathsLine, sizeof(pathsLine)) > 0) {
+        if (Paths::Describe(pathsLine, sizeof(pathsLine)) > 0) {
             fputs(pathsLine, g_log);
             fflush(g_log);
         }
