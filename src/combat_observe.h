@@ -11,7 +11,7 @@ class CombatObserve
 {
 public:
     static void Init();            // DLL_PROCESS_ATTACH, next to DerefGuard::Init()
-    static void Shutdown();        // DLL_PROCESS_DETACH — clears every DR and removes the VEH
-    static void OnThreadAttach();  // DLL_THREAD_ATTACH — DRs are per-thread; call from the new thread
+    static void Shutdown();        // DLL_PROCESS_DETACH — self-edit DRs, remove the VEH
+    static void OnThreadAttach();  // DLL_THREAD_ATTACH — arms the CURRENT thread only, no allocation
     static bool Armed();           // true between a successful arm and a completed disarm
 };

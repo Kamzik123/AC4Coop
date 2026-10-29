@@ -9,8 +9,22 @@
 //
 // OBSERVATION ONLY: no bytes are patched, `VirtualProtect` is never called on the module, no game
 // function is called from the handler, and no game memory is written. The only writes are to the
-// debug registers (via SetThreadContext) and to this unit's log file. It cannot alter combat
-// behaviour.
+// debug registers of THE CALLING THREAD (SetThreadContext(GetCurrentThread()) or the context record
+// the CPU already handed to our VEH) and to this unit's log file. It cannot alter combat behaviour.
+//
+// WHICH THREADS GET DRs, AND WHY THAT IS THE ONLY SAFE SET
+// -------------------------------------------------------
+// Debug registers are per-thread state, so arming a thread this module did not create would mean
+// suspending it and rewriting its context from outside (OpenThread + SuspendThread +
+// SetThreadContext on a foreign thread). That is the crash class this project has hit before: the
+// foreign thread can be holding the loader lock, a heap lock, or a half-finished kernel transition.
+// This unit therefore never edits a foreign thread's context:
+//   - Init() arms the thread it is called on (the thread inside DllMain), by self-edit;
+//   - DLL_THREAD_ATTACH arms each thread from INSIDE that thread, also by self-edit;
+//   - a thread that existed before this module was loaded is never armed. That is a known coverage
+//     gap, recorded in the run report; it is NOT papered over with unsafe context edits.
+// Disarm follows the same rule: a thread clears its own DRs — the detach thread in Shutdown(), the
+// reporter on its way out, or any armed thread from its own single-step handler once quiesced.
 //
 // WHY HARDWARE BREAKPOINTS AND NOT AN E9 PATCH (unlike deref_guard/action_guard):
 // an execution breakpoint fires on the first byte of the function, so no prologue length has to be
@@ -79,6 +93,10 @@
 //     identifies it as OURS (this unit is the only thing in the process that writes TF), so no
 //     per-thread table is needed and two threads hitting the same slot cannot confuse each other;
 //   - on the step we re-arm all slots, clear TF and clear DR6.
+//
+// Every one of those writes is applied to the context record the CPU already handed to our VEH,
+// i.e. to the context of the thread that trapped, or (when arming) to GetCurrentThread(). The
+// handler never reaches for another thread's context.
 
 #include "combat_observe.h"
 #include "Hook.h"
@@ -86,7 +104,6 @@
 #include "pattern_scan.h"
 
 #include <windows.h>
-#include <tlhelp32.h>
 #include <process.h>
 #include <stdio.h>
 #include <share.h>
@@ -102,8 +119,6 @@ const char*     INI_PATH      = ".\\AC4Coop.ini";
 const size_t    SITE_COUNT    = 4;            // one DR each: 4 slots, 4 sites, no headroom
 const size_t    PATTERN_MAX   = 32;
 const LONG      MAX_HITS      = 5000;         // hard cap; the log stops at exactly this many lines
-const size_t    MAX_SEEN_TIDS = 256;
-const DWORD     REARM_MS      = 2000;         // new-thread sweep cadence
 
 // Disarm hotkey. The patch proposed VK_F2; F1-F15 are all bound by phase1 (F1 health map .. F15
 // CombatTest) and V / Ctrl+Alt+J / Ctrl+Alt+K / Ctrl+Alt+L are bound too, so F2 would have been a
@@ -153,10 +168,8 @@ volatile LONG g_stop  = 0;          // 1 = disarm requested (cap or hotkey)
 volatile LONG g_hits  = 0;          // total hits logged
 volatile LONG g_inLog = 0;          // logger reentrancy guard
 
-// Threads this unit has armed. A fixed table rather than a Toolhelp walk at shutdown, because
-// Shutdown() runs from DLL_PROCESS_DETACH under the loader lock and must not allocate.
-DWORD         g_seenTid[MAX_SEEN_TIDS];
-volatile LONG g_seenCount = 0;
+// Threads are never tracked in a table any more: no code path can name another thread, so there is
+// nothing to enumerate at shutdown and nothing to race with a new thread's attach.
 
 // Same shape as the other units' loggers: debugger + a live-readable file, never a blocking
 // console write. Called from the game thread inside a VEH, so it is bounded and reentrancy-guarded.
@@ -251,134 +264,32 @@ void BuildDisarmedContext(CONTEXT* c)
     c->Dr7 = 0;
 }
 
-bool SeenTid(DWORD tid)
+// ---- arming: the calling thread, and only the calling thread --------------------------------
+// Applies one context edit to the thread that calls this function. The handle is ALWAYS
+// GetCurrentThread(): there is no thread id parameter, so no call site can name another thread.
+// Nothing here allocates or takes the loader lock, so it is safe from DllMain and from
+// DLL_THREAD_ATTACH.
+bool EditCallingThreadContext(bool arm)
 {
-    const LONG n = g_seenCount;
-    for (LONG i = 0; i < n && i < (LONG)MAX_SEEN_TIDS; ++i)
-        if (g_seenTid[i] == tid) return true;
-    return false;
-}
-
-void RememberTid(DWORD tid)
-{
-    const LONG slot = InterlockedIncrement(&g_seenCount) - 1;
-    if (slot >= 0 && slot < (LONG)MAX_SEEN_TIDS) g_seenTid[slot] = tid;
-    else InterlockedDecrement(&g_seenCount);   // table full: stop growing, keep the first 256
-}
-
-// Applies one context edit to another thread. The thread is suspended only for the duration of
-// Get/SetThreadContext (microseconds); nothing here takes the loader lock or allocates, so a
-// thread suspended while holding either is not a deadlock for us.
-bool EditThreadContext(DWORD tid, bool arm)
-{
-    HANDLE th = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_SUSPEND_RESUME,
-                           FALSE, tid);
-    if (!th) return false;
-
-    const bool self = (tid == GetCurrentThreadId());
-    DWORD prev = 0;
-    if (!self) {
-        prev = SuspendThread(th);
-        if (prev == (DWORD)-1) { CloseHandle(th); return false; }
-    }
-
-    bool ok = false;
     CONTEXT c;
     memset(&c, 0, sizeof(c));
     // Arming writes only the DR block. Disarming also asks for CONTEXT_CONTROL so TF can be
-    // cleared: a thread suspended in the middle of a step-over keeps TF in its own context, and
-    // once the VEH is removed that pending single-step would be delivered to the engine's SEH.
+    // cleared: a thread quiesced in the middle of a step-over still has TF in its own context, and
+    // with the handler gone that pending single-step would be delivered to the engine's SEH.
     c.ContextFlags = arm ? CONTEXT_DEBUG_REGISTERS
                          : (CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL);
-    if (GetThreadContext(th, &c)) {
-        if (arm) {
-            BuildArmedContext(&c);
-        } else {
-            BuildDisarmedContext(&c);
-            c.EFlags &= ~EFLAGS_TF;
-        }
-        ok = SetThreadContext(th, &c) != 0;
-    }
 
-    if (!self) ResumeThread(th);
-    CloseHandle(th);
-    return ok;
+    HANDLE th = GetCurrentThread();
+    if (!GetThreadContext(th, &c)) return false;
+    if (arm) {
+        BuildArmedContext(&c);
+    } else {
+        BuildDisarmedContext(&c);
+        c.EFlags &= ~EFLAGS_TF;
+    }
+    return SetThreadContext(th, &c) != 0;
 }
 
-void ArmAllThreads()
-{
-    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-    if (snap == INVALID_HANDLE_VALUE) {
-        Log("[CO] thread snapshot failed (%lu); only the calling thread is armed\n",
-            (unsigned long)GetLastError());
-        if (EditThreadContext(GetCurrentThreadId(), true)) RememberTid(GetCurrentThreadId());
-        return;
-    }
-
-    const DWORD self = GetCurrentThreadId();
-    const DWORD pid  = GetCurrentProcessId();
-    size_t armed = 0, failed = 0;
-
-    THREADENTRY32 te;
-    memset(&te, 0, sizeof(te));
-    te.dwSize = sizeof(te);
-    if (Thread32First(snap, &te)) {
-        do {
-            if (te.th32OwnerProcessID != pid) continue;
-            if (te.th32ThreadID == self || te.th32ThreadID == g_reporterTid) continue;
-            if (SeenTid(te.th32ThreadID)) continue;
-            if (EditThreadContext(te.th32ThreadID, true)) { RememberTid(te.th32ThreadID); ++armed; }
-            else ++failed;
-        } while (Thread32Next(snap, &te));
-    }
-    CloseHandle(snap);
-
-    if (EditThreadContext(self, true)) { RememberTid(self); ++armed; }
-
-    // The report says `armed`, and a session whose simulation thread is missing is INVALID (E2
-    // §1.4). A failed arm is a missing measurement, never a wrong one.
-    Log("[CO] armed %u thread(s), %u refused\n", (unsigned)armed, (unsigned)failed);
-}
-
-// Only threads that appeared after the initial arm, so an already-armed thread (possibly mid
-// single-step) is never rewritten.
-void ArmUnseenThreads()
-{
-    if (g_state != ST_ARMED) return;
-
-    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-    if (snap == INVALID_HANDLE_VALUE) return;
-
-    const DWORD self = GetCurrentThreadId();
-    const DWORD pid  = GetCurrentProcessId();
-    size_t armed = 0;
-
-    THREADENTRY32 te;
-    memset(&te, 0, sizeof(te));
-    te.dwSize = sizeof(te);
-    if (Thread32First(snap, &te)) {
-        do {
-            if (te.th32OwnerProcessID != pid) continue;
-            if (te.th32ThreadID == self || te.th32ThreadID == g_reporterTid) continue;
-            if (SeenTid(te.th32ThreadID)) continue;
-            if (EditThreadContext(te.th32ThreadID, true)) { RememberTid(te.th32ThreadID); ++armed; }
-        } while (Thread32Next(snap, &te));
-    }
-    CloseHandle(snap);
-
-    if (armed) Log("[CO] re-armed %u new thread(s)\n", (unsigned)armed);
-}
-
-// Reads every thread this unit armed back to "no debug registers". Used by the reporter (cap,
-// hotkey) and by Shutdown(), both of which must not allocate, hence the cached table.
-void DisarmAllThreads()
-{
-    const LONG n = g_seenCount;
-    size_t done = 0;
-    for (LONG i = 0; i < n && i < (LONG)MAX_SEEN_TIDS; ++i)
-        if (EditThreadContext(g_seenTid[i], false)) ++done;
-    Log("[CO] disarmed %u/%u thread(s)\n", (unsigned)done, (unsigned)(n > 0 ? n : 0));
-}
 
 // ---- life / alive, read-only ----------------------------------------------------------------
 // `hp` is the object site 2 is about to write. Exact: we break before the instruction executes.
@@ -457,13 +368,20 @@ LONG HandleSingleStep(PEXCEPTION_POINTERS ep)
 {
     CONTEXT* c = ep->ContextRecord;
     const DWORD dr6 = (DWORD)c->Dr6;
+    const bool live = (g_state == ST_ARMED) && (g_stop == 0);
 
     // (a) our own step-over: TF still set + DR6.BS. This unit is the only writer of TF.
     if (dr6 & DR6_BS) {
         if ((c->EFlags & EFLAGS_TF) == 0) return EXCEPTION_CONTINUE_SEARCH;   // not ours
         c->EFlags &= ~EFLAGS_TF;
         c->Dr6 = 0;
-        if (g_state == ST_ARMED) BuildArmedContext(c);   // re-arm; while stopping, stay disarmed
+        if (g_state == ST_ARMED) {
+            BuildArmedContext(c);   // re-arm
+        } else {
+            // Quiesced while this thread was mid step-over: it drops every DR of ours, for good.
+            // This is the thread's OWN context record, so it is not a foreign-thread edit.
+            BuildDisarmedContext(c);
+        }
         return EXCEPTION_CONTINUE_EXECUTION;
     }
 
@@ -475,10 +393,19 @@ LONG HandleSingleStep(PEXCEPTION_POINTERS ep)
     for (size_t i = 0; i < SITE_COUNT; ++i) {
         if (!(hit & (1u << i))) continue;
         if (!g_siteOk[i] || (uintptr_t)c->Eip != g_va[i]) continue;   // another DR user's slot
-        if (g_state == ST_ARMED && g_stop == 0) LogHit(i, c);
+        if (live) LogHit(i, c);
         ours |= (1u << i);
     }
     if (!ours) return EXCEPTION_CONTINUE_SEARCH;
+
+    if (!live) {
+        // Quiesced (hit cap, Ctrl+Alt+M, or a disarm in progress): this thread clears its own DRs
+        // from its own context record and the instruction at EIP runs untouched. Clearing Ln is
+        // what stops it from firing again; no other thread is involved, and no thread is suspended.
+        BuildDisarmedContext(c);
+        c->EFlags &= ~EFLAGS_TF;
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
 
     // Stop the immediate re-trigger at the same EIP, step the instruction, re-arm on the step.
     for (size_t i = 0; i < SITE_COUNT; ++i)
@@ -514,10 +441,18 @@ void BeginDisarm(const char* why)
 {
     if (InterlockedCompareExchange(&g_state, ST_STOPPING, ST_ARMED) != ST_ARMED) return;
     Log("[CO] disarming (%s) after %u hit(s)\n", why, (unsigned)g_hits);
-    DisarmAllThreads();
-    if (g_veh) { RemoveVectoredExceptionHandler(g_veh); g_veh = nullptr; }
-    InterlockedExchange(&g_state, ST_OFF);
-    Log("[CO] disarmed; no debug registers remain\n");
+
+    // Only a thread that runs this function can be disarmed here, and the only thread that does is
+    // ours: the reporter (cap/hotkey). The edit is therefore a self-edit.
+    EditCallingThreadContext(false);
+
+    // The VEH deliberately STAYS registered for the rest of the process. Threads armed by
+    // DLL_THREAD_ATTACH still hold DR0-DR3, and removing the handler would deliver their next #DB
+    // to the engine's SEH as an unhandled single-step (the process dies). Keeping it lets each of
+    // those threads neutralise itself on its first trap (HandleSingleStep, quiesced path), which is
+    // a thread editing its own context record — the safe direction. Shutdown() removes the handler
+    // when the process is on its way out, and the DRs that are still set expire with the process.
+    Log("[CO] disarmed this thread; other armed threads clear their own DRs on their next trap\n");
 }
 
 // Ctrl+Alt+M, edge-triggered so one press is one request.
@@ -531,26 +466,25 @@ bool HotkeyDown()
 
 unsigned __stdcall ReporterThread(void*)
 {
-    DWORD lastSweep = GetTickCount();
-    bool  wasDown   = false;
+    bool wasDown = false;
     for (;;) {
         Sleep(100);
-        if (g_state == ST_OFF) break;
+        if (g_state != ST_ARMED) break;              // ST_OFF: never installed; ST_STOPPING: quiesced
 
-        if (g_stop) { BeginDisarm("hit cap or hotkey"); continue; }
+        if (g_stop) { BeginDisarm("hit cap or hotkey"); break; }
 
         const bool down = HotkeyDown();
         if (down && !wasDown) {
             InterlockedExchange(&g_stop, 1);
             BeginDisarm("hotkey");
-            wasDown = down;
-            continue;
+            break;
         }
         wasDown = down;
-
-        const DWORD now = GetTickCount();
-        if (now - lastSweep >= REARM_MS) { lastSweep = now; ArmUnseenThreads(); }
     }
+
+    // This is the module's own thread, so clearing its DRs is a self-edit and cannot trap: it never
+    // executes one of the four sites. Harmless when it was never armed.
+    EditCallingThreadContext(false);
     return 0;
 }
 
@@ -666,6 +600,14 @@ void CombatObserve::Init()
             (unsigned)(SITE_COUNT - ok), (unsigned)SITE_COUNT);
     }
 
+    // The reporter thread is created while the state is still ST_OFF, so its own DLL_THREAD_ATTACH
+    // arrives before anything is armed and it never carries DRs of ours. OnThreadAttach also skips
+    // it by id, in case that notification lands late.
+    unsigned reporterTid = 0;
+    g_reporter = (HANDLE)_beginthreadex(nullptr, 0, ReporterThread, nullptr, 0, &reporterTid);
+    g_reporterTid = reporterTid;
+    if (!g_reporter) Log("[CO] reporter thread (cap/hotkey) failed; the observer runs without it\n");
+
     g_veh = AddVectoredExceptionHandler(1, CombatVeh);   // first-chance, same call as phase1 DrTrap
     if (!g_veh) {
         Log("[CO] install FAILED: AddVectoredExceptionHandler\n");
@@ -676,12 +618,18 @@ void CombatObserve::Init()
     // the engine's SEH and the process dies on an unhandled single-step.
     InterlockedExchange(&g_state, ST_ARMED);
 
-    unsigned reporterTid = 0;
-    g_reporter = (HANDLE)_beginthreadex(nullptr, 0, ReporterThread, nullptr, 0, &reporterTid);
-    g_reporterTid = reporterTid;
-    if (!g_reporter) Log("[CO] reporter thread failed; arming without the sweep\n");
-
-    ArmAllThreads();
+    // The FIRST armed thread, and the only one armed from here: the thread DllMain is running on.
+    // That is a self-edit (GetCurrentThread()), so it is safe inside the loader lock. Every other
+    // thread arms itself from its own DLL_THREAD_ATTACH.
+    const DWORD installTid = GetCurrentThreadId();
+    if (EditCallingThreadContext(true)) {
+        Log("[CO] armed the install thread tid=%u (DllMain's thread; other threads arm themselves "
+            "on DLL_THREAD_ATTACH)\n", (unsigned)installTid);
+    } else {
+        Log("[CO] WARNING: could not arm the install thread tid=%u (error %lu); coverage is now "
+            "DLL_THREAD_ATTACH only\n",
+            (unsigned)installTid, (unsigned long)GetLastError());
+    }
 
     Log("[CO] armed; hit cap %u, disarm with Ctrl+Alt+%c\n",
         (unsigned)MAX_HITS, (char)HOTKEY_VK);
@@ -689,12 +637,18 @@ void CombatObserve::Init()
 
 void CombatObserve::OnThreadAttach()
 {
-    // DRs are per-thread. This is the only correct place to arm a thread that did not exist when
-    // Init() ran; the reporter's 2 s sweep is the fallback for a call that never arrives.
+    // Runs ON the new thread, under the loader lock, for every thread the process creates. It must
+    // not allocate, log, open a file or call into the loader: only an int test and, when live, one
+    // Get/SetThreadContext pair on GetCurrentThread(). The decision itself is made in DllMain
+    // (Armed()), so the disabled cost is a single int test there and nothing here.
     if (g_state != ST_ARMED) return;
+
     const DWORD self = GetCurrentThreadId();
-    if (self == g_reporterTid || SeenTid(self)) return;
-    if (EditThreadContext(self, true)) RememberTid(self);
+    if (self == g_reporterTid) return;    // our own reporter: never armed (see Init)
+
+    // Fail silently: a thread that cannot be armed is a missing measurement on that thread, never a
+    // wrong one, and there is no safe way to log from under the loader lock.
+    EditCallingThreadContext(true);
 }
 
 void CombatObserve::Shutdown()
@@ -702,13 +656,23 @@ void CombatObserve::Shutdown()
     if (!g_entry) return;
 
     // Order matters. The VEH must keep servicing single-steps while the DRs are being cleared, so
-    // the state machine goes STOPPING (handle traps, never re-arm, never log) before the sweep,
+    // the state machine goes STOPPING (handle traps, never re-arm, never log) before the disarm,
     // and only becomes OFF after the VEH is gone.
     InterlockedExchange(&g_stop, 1);
     const LONG prev = InterlockedExchange(&g_state, ST_STOPPING);
-    // ST_STOPPING too: the reporter may have entered BeginDisarm() already; disarming twice is a
-    // no-op per thread, skipping it would leave DRs armed with the VEH about to be removed.
-    if (prev == ST_ARMED || prev == ST_STOPPING) DisarmAllThreads();
+    // Only if this unit ever armed anything: with the observer disabled the state never left
+    // ST_OFF, so a disabled install touches no thread context even on the way out.
+    if (prev == ST_ARMED || prev == ST_STOPPING) {
+        // THIS thread only — the detach thread is the one running Shutdown, so this is a self-edit.
+        //
+        // DELIBERATE: DR0-DR3 on every other thread are left set and expire with the process. The
+        // only way to clear them from here would be OpenThread + SuspendThread + SetThreadContext
+        // on a foreign thread, which is the crash class this build exists to remove (the target may
+        // hold the loader lock or a heap lock, and we would resume it into a context we guessed).
+        // A stale DR costs at most one extra trap on that thread before it exits, and the process is
+        // already winding down.
+        EditCallingThreadContext(false);
+    }
     if (g_veh) { RemoveVectoredExceptionHandler(g_veh); g_veh = nullptr; }
     InterlockedExchange(&g_state, ST_OFF);
 

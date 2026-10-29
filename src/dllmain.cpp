@@ -508,13 +508,18 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // initialise the CRT's per-thread state, which crashed deref_guard's reporter thread.
         _beginthreadex(nullptr, 0, PollThread, nullptr, 0, nullptr);
     } else if (reason == DLL_THREAD_ATTACH) {
-        // Delivered on the new thread (DisableThreadLibraryCalls is gone, see above). Arms this
-        // thread's DRs when the observer is live; a no-op int test when it is not.
-        CombatObserve::OnThreadAttach();
+        // Delivered ON the new thread (DisableThreadLibraryCalls is gone, see above), which is the
+        // only safe moment to program that thread's DR0-DR3: the edit is a self-edit, so nothing is
+        // opened, suspended or re-contexted from outside. When the observer is off this is one int
+        // test and nothing else -- no allocation, no logging, no loader call, because it runs under
+        // the loader lock.
+        if (CombatObserve::Armed()) CombatObserve::OnThreadAttach();
     } else if (reason == DLL_PROCESS_DETACH) {
         g_run = false;
-        // Clears Dr0-Dr3/Dr6/Dr7 and TF on every thread this unit programmed, then removes the VEH.
-        // Safe here: it allocates nothing and its thread list is a fixed table, not a Toolhelp walk.
+        // Clears the DETACH thread's own Dr0-Dr3/Dr6/Dr7/TF and removes the VEH. DRs left set on
+        // other threads expire with the process by design: clearing them would need
+        // OpenThread/SuspendThread/SetThreadContext on a foreign thread, which is the crash class
+        // this build removes.
         CombatObserve::Shutdown();
         Sleep(120);
     }
