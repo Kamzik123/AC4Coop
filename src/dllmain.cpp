@@ -451,14 +451,11 @@ static void InstallMultiInstance()
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
 {
     if (reason == DLL_PROCESS_ATTACH) {
-        // NOTE: DisableThreadLibraryCalls(hMod) used to be the first line here. It is deliberately
-        // NOT called any more, because the stage-2A observer needs DLL_THREAD_ATTACH to be
-        // delivered: debug registers are PER-THREAD state, so every thread that can execute one of
-        // the four observed functions must have DR0-DR3 programmed in its own context. Thread
-        // attach is the only notification that arrives *on* the new thread, which is where
-        // SetThreadContext is cheapest and race-free. Cost: the loader now calls this DllMain on
-        // every thread create/destroy in the process (an empty case below when the observer is off
-        // — one int test, no allocation, no API call). Judged worth it for per-site DR coverage.
+        // No per-thread state anywhere in this module, so the loader has no reason to call us on
+        // thread create/destroy. (This supersedes the earlier exception, which existed only because
+        // the stage-2A observer armed per-thread debug registers; it is now a byte-patch hook that
+        // covers every thread from one write to the site.)
+        DisableThreadLibraryCalls(hMod);
 
         // Build gate FIRST: everything below patches engine code, and none of it may run against a
         // build whose layout we have not verified. Fail closed on patching, not on loading -- an
@@ -488,12 +485,12 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // (+0x114 / +0x118), which the node constructor leaves NULL. [Coop] GuardNullTarget, default 1.
         DerefGuard::Init();
 
-        // Stage 2A combat observer (E2-combat.md §1.2). OBSERVATION ONLY: four hardware execution
-        // breakpoints via DR0-DR3 + a first-chance VEH; no byte patches, no game-memory writes, no
-        // engine calls. Off by default ([Coop] CombatObserve=0) — with the flag at 0 this returns
-        // before the VEH is registered and before any thread context is touched, so the per-frame
-        // cost of the disabled unit is zero (it has no per-frame code at all; the only entry point
-        // that runs is one GetPrivateProfileIntA at attach).
+        // Stage 2A combat observer (E2-combat.md §1.2). OBSERVATION ONLY, installed as a byte-patch
+        // hook: four whole-instruction prologues are detoured into private stubs that log the call
+        // arguments and re-execute the stolen bytes. No engine state is touched, no engine function
+        // is called, and the original bytes are restored on detach. Off by default
+        // ([Coop] CombatObserve=0) -- with the flag at 0 this is one GetPrivateProfileIntA and one
+        // int test: no log file, no allocation, no VirtualProtect, no detour, no thread.
         CombatObserve::Init();
 
         // Front B (peer-to-peer UDP link) is started on the first in-world frame instead of at
@@ -507,19 +504,13 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // _vsnprintf_s / fputs / fflush / printf) and Phase1 callees do too. CreateThread does not
         // initialise the CRT's per-thread state, which crashed deref_guard's reporter thread.
         _beginthreadex(nullptr, 0, PollThread, nullptr, 0, nullptr);
-    } else if (reason == DLL_THREAD_ATTACH) {
-        // Delivered ON the new thread (DisableThreadLibraryCalls is gone, see above), which is the
-        // only safe moment to program that thread's DR0-DR3: the edit is a self-edit, so nothing is
-        // opened, suspended or re-contexted from outside. When the observer is off this is one int
-        // test and nothing else -- no allocation, no logging, no loader call, because it runs under
-        // the loader lock.
-        if (CombatObserve::Armed()) CombatObserve::OnThreadAttach();
     } else if (reason == DLL_PROCESS_DETACH) {
         g_run = false;
-        // Clears the DETACH thread's own Dr0-Dr3/Dr6/Dr7/TF and removes the VEH. DRs left set on
-        // other threads expire with the process by design: clearing them would need
-        // OpenThread/SuspendThread/SetThreadContext on a foreign thread, which is the crash class
-        // this build removes.
+        // Restores each armed site's original prologue bytes (Hook::RestoreFunction) and logs
+        // "[CO] disarmed N sites". There is no VEH and no per-thread context to clean up: the patch
+        // is a property of the code page, not of any thread. Stub pages are left allocated on
+        // purpose -- a thread may still be inside one at detach, and it exits through the restored
+        // site regardless.
         CombatObserve::Shutdown();
         Sleep(120);
     }
