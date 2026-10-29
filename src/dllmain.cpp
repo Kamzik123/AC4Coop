@@ -409,6 +409,21 @@ static unsigned __stdcall PollThread(void*)
         }
         lprev = l;
 
+        // Ctrl+Alt+M (edge-triggered): disarm the stage-2A observer -- puts the original prologue bytes
+        // back at every armed site so nothing more is logged. M is the only other unbound letter in this
+        // file (the whole bound set is the F-keys, V and Ctrl+Alt+J/K/L), and both modifiers are required
+        // at the edge, so a plain M in gameplay never fires. This runs on THIS thread: it creates no
+        // thread, allocates nothing and touches no engine state -- Disarm() only writes the saved bytes
+        // back. With the observer off ([Coop] CombatObserve=0) Armed() is false and this is a no-op.
+        static bool mprev = false;
+        const bool m = (GetAsyncKeyState('M') & 0x8000) != 0;
+        if (m && !mprev) {
+            const bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            const bool alt  = (GetAsyncKeyState(VK_MENU)    & 0x8000) != 0;
+            if (ctrl && alt) { if (CombatObserve::Armed()) CombatObserve::Disarm(); }
+        }
+        mprev = m;
+
         // (Phase 0 position logging removed — Phase 1 uses the main-thread frame hook.)
         (void)lastPlayer;
     }

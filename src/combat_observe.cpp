@@ -254,7 +254,11 @@ extern "C" void __cdecl CombatObserve_LogHit(int siteId, const void* saved)
 namespace {
 
 // Builds one stub (see the file header for the layout). VirtualAlloc, never a code cave: the
-// page is ours, writable-by-us only until the first hit, and freed only with the process.
+// page is ours, writable-by-us only until the first hit, and DELIBERATELY never VirtualFree'd.
+// A thread can still be executing inside a stub when the detour is undone (detach, or the
+// Ctrl+Alt+M disarm); freeing the page under it would fault on the very next instruction. Its
+// tail re-executes the stolen bytes and jumps back into the site, so an in-flight thread finishes
+// cleanly through the restored code. Leaking four small pages per process is the correct trade.
 BYTE* BuildStub(int siteId, const BYTE* stolen, size_t steal, uintptr_t resume)
 {
     BYTE* s = (BYTE*)VirtualAlloc(nullptr, STUB_SIZE, MEM_COMMIT | MEM_RESERVE,
@@ -423,26 +427,50 @@ void CombatObserve::Init()
         Log("[CO] install FAILED: no site verified -> nothing patched\n");
 }
 
-void CombatObserve::Shutdown()
+// Restores the original prologue at every armed site and clears the armed flags. Returns the count
+// actually restored. Shared by Shutdown() (detach) and Disarm() (Ctrl+Alt+M) so both undo a site
+// through the exact same path: Hook::RestoreFunction with the bytes saved at install time.
+//
+// The stub pages are deliberately NOT VirtualFree'd, here or in Shutdown(). A game thread may still
+// be executing inside one when this runs; freeing it would crash the process on the next instruction.
+// The stub's tail is the stolen bytes plus the slot jump into the (now restored) site, so an in-flight
+// thread exits through the original code either way. Leaking four small pages per process is the
+// correct trade against a crash.
+static int RestoreAllSites()
 {
-    if (!g_installed) return;
-
     int restored = 0;
     for (size_t i = 0; i < SITE_COUNT; ++i) {
         if (!g_armed[i]) continue;
-        // Restore the exact original bytes first: new hits stop here. The stub page is intentionally
-        // NOT freed -- a thread may still be executing inside it at detach, and it will exit through
-        // the stolen bytes + slot jump into the (already restored) site either way.
         Hook::RestoreFunction(g_va[i], kSites[i].steal, g_orig[i]);
         g_armed[i] = false;
         ++restored;
     }
-    InterlockedExchange(&g_armedCount, 0);
+    if (restored > 0) InterlockedExchange(&g_armedCount, 0);
+    return restored;
+}
+
+void CombatObserve::Shutdown()
+{
+    if (!g_installed) return;
+
+    const int restored = RestoreAllSites();
 
     Log("[CO] disarmed %d sites\n", restored);
 
     if (g_log) { fclose(g_log); g_log = nullptr; }
     g_installed = false;
+}
+
+// Disarm, not Shutdown: the log file stays open and the unit stays installed, so the sites can be
+// inspected for a "disarmed N sites" line at the moment of the press. A second call is a no-op --
+// g_armedCount is already 0, so nothing is written and nothing is logged.
+void CombatObserve::Disarm()
+{
+    if (!g_installed) return;       // observer never installed (flag off) or already shut down
+    if (g_armedCount <= 0) return;  // idempotent: nothing armed, so nothing to restore
+
+    const int restored = RestoreAllSites();
+    Log("[CO] disarmed %d sites\n", restored);
 }
 
 bool CombatObserve::Armed()

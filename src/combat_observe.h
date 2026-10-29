@@ -18,5 +18,6 @@ class CombatObserve
 public:
     static void Init();       // DLL_PROCESS_ATTACH, next to DerefGuard::Init()
     static void Shutdown();   // DLL_PROCESS_DETACH -- restores the original prologues
+    static void Disarm();     // Ctrl+Alt+M -- restores the prologues, keeps the log and the stub pages
     static bool Armed();      // true while at least one site is patched
 };
