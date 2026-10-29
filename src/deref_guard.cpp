@@ -101,6 +101,35 @@ const uintptr_t LITERAL_NR_EPILOGUE = 0x006818E6;   // pop edi; pop ebx; pop esi
 const uintptr_t LITERAL_NR_CONT     = 0x006817FF;   // mov edi,eax
 const size_t    NR_TRAMP_SIZE       = 19;           // call 5 + test 2 + jnz 2 + jmp 5 + jmp 5
 
+// Part D (task 0.3 / D-015): READ-ONLY observer on sub_733FB0 itself. It changes no behaviour -- it
+// only records the return address that the function's own `ret` is about to pop, when it returns 0.
+// Prologue, verified against the IDB (bytes below are the literal oracle):
+//
+//   0x00733FB0  8B C1                  mov   eax,ecx                      <- stolen (2 bytes)
+//   0x00733FB2  0F B6 88 D4 00 00 00   movzx ecx,byte ptr [eax+0D4h]    <- stolen (7 bytes)
+//   0x00733FB9  83 F9 04               cmp   ecx,4                      <- resume (func+9)
+//
+// 9 bytes is the smallest whole-instruction prefix >= 5. Neither stolen instruction touches the stack
+// or a callee-saved register (they write EAX/ECX only), and the trampoline re-executes them verbatim.
+const uintptr_t LITERAL_NO_FUNC  = 0x00733FB0;   // EntityHandle_GetEntity, __thiscall, no stack args
+const size_t    NO_STEAL_LEN     = 9;
+const size_t    NO_TRAMP_SIZE    = 19;           // 9 stolen + FF 25 <slot> + dword target
+const BYTE      NO_PROLOGUE[NO_STEAL_LEN] =
+    { 0x8B, 0xC1, 0x0F, 0xB6, 0x88, 0xD4, 0x00, 0x00, 0x00 };
+
+const uint32_t  NO_MAX_LOGS      = 2000;         // hard cap on null-return lines
+const uint32_t  NO_MAX_CALLERS   = 64;           // distinct callers remembered
+
+struct NoCaller { DWORD ra; volatile LONG count; };
+
+NoCaller       g_noCallers[NO_MAX_CALLERS];
+volatile LONG  g_noCallersUsed = 0;
+volatile LONG  g_noNulls       = 0;   // every null return, beyond the cap too
+volatile LONG  g_noCapLogged   = 0;
+volatile LONG  g_noTableFull   = 0;
+DWORD          g_noTramp       = 0;   // read by NullObsDetour's inline asm
+bool           g_noInstalled   = false;
+
 // A rel32 patch reaches +-2 GB. Require a comfortable margin so the boundary itself is never used.
 const uintptr_t MAX_CAVE_DELTA = 0x7FFF0000;
 
@@ -809,6 +838,143 @@ static bool InstallNullReturnFix(uintptr_t moduleBase)
     return true;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Part D: read-only observer on sub_733FB0's NULL returns (task 0.3, D-015).
+// ---------------------------------------------------------------------------------------------
+//
+// sub_733FB0 is __thiscall with no stack arguments (the call at 0x006817FA is followed directly by
+// `mov edi,eax` at 0x006817FF, no `add esp`), so it ends in a plain `ret` -- and it has a second
+// exit at 0x00733FD8, `jmp sub_4956E0`, a tail call whose `ret` pops the same caller slot. That is
+// why the observer intercepts the function's ENTRY and remembers the value its own `ret` will pop,
+// rather than interposing on a return instruction: both exits are covered by one saved word.
+//
+// Detour (entered through the E9 the patcher writes at 0x00733FB0, so it inherits the call frame):
+//
+//   8B 14 24         mov  edx,[esp]                  ; caller's return address -- what `ret` pops
+//   52               push edx                        ; [savedRA][RA]
+//   FF 15 <imm32>    call dword ptr [g_noTramp]      ; stolen bytes, then jmp func+9; its ret -> here
+//   85 C0            test eax,eax                    ; EAX = sub_733FB0's return value
+//   75 0D            jnz  done
+//   50               push eax                        ; preserve the return value EXACTLY
+//   8B 4C 24 04      mov  ecx,[esp+4]                ; savedRA
+//   51               push ecx                        ; __cdecl argument
+//   E8 <rel32>       call LogNullReturn
+//   83 C4 04         add  esp,4
+//   58               pop  eax
+// done:
+//   5A               pop  edx                        ; discard savedRA
+//   C3               ret                             ; -> the real caller
+//
+// Stack, word for word: entry [RA] -> [savedRA][RA] -> the `call` pushes [ret2][savedRA][RA] -> the
+// function's own `ret` (or the tail-called sub_4956E0's) pops ret2 -> [savedRA][RA] -> `pop edx` ->
+// [RA] -> `ret` -> caller. The body therefore runs on a frame 8 bytes deeper than the original; on
+// x86 with 4-byte-aligned frames that is invisible, and sub_733FB0 has neither stack arguments nor a
+// frame-pointer setup to disturb. EAX is saved/restored around the logging call; EBX/ESI/EDI/EBP are
+// never touched. EDX is caller-saved and the function is free to clobber it, so the detour's use of
+// it is not observable (the value it leaves is the saved return address, by design).
+//
+// The logging call is the project's Log() (OutputDebugStringA + fputs + fflush): it can block on a
+// slow disk, but it is bounded to NO_MAX_LOGS lines and stops after that, and the detour stays
+// installed because it is read-only.
+void __cdecl LogNullReturn(DWORD caller);   // defined below; visible to the inline asm
+
+__declspec(naked) void NullObsDetour()
+{
+    __asm {
+        mov  edx, dword ptr [esp]
+        push edx
+        call dword ptr [g_noTramp]
+        test eax, eax
+        jnz  obs_done
+        push eax
+        mov  ecx, dword ptr [esp + 4]
+        push ecx
+        call LogNullReturn
+        add  esp, 4
+        pop  eax
+    obs_done:
+        pop  edx
+        ret
+    }
+}
+
+// __cdecl, called from the detour with the saved return address. No allocation, no engine call, and
+// no exception may escape into the game thread.
+void __cdecl LogNullReturn(DWORD caller)
+{
+    const LONG n = InterlockedIncrement(&g_noNulls);
+    if (n > (LONG)NO_MAX_LOGS)
+        return;                                        // silent from here on; the count keeps rising
+    if (n == (LONG)NO_MAX_LOGS) {
+        if (InterlockedExchange(&g_noCapLogged, 1) == 0)
+            Log("[NO] cap reached (2000)\n");
+        return;
+    }
+
+    const LONG used = g_noCallersUsed;
+    for (LONG i = 0; i < used && i < (LONG)NO_MAX_CALLERS; ++i) {
+        if (g_noCallers[i].ra == caller) {
+            const LONG c = InterlockedIncrement(&g_noCallers[i].count);
+            Log("[NO] null return -> caller 0x%08X (n=%u)\n", (unsigned)caller, (unsigned)c);
+            return;
+        }
+    }
+
+    const LONG slot = InterlockedIncrement(&g_noCallersUsed) - 1;
+    if (slot < (LONG)NO_MAX_CALLERS) {
+        g_noCallers[slot].ra    = caller;
+        g_noCallers[slot].count = 1;
+        Log("[NO] null return -> caller 0x%08X (n=%u)\n", (unsigned)caller, 1u);
+    } else if (InterlockedExchange(&g_noTableFull, 1) == 0) {
+        Log("[NO] caller table full\n");                // counts only from here on
+    }
+}
+
+static bool InstallNullReturnObserver(uintptr_t moduleBase)
+{
+    const uintptr_t func = VaLiteral(moduleBase, LITERAL_NO_FUNC);
+
+    // Read-only check first: a different build (or an already-patched prologue) is left untouched.
+    if (memcmp((const void*)func, NO_PROLOGUE, NO_STEAL_LEN) != 0) {
+        const BYTE* f = (const BYTE*)func;
+        Log("[NO] install FAILED @ 0x%08X: prologue mismatch (%02X %02X %02X %02X %02X %02X %02X %02X %02X)\n",
+            (unsigned)func, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8]);
+        return false;
+    }
+
+    // Fresh allocation from the same allocator the guard caves use; it never reuses a live cave, so
+    // it cannot overlap them.
+    BYTE* t = AllocCaveNear(func, NO_TRAMP_SIZE + 16, "null-observer");
+    if (!t) {
+        Log("[NO] install FAILED @ 0x%08X: no trampoline memory\n", (unsigned)func);
+        return false;
+    }
+
+    memcpy(t, NO_PROLOGUE, NO_STEAL_LEN);              // 8B C1 / 0F B6 88 D4 00 00 00
+    // `FF 25 <slot>` is jmp dword ptr [slot], i.e. THROUGH the dword at `slot`, so the target lives in
+    // a data slot after the code (position-independent, valid wherever the cave landed).
+    t[9]  = 0xFF;
+    t[10] = 0x25;
+    *reinterpret_cast<DWORD*>(t + 11) = (DWORD)(uintptr_t)(t + 15);
+    *reinterpret_cast<DWORD*>(t + 15) = (DWORD)(func + NO_STEAL_LEN);
+    FlushInstructionCache(GetCurrentProcess(), t, NO_TRAMP_SIZE);
+
+    g_noTramp = (DWORD)(uintptr_t)t;
+
+    // E9 rel32 + 4x 0x90 (9 bytes) via the project's detour helper, which NOP-pads the remainder.
+    if (!Hook::DetourFunc((BYTE*)func, (DWORD)(uintptr_t)&NullObsDetour, (DWORD)NO_STEAL_LEN)) {
+        Log("[NO] install FAILED @ 0x%08X: DetourFunc\n", (unsigned)func);
+        VirtualFree(t, 0, MEM_RELEASE);
+        g_noTramp = 0;
+        return false;
+    }
+
+    g_noInstalled = true;
+    Log("[NO] observer installed @ 0x%08X (steal=%u, tramp=0x%08X)\n",
+        (unsigned)func, (unsigned)NO_STEAL_LEN, (unsigned)g_noTramp);
+    return true;
+}
+
 void DerefGuard::Init()
 {
     if (g_entry) return;
@@ -828,6 +994,8 @@ void DerefGuard::Init()
     const bool nullGuard     = GetPrivateProfileIntA("Coop", "GuardNullTarget", 1, INI_PATH) != 0;
     const bool staleGuard    = GetPrivateProfileIntA("Coop", "GuardStaleTarget", 1, INI_PATH) != 0;
     const bool nullReturnFix = GetPrivateProfileIntA("Coop", "FixNullReturn", 1, INI_PATH) != 0;
+    // Part D is read-only and default ON: it observes, it never changes an engine decision.
+    const bool nullObserver  = GetPrivateProfileIntA("Coop", "NullReturnObserver", 1, INI_PATH) != 0;
 
     if (!nullGuard)
         OutputDebugStringA("[DG] null-target guards disabled by [Coop] GuardNullTarget=0\n");
@@ -835,7 +1003,9 @@ void DerefGuard::Init()
         OutputDebugStringA("[DG] stale-target guard disabled by [Coop] GuardStaleTarget=0\n");
     if (!nullReturnFix)
         OutputDebugStringA("[NR] null-return fix disabled by [Coop] FixNullReturn=0\n");
-    if (!nullGuard && !staleGuard && !nullReturnFix) {
+    if (!nullObserver)
+        OutputDebugStringA("[NO] observer disabled by [Coop] NullReturnObserver=0\n");
+    if (!nullGuard && !staleGuard && !nullReturnFix && !nullObserver) {
         OutputDebugStringA("[DG] disabled: all [Coop] guards are 0\n");
         return;
     }
@@ -878,6 +1048,13 @@ void DerefGuard::Init()
         installedAny |= InstallNullReturnFix(moduleBase);
     } else {
         Log("[NR] FixNullReturn=0 (skipped)\n");
+    }
+
+    // Part D: read-only, so it installs independently of the three guards above.
+    if (nullObserver) {
+        installedAny |= InstallNullReturnObserver(moduleBase);
+    } else {
+        Log("[NO] NullReturnObserver=0 (skipped)\n");
     }
 
     g_installed = installedAny;
