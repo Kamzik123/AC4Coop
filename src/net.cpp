@@ -40,6 +40,31 @@ namespace {
         if (f) { fputs(s, f); fflush(f); }
     }
 
+    // ---- same-PC instance slot marker (D-018) ----------------------------------------------------
+    // A named mutex is an OWNED marker: whoever creates it first is slot 1, a second process that
+    // finds it already existing is slot 2. Unlike a bind failure this cannot be defeated by
+    // SO_REUSEADDR, which (deliberately, see the bind comment below) lets any number of sockets
+    // bind the same port, so bind() never fails and the old "LocalPort taken" signal was dead.
+    HANDLE             g_slotMutex = NULL;   // kept open for the process lifetime; closing it releases the marker
+
+    bool DetectSecondInstance() {
+        static bool s_done   = false;
+        static bool s_second = false;
+        if (!s_done) {
+            s_done = true;
+            SetLastError(0);
+            HANDLE h = CreateMutexW(NULL, FALSE, L"AC4Coop_InstanceSlot_v1");
+            if (!h) {
+                char m[96]; wsprintfA(m, "[Net] instance marker failed err=%lu (assuming slot 1)\n", GetLastError()); dbg(m);
+                s_second = false;
+            } else {
+                s_second = (GetLastError() == ERROR_ALREADY_EXISTS);
+                g_slotMutex = h;   // never closed, not even on shutdown: it IS the marker
+            }
+        }
+        return s_second;
+    }
+
     volatile LONG g_txPackets = 0, g_txBytes = 0, g_txEnts = 0, g_rxPackets = 0, g_rxBytes = 0;
 
     // ---- Phase 2: compact entity wire ---------------------------------------------------------
@@ -332,22 +357,31 @@ bool Init() {
     // datagrams - so the live game always receives, whatever else is holding the port.
     { BOOL reuse = TRUE; setsockopt(g_sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)); }
 
+    // Instance slot comes from the owned mutex marker FIRST (D-018). With SO_REUSEADDR below the
+    // bind can never fail, so a bind failure alone can no longer tell the 2nd instance apart.
+    g_secondInstance = DetectSecondInstance();
+
     // Bind LocalPort; if it's already taken (2nd instance on the same PC sharing this ini), bind
     // PeerPort instead and send to LocalPort. Two-PC setups use LocalPort==PeerPort and just bind.
-    int bindPort = localPort, sendPort = peerPort;
+    // Slot 1 keeps exactly this behaviour; slot 2 is decided by the marker above, and a bind failure
+    // is kept only as a SECONDARY signal (it can still fire for other reasons).
+    int bindPort = g_secondInstance ? peerPort  : localPort;
+    int sendPort = g_secondInstance ? localPort : peerPort;
     sockaddr_in local{};
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = INADDR_ANY;
     local.sin_port = htons((u_short)bindPort);
     if (bind(g_sock, (sockaddr*)&local, sizeof(local)) == SOCKET_ERROR) {
-        bindPort = peerPort; sendPort = localPort;
-        g_secondInstance = true;   // LocalPort taken -> this is the same-PC 2nd instance (guest)
+        bindPort = g_secondInstance ? localPort : peerPort;
+        sendPort = g_secondInstance ? peerPort : localPort;
+        g_secondInstance = true;   // bind failure (secondary signal) -> this is the same-PC 2nd instance (guest)
         local.sin_port = htons((u_short)bindPort);
         if (bind(g_sock, (sockaddr*)&local, sizeof(local)) == SOCKET_ERROR) {
             char m[96]; wsprintfA(m, "[Net] bind(%d/%d) failed err=%d\n", localPort, peerPort, WSAGetLastError()); dbg(m);
             closesocket(g_sock); g_sock = INVALID_SOCKET; return false;
         }
     }
+    { char m[96]; wsprintfA(m, "[Net] instance slot=%d bind=%d peer=%d\n", g_secondInstance ? 2 : 1, bindPort, sendPort); dbg(m); }
 
     g_peer.sin_family = AF_INET;
     g_peer.sin_port = htons((u_short)sendPort);
