@@ -967,6 +967,9 @@ static float   g_ghostSyncQuat[4] = {0,0,0,1}; // peer's ship rotation quaternio
 static volatile long g_ghostHasSync = 0;     // 1 = we have a peer ship position to drive to
 static bool    g_ghostAuto = false;          // 1 = spawned by the net path (despawn on disembark); 0 = manual F12
 static float   g_localShipZ = 0.0f;          // the LOCAL ship's current Z (water height, bobs with waves)
+// A1 ([Coop] ActionDeathLog): the local player's current action alias, mirrored here by
+// CaptureLocalState so EntitySyncTick can print it at a death without re-reading the engine.
+static uint32_t g_capPlayerAlias = 0;
 
 // Read a player entity's full state (transform + locomotion) into a PlayerState.
 bool Phase1::CaptureLocalState(PlayerState& s) {
@@ -1064,6 +1067,7 @@ bool Phase1::CaptureLocalState(PlayerState& s) {
                 void* act = ac->GetCurrentAction(&mirrored, 0, ACTLAYER_PRIMARY);
                 if (readable(act, 0x14)) {
                     s.actionAlias = *(uint32_t*)((char*)act + 8);
+                    g_capPlayerAlias = s.actionAlias;                  // A1: mirror for the [AD] log
                     void* bpc = *(void**)((char*)act + 0x0C);          // Action::m_BodyPartChannel
                     if (readable(bpc, 0x0A)) s.actionChannel = *(uint16_t*)((char*)bpc + 8);
                     s.actionLayer = *(int32_t*)((char*)act + 0x10);    // Action::m_Layer (ACTLayer)
@@ -2250,6 +2254,35 @@ static HostLifeWatch s_hostLife[256];
 static int  s_hostLifeN = 0;
 static unsigned int s_hostLifeGen = 0;
 
+// ---- A1 death-animation capture ([Coop] ActionDeathLog, default 0) -----------------------------
+// Every replicated death plays one hardcoded clip because the kill lane bypasses the engine's reaction
+// system, which normally selects the clip from the damage context. The real killer-action ->
+// victim-death-clip table can only be measured from kills the engine performs ITSELF, so this records
+// each captured entity's last non-zero action alias and prints it at the death transition. Read-only:
+// no engine write, no hook, no wire change. Gate OFF => one ini read and one branch per entity.
+struct AdAlias { uint64_t objId; uint32_t alias; };
+static AdAlias s_adRing[128];
+static int     s_adRingN    = 0;    // used entries
+static int     s_adRingNext = 0;    // overwrite cursor once full
+static int     s_adLines    = 0;    // [AD] lines emitted (cap 500)
+static int     s_adLog      = -1;   // ini [Coop] ActionDeathLog, read once
+
+static void AdAliasPut(uint64_t objId, uint32_t alias) {
+    if (!objId || !alias) return;                       // 0 = "no action yet"; never overwrite with it
+    for (int i = 0; i < s_adRingN; ++i)
+        if (s_adRing[i].objId == objId) { s_adRing[i].alias = alias; return; }
+    if (s_adRingN < 128) { s_adRing[s_adRingN].objId = objId; s_adRing[s_adRingN].alias = alias; ++s_adRingN; return; }
+    int slot = s_adRingNext % 128;
+    s_adRing[slot].objId = objId; s_adRing[slot].alias = alias;
+    ++s_adRingNext;
+}
+
+static uint32_t AdAliasGet(uint64_t objId) {
+    if (!objId) return 0;
+    for (int i = 0; i < s_adRingN; ++i) if (s_adRing[i].objId == objId) return s_adRing[i].alias;
+    return 0;
+}
+
 static HostLifeWatch* HostLifeFor(uint64_t objId) {
     for (int i = 0; i < s_hostLifeN; ++i) if (s_hostLife[i].objId == objId) return &s_hostLife[i];
     if (s_hostLifeN >= 256) return nullptr;
@@ -2305,6 +2338,7 @@ static void MarkPeerApplied(unsigned int e) {
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
 static void CaptureGuards(EntityPacket& pkt) {
+    if (s_adLog < 0) s_adLog = GetPrivateProfileIntA("Coop", "ActionDeathLog", 0, ".\\AC4Coop.ini");
     ObjMapReset();                       // rebuild the objId table for this capture
     World* world = World::GetCurrentWorld();
     if (!world) return;
@@ -2427,6 +2461,25 @@ static void CaptureGuards(EntityPacket& pkt) {
             // seen in the previous capture with a plausible Life and now read 0xFFFF. An entity first seen
             // already at 0xFFFF (recycled service, dropped-out entity) is NOT an event, and once a watch has
             // emitted it is tombstoned so neither garbage nor a repeated 0xFFFF can emit again.
+            // A1: read the entity's CURRENT action clip BEFORE the death decision, so that on the death
+            // frame the ring already holds the engine's own chosen death clip — that value is the mapping.
+            // Alertness: HumanGroundStage (Fight=4=aggro, Navigation=1=calm).
+            es.stage = 0;
+            es.actionAlias = 0;
+            Human* gh = AIEntityHelper::GetHuman(e);
+            if (gh && readable(gh, 4)) {
+                HumanDataBundle* gpB = gh->m_Data.m_HumanDataBundle;
+                if (gpB && readable(gpB, 4)) es.stage = (uint8_t)(int32_t)gpB->m_GroundData.m_HumanGroundStage;
+                // Current action clip (file alias) — for the mirror drive on the peer.
+                ActionComponent* ac = gh->GetActionComponent();
+                if (ac && readable(ac, 0x40)) {
+                    unsigned char mirrored = 0;
+                    void* act = ac->GetCurrentAction(&mirrored, 0, ACTLAYER_PRIMARY);
+                    if (act && readable(act, 0x14)) es.actionAlias = *(uint32_t*)((char*)act + 8);
+                }
+            }
+            if (s_adLog && es.objId) AdAliasPut(es.objId, es.actionAlias);   // A1 (OFF => no work)
+
             uint64_t deathId = 0;
             if (es.objId) {
                 HostLifeWatch* w = HostLifeFor(es.objId);
@@ -2437,6 +2490,18 @@ static void CaptureGuards(EntityPacket& pkt) {
                         if (es.hp == 0xFFFFu) {
                             if (w->seen && w->lastLife >= 1 && w->lastLife <= 2000) {
                                 deathId = es.objId;
+                                // A1: one line per death transition, emitted here — there is exactly one
+                                // such site. Single-shot is structural: this needs a watch that already
+                                // had a plausible Life and now reads 0xFFFF, and the tombstone is set on
+                                // the next lines, so the same objId can never reach this block twice.
+                                if (s_adLog && s_adLines < 500) {
+                                    uint32_t victim = AdAliasGet(es.objId);
+                                    float dx = e->m_GlobalMatrix.M41 - px, dy = e->m_GlobalMatrix.M42 - py, dz = e->m_GlobalMatrix.M43 - pz;
+                                    float dist = sqrtf(dx*dx + dy*dy + dz*dz);
+                                    L("[AD] player=%u victim=%u objId=%llu dist=%.1f ent=%08X\n",
+                                      g_capPlayerAlias, victim, (unsigned long long)es.objId, dist, (unsigned)e);
+                                    ++s_adLines;
+                                }
                                 w->tombstoned = true;
                                 w->life = 0xFFFFu;
                             }
@@ -2456,21 +2521,6 @@ static void CaptureGuards(EntityPacket& pkt) {
                 if (!seen && s_capDeadN < 64) {
                     s_capDead[s_capDeadN++] = e;
                     L("[Cap] ent=%08X dead=1 ai=%08X (captured into the snapshot)\n", e, ai);
-                }
-            }
-            // Alertness: HumanGroundStage (Fight=4=aggro, Navigation=1=calm).
-            es.stage = 0;
-            es.actionAlias = 0;
-            Human* gh = AIEntityHelper::GetHuman(e);
-            if (gh && readable(gh, 4)) {
-                HumanDataBundle* gpB = gh->m_Data.m_HumanDataBundle;
-                if (gpB && readable(gpB, 4)) es.stage = (uint8_t)(int32_t)gpB->m_GroundData.m_HumanGroundStage;
-                // Current action clip (file alias) — for the mirror drive on the peer.
-                ActionComponent* ac = gh->GetActionComponent();
-                if (ac && readable(ac, 0x40)) {
-                    unsigned char mirrored = 0;
-                    void* act = ac->GetCurrentAction(&mirrored, 0, ACTLAYER_PRIMARY);
-                    if (act && readable(act, 0x14)) es.actionAlias = *(uint32_t*)((char*)act + 8);
                 }
             }
             ++count;
@@ -6399,6 +6449,9 @@ static void OnFrameInner(Human* updatedHuman) {
                 s_entHealthN = 0;
                 s_hostLifeN = 0;
                 s_pushedDeathN = 0;
+                // A1: the alias ring is per-world too — objIds are recycled, so a stale objId -> alias
+                // entry would attach the previous world's clip to a death in the new one.
+                s_adRingN = 0; s_adRingNext = 0; s_adLines = 0;
                 if (lastLocalKey != 0xFFFFFFFFu || lastPeerKey != 0xFFFFFFFFu)
                     L("[Net] scene change: localKey=%08X peerKey=%08X -> puppet %s\n",
                       lk, pk, (lk == pk || s_sceneAware == 0) ? "shown" : "hidden");
