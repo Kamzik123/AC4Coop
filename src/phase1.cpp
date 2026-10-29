@@ -2184,6 +2184,23 @@ static void RememberEntityHealth(unsigned int ent, unsigned int hp) {
     }
 }
 
+// D-016(1): the ONE gate in front of every read of a CSrvNPCHealth service (Life@+0x5C, Max@+0x5E,
+// flags@+0x60). A scene change recycles the objects behind cached pointers, so `readable()` alone is not
+// enough: the vtable proves the slot is still that class, and a plausible Max proves the rest of the
+// object is initialised (a recycled / freed slot reads 0xFFFF or 0 there). Nothing may read those three
+// fields without passing this.
+static const uint32_t CSRV_NPCHEALTH_VTABLE = 0x02712F60u;
+static bool HostHpSvcValid(unsigned int svc) {
+    if (!svc) return false;
+    __try {
+        if (!readable((void*)svc, 0x70)) return false;
+        if (*(uint32_t*)svc != CSRV_NPCHEALTH_VTABLE) return false;
+        const unsigned short maxLife = *(unsigned short*)(svc + 0x5E);
+        if (maxLife < 1 || maxLife > 2000) return false;
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+    return true;
+}
+
 // Host-side object table for the current capture: objId -> entity + health service. The peer echoes the
 // objId back, so the host never has to guess which guard a hit belongs to.
 struct ObjEntry { uint64_t objId; unsigned int ent; unsigned int hp; };
@@ -2217,7 +2234,18 @@ static bool ObjMapFind(uint64_t objId, unsigned int* ent, unsigned int* hp) {
 // handles life==0xFFFF on either side).
 static const uint8_t KIND_KILL = 3;
 
-struct HostLifeWatch { uint64_t objId; unsigned short life; unsigned int hpSvc; unsigned int gen; bool vanishedLogged; };
+struct HostLifeWatch {
+    uint64_t objId;
+    unsigned short life;
+    unsigned int hpSvc;
+    unsigned int gen;
+    bool vanishedLogged;
+    // D-016(3/4): a death is a transition of a watch that already had a real Life, and it is reported at
+    // most once (tombstone). `seen` distinguishes "first sighting" from "changed since last capture".
+    unsigned short lastLife;
+    bool seen;
+    bool tombstoned;
+};
 static HostLifeWatch s_hostLife[256];
 static int  s_hostLifeN = 0;
 static unsigned int s_hostLifeGen = 0;
@@ -2227,6 +2255,7 @@ static HostLifeWatch* HostLifeFor(uint64_t objId) {
     if (s_hostLifeN >= 256) return nullptr;
     HostLifeWatch* w = &s_hostLife[s_hostLifeN++];
     w->objId = objId; w->life = 0; w->hpSvc = 0; w->gen = 0; w->vanishedLogged = false;
+    w->lastLife = 0; w->seen = false; w->tombstoned = false;
     return w;
 }
 
@@ -2378,10 +2407,11 @@ static void CaptureGuards(EntityPacket& pkt) {
             AbstractEntityAI* ai = AIEntityHelper::GetEntityAI(e);
             // P0: identity + health that survive the AI being torn down after death.
             unsigned int hpSvc = FindHealthInAI((unsigned int)ai);
-            if (hpSvc) RememberEntityHealth((unsigned int)e, hpSvc);
-            else       hpSvc = CachedHealthForEntity((unsigned int)e);
+            bool hpSvcOk = HostHpSvcValid(hpSvc);          // D-016(1): validate before caching or reading
+            if (hpSvcOk) RememberEntityHealth((unsigned int)e, hpSvc);
+            else { hpSvc = CachedHealthForEntity((unsigned int)e); hpSvcOk = HostHpSvcValid(hpSvc); }
             es.objId = hc->GetObjectID();
-            if (hpSvc && readable((void*)hpSvc, 0x70)) {
+            if (hpSvcOk) {
                 es.hp = *(unsigned short*)(hpSvc + 0x5C);
                 // Dead = the engine's own answer. Primary: the health dead flag (set by the engine on a
                 // real death); secondary: combat is-alive. Do NOT use ai+0x8C here — that is a different
@@ -2393,15 +2423,29 @@ static void CaptureGuards(EntityPacket& pkt) {
                 es.dead = EngineIsAlive((unsigned int)e) ? 0 : 1;
             }
             ObjMapAdd(es.objId, (unsigned int)e, hpSvc);
-            // Host -> guest death lane: remember Life and flag the 0xFFFF transition.
+            // Host -> guest death lane. D-016(3/4): a death is a TRANSITION - the same objId must have been
+            // seen in the previous capture with a plausible Life and now read 0xFFFF. An entity first seen
+            // already at 0xFFFF (recycled service, dropped-out entity) is NOT an event, and once a watch has
+            // emitted it is tombstoned so neither garbage nor a repeated 0xFFFF can emit again.
             uint64_t deathId = 0;
             if (es.objId) {
                 HostLifeWatch* w = HostLifeFor(es.objId);
                 if (w) {
                     w->gen = s_hostLifeGen;
-                    if (!w->hpSvc && hpSvc) w->hpSvc = hpSvc;
-                    if (w->life != 0xFFFFu && w->life != 0 && es.hp == 0xFFFFu) { deathId = es.objId; w->life = 0xFFFFu; }
-                    else if (w->life != 0xFFFFu) w->life = es.hp;
+                    if (!w->hpSvc && hpSvc && hpSvcOk) w->hpSvc = hpSvc;
+                    if (!w->tombstoned && hpSvcOk) {
+                        if (es.hp == 0xFFFFu) {
+                            if (w->seen && w->lastLife >= 1 && w->lastLife <= 2000) {
+                                deathId = es.objId;
+                                w->tombstoned = true;
+                                w->life = 0xFFFFu;
+                            }
+                        } else if (es.hp >= 1 && es.hp <= 2000) {
+                            w->lastLife = es.hp;
+                            w->seen = true;
+                            w->life = es.hp;
+                        }
+                    }
                 }
             }
             if (es.dead) {
@@ -2434,25 +2478,31 @@ static void CaptureGuards(EntityPacket& pkt) {
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
 
-    // Anything we tracked last capture but did not see now either walked out of range or died. Only the
-    // cached health's dead flag decides; a guard that merely left has it clear and is left alone.
+    // Anything we tracked last capture but did not see now either walked out of range or died. D-016(5):
+    // only a VALIDATED service decides, and only for a watch that already had a plausible Life. A service
+    // that fails validation (scene change recycled it, pointer rotted) updates nothing and logs nothing -
+    // that silence is the fix for the invented deaths, and it also keeps "walked out of range" silent.
     for (int i = 0; i < s_hostLifeN; ++i) {
         HostLifeWatch& w = s_hostLife[i];
-        if (w.gen == s_hostLifeGen || w.life == 0xFFFFu || !w.hpSvc) continue;
+        if (w.gen == s_hostLifeGen || w.tombstoned || !w.hpSvc) continue;
+        if (!HostHpSvcValid(w.hpSvc)) { w.hpSvc = 0; continue; }   // stale: drop it, change nothing
         bool dead = false;
         unsigned short life = w.life;
+        bool readOk = true;
         __try {
             dead = (*(unsigned int*)(w.hpSvc + 0x60) & 0x01000000u) != 0;
             life = *(unsigned short*)(w.hpSvc + 0x5C);      // the service can outlive the entity list entry
         }
-        __except (EXCEPTION_EXECUTE_HANDLER) { dead = false; }
+        __except (EXCEPTION_EXECUTE_HANDLER) { readOk = false; }
+        if (!readOk) { w.hpSvc = 0; continue; }
         if (!w.vanishedLogged) {
             w.vanishedLogged = true;
             L("[Relay] objId=%llu vanished dead=%d life=%u\n",
               (unsigned long long)w.objId, dead ? 1 : 0, (unsigned)life);
         }
-        if (life == 0xFFFFu || dead) {
+        if ((life == 0xFFFFu || dead) && w.seen && w.lastLife >= 1 && w.lastLife <= 2000) {
             w.life = 0xFFFFu;
+            w.tombstoned = true;
             EmitHostDeath(pkt, count, w.objId, nullptr);
         }
     }
@@ -4443,8 +4493,21 @@ static uint64_t ObjIdForEntity(unsigned int ent) {
     for (int i = 0; i < s_objMapN; ++i) if (s_objMap[i].ent == ent) return s_objMap[i].objId;
     return 0;
 }
+// D-016(6): a death (life==0xFFFF) is terminal for an objId, but the peer's kill can reach the apply path
+// more than once (the same packet is re-delivered / the recipe re-runs), and every pass re-pushed - which is
+// how 6 live kills produced 12 "[Kill] push health event" lines. Remember what has already been pushed so a
+// death crosses the wire once. Cleared on a scene change (objIds are per-capture). Nothing else is touched:
+// damage pushes still go out every time, and the packet contents are unchanged.
+static uint64_t s_pushedDeathIds[256];
+static int      s_pushedDeathN = 0;
+
 static void SendHealthEvent(uint64_t objId, unsigned short life, float x, float y, float z) {
     if (!g_entHost || !objId) return;              // host lane only
+    if (life == 0xFFFFu) {
+        for (int i = 0; i < s_pushedDeathN; ++i)
+            if (s_pushedDeathIds[i] == objId) return;   // already announced this death
+        if (s_pushedDeathN < 256) s_pushedDeathIds[s_pushedDeathN++] = objId;
+    }
     EntityPacket out;
     memset(&out, 0, sizeof(out));
     out.magic = NET_ENTITY_MAGIC;
@@ -6327,6 +6390,13 @@ static void OnFrameInner(Human* updatedHuman) {
             uint32_t lk = localOk ? local.sceneKey : 0xFFFFFFFFu;
             uint32_t pk = gotRaw  ? raw.sceneKey   : 0xFFFFFFFFu;
             if (lk != lastLocalKey || pk != lastPeerKey) {
+                // D-016(2): a scene change is the event that invalidates every cached ent->hp binding: the
+                // engine recycles the CSrvNPCHealth objects behind the pointers we stored, so +0x5C reads
+                // 0xFFFF and the host lane used to call that a death. Drop the caches BEFORE anything reads
+                // them again (and before the log line, so the log shows the post-change state).
+                s_entHealthN = 0;
+                s_hostLifeN = 0;
+                s_pushedDeathN = 0;
                 if (lastLocalKey != 0xFFFFFFFFu || lastPeerKey != 0xFFFFFFFFu)
                     L("[Net] scene change: localKey=%08X peerKey=%08X -> puppet %s\n",
                       lk, pk, (lk == pk || s_sceneAware == 0) ? "shown" : "hidden");
