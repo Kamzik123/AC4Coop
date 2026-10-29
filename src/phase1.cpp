@@ -6771,10 +6771,13 @@ static void* buildTrampoline(uintptr_t target, size_t stolenLen) {
     return t;
 }
 
-// BhvAssassin::AddToWorldInternal calls GetUnusedPadID, but on PC it hands back the ACTIVE pad
-// (one "valid" pad, unused-search fails -> defaults to the active slot), so the puppet enrolls onto
-// the real player's pad+gamer and hijacks it. Force a genuinely-empty slot for the puppet instead;
-// since gamerID==padID, a distinct pad also makes GamerCollection ADD a new gamer rather than reuse.
+// PlayerPadManager::GetUnusedPadID - VA base()+0x344CF0 (an RVA; image base 0x400000 => 0x744CF0).
+// __thiscall: ecx = this (pad manager), one stack arg BYTE* out at [esp+4], callee cleans (retn 4);
+// the detour's edx slot is never read by the callee. Returns char:
+//   1 = success - first slot whose object ptr [this+slot*4]==nullptr was stored into *out;
+//   0 = failure - candidate set scanned with no null slot, and *out is left UNWRITTEN.
+// Caller (sub_18317F0 / BhvAssassin::AddToWorldInternal) pre-zeroes *out and ignores the return, so
+// "no free slot" silently yields slot 0 = the real player's pad and the puppet hijacks it. Hence the forced slot.
 typedef char (__fastcall *GetUnusedPad_t)(void* padMgr, void* edx, uint8_t* out);
 static GetUnusedPad_t g_origGetUnusedPad = nullptr;
 
