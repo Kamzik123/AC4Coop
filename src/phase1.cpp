@@ -3107,6 +3107,13 @@ static void EntitySyncTick() {
     // so the user sees the duplicate ships (proves the deep-copy + render override with no peer).
     static int s_selfTest = -1;
     if (s_selfTest < 0) s_selfTest = GetPrivateProfileIntA("Coop", "EntitySelfTest", 0, ".\\AC4Coop.ini");
+
+    // Poll incoming packets BEFORE the self-test branch (D-019). The old order returned early with
+    // EntitySelfTest=1, so every incoming entity and kill packet was dropped.
+    EntityPacket in;
+    const bool haveIn = Net::GetEntities(in) && in.protoVer == NET_PROTO_VER;
+    if (haveIn) ProcessKillEvents(in);
+
     if (s_selfTest) {
         EntityPacket pkt;
         CaptureShips(pkt);
@@ -3135,17 +3142,12 @@ static void EntitySyncTick() {
             CaptureGuards(pkt);   // append the characters after the ships
             if (pkt.count) Net::SendEntities(pkt);
         }
-        // Peer-reported kills (guest -> host): resolve by position and kill the real guard. Runs every
-        // frame - events must not be gated by the snapshot cadence.
-        EntityPacket in;
-        if (Net::GetEntities(in) && in.protoVer == NET_PROTO_VER) ProcessKillEvents(in);
-    } else {
-        EntityPacket pkt;
-        if (Net::GetEntities(pkt) && pkt.protoVer == NET_PROTO_VER) {
-            ApplyShips(pkt);
-            ApplyGuards(pkt);   // apply the characters
-            ProcessKillEvents(pkt);   // symmetric; host->guest packets carry no kill entries
-        }
+        // Peer-reported kills (guest -> host): resolve by position and kill the real guard. Kill
+        // processing already ran above (before the self-test branch); do NOT poll a second time here.
+    } else if (haveIn) {
+        ApplyShips(in);
+        ApplyGuards(in);   // apply the characters
+        // ProcessKillEvents already ran above (host->guest packets carry no kill entries)
     }
 }
 

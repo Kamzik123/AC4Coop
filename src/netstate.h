@@ -104,7 +104,8 @@ struct PlayerState {
     bool     shipValid;    // player is aboard a ship -> the fields below are meaningful
     float    shipPos[3];   // ship world position (x,y,z) = m_GlobalMatrix.M41/42/43
     float    shipQuat[4];  // ship rotation quaternion (x,y,z,w), from the 3x3 at +0x10
-    int32_t  shipHP;       // ship hull HP = *(int*)(*(void**)(ship+0x5C)+0x84)
+    int32_t  shipHP;       // ship hull HP. SOURCE UNRESOLVED: [[ship+0x5C]+0x84] is disproved (it regenerates,
+                           // not health); a ShipHealthData class exists. Do not treat this field as verified.
 
     uint8_t  valid;                 // 1 = a live player was captured
 };
