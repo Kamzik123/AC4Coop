@@ -120,6 +120,7 @@
     <ClCompile Include="src\action_guard.cpp" />
     <ClCompile Include="src\build_gate.cpp" />
     <ClCompile Include="src\deref_guard.cpp" />
+    <ClCompile Include="src\combat_observe.cpp" />
     <ClCompile Include="src\pattern_scan.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +132,7 @@
     <ClInclude Include="src\action_guard.h" />
     <ClInclude Include="src\build_gate.h" />
     <ClInclude Include="src\deref_guard.h" />
+    <ClInclude Include="src\combat_observe.h" />
     <ClInclude Include="src\pattern_scan.h" />
     <ClInclude Include="src\Scimitar\AI\AbstractEntityAI.h" />
     <ClInclude Include="src\Scimitar\AI\AIActor.h" />

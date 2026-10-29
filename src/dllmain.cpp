@@ -22,6 +22,7 @@
 #include "net.h"
 #include "action_guard.h"
 #include "deref_guard.h"
+#include "combat_observe.h"
 #include "build_gate.h"
 #include <bcrypt.h>
 #include <cstring>
@@ -450,7 +451,14 @@ static void InstallMultiInstance()
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
 {
     if (reason == DLL_PROCESS_ATTACH) {
-        DisableThreadLibraryCalls(hMod);
+        // NOTE: DisableThreadLibraryCalls(hMod) used to be the first line here. It is deliberately
+        // NOT called any more, because the stage-2A observer needs DLL_THREAD_ATTACH to be
+        // delivered: debug registers are PER-THREAD state, so every thread that can execute one of
+        // the four observed functions must have DR0-DR3 programmed in its own context. Thread
+        // attach is the only notification that arrives *on* the new thread, which is where
+        // SetThreadContext is cheapest and race-free. Cost: the loader now calls this DllMain on
+        // every thread create/destroy in the process (an empty case below when the observer is off
+        // — one int test, no allocation, no API call). Judged worth it for per-site DR coverage.
 
         // Build gate FIRST: everything below patches engine code, and none of it may run against a
         // build whose layout we have not verified. Fail closed on patching, not on loading -- an
@@ -480,6 +488,14 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // (+0x114 / +0x118), which the node constructor leaves NULL. [Coop] GuardNullTarget, default 1.
         DerefGuard::Init();
 
+        // Stage 2A combat observer (E2-combat.md §1.2). OBSERVATION ONLY: four hardware execution
+        // breakpoints via DR0-DR3 + a first-chance VEH; no byte patches, no game-memory writes, no
+        // engine calls. Off by default ([Coop] CombatObserve=0) — with the flag at 0 this returns
+        // before the VEH is registered and before any thread context is touched, so the per-frame
+        // cost of the disabled unit is zero (it has no per-frame code at all; the only entry point
+        // that runs is one GetPrivateProfileIntA at attach).
+        CombatObserve::Init();
+
         // Front B (peer-to-peer UDP link) is started on the first in-world frame instead of at
         // DLL attach. The game's launch chain (Steam -> Ubisoft -> DRM -> real game) starts more
         // than one process that loads this ASI, and the transient one binds the UDP port and then
@@ -491,8 +507,15 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)
         // _vsnprintf_s / fputs / fflush / printf) and Phase1 callees do too. CreateThread does not
         // initialise the CRT's per-thread state, which crashed deref_guard's reporter thread.
         _beginthreadex(nullptr, 0, PollThread, nullptr, 0, nullptr);
+    } else if (reason == DLL_THREAD_ATTACH) {
+        // Delivered on the new thread (DisableThreadLibraryCalls is gone, see above). Arms this
+        // thread's DRs when the observer is live; a no-op int test when it is not.
+        CombatObserve::OnThreadAttach();
     } else if (reason == DLL_PROCESS_DETACH) {
         g_run = false;
+        // Clears Dr0-Dr3/Dr6/Dr7 and TF on every thread this unit programmed, then removes the VEH.
+        // Safe here: it allocates nothing and its thread list is a fixed table, not a Toolhelp walk.
+        CombatObserve::Shutdown();
         Sleep(120);
     }
     return TRUE;
