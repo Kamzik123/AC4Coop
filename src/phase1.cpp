@@ -2670,11 +2670,13 @@ static void MarkPeerApplied(unsigned int e) {
 // (the archetype whitelist that used to live here was removed: the inventory probe proved the +0x14 id is
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
-// ---- T13: the soldier discriminator (RE, binary-verified) --------------------------------------
+// ---- T13/T21: the soldier discriminator (RE + PS3 debug ELF) -----------------------------------
 // entity+0x9C is a packed u32: kind = (v & 7), role = ((v >> 3) & 0x3F). The engine's own predicates
 // read exactly this one dword - sub_73B4B0 = soldier (kind 3, role 1), sub_54EC00 = civilian
 // (kind 2, role 2), names in sub_1406C70. So the class question is one dword load: no component walk,
 // no vtable guess, no archetype id (+0x14 is proven unstable and stays a display value only).
+// T21: the PS3 debug ELF names `role` = EntityDescriptorNPCSubType, so (3,1) is Templar, not "guard" -
+// the fighter filter below is a role SET, not one value (see IsFighterRole).
 struct KindRole { uint32_t raw; int kind; int role; bool ok; };
 static KindRole EntityKindRole(const Entity* e) {
     KindRole kr = { 0u, -1, -1, false };
@@ -2685,7 +2687,22 @@ static KindRole EntityKindRole(const Entity* e) {
     kr.ok   = true;
     return kr;
 }
-static inline bool IsSoldierBody(const KindRole& kr)  { return kr.ok && kr.kind == 3 && kr.role == 1; }
+static inline bool IsFighterRole(int role) {
+    // T21 / PS3 debug ELF (ops/PS3-SYMBOLS.md): role is EntityDescriptorNPCSubType, not a Guard/
+    // Civilian flag. The old test (kind 3 && role 1) accepted Templars only and dropped every other
+    // fighter. Fighter-capable set: 1 Templar, 3 Thief, 5 Mercenary, 6 Target, 15 Assassin,
+    // 16 Harasser, 17 Pirate, 23 NavalNPC (naval lane), 25 Criminal, 28 Vigilantes.
+    // Everything else (2 Peasant, 4 Courtesan, 19 Animal, 11/24 horse+cart, 7-10 city events,
+    // 12 Nurse, ...) is not a fighter and stays out. Hostility itself is the faction/AI handler's
+    // decision (IsEnemyOfThePlayer) - this only decides which bodies are worth shipping.
+    switch (role) {
+    case 1: case 3: case 5: case 6: case 15: case 16: case 17: case 23: case 25: case 28:
+        return true;
+    default:
+        return false;
+    }
+}
+static inline bool IsFighterBody(const KindRole& kr) { return kr.ok && kr.kind == 3 && IsFighterRole(kr.role); }
 static inline bool IsCivilianBody(const KindRole& kr) { return kr.ok && kr.kind == 2 && kr.role == 2; }
 
 // ---- sync scope (TASK: proximity to the PEER) ------------------------------------------------
@@ -2696,7 +2713,8 @@ static inline bool IsCivilianBody(const KindRole& kr) { return kr.ok && kr.kind 
 // (MapIconBehaviorGuard) is ever attached to a live body, so `enemies` stays 0 over any population.
 // T13 (RE): the class discriminator DOES exist - entity+0x9C, the packed kind|role the engine's own
 // soldier/civilian predicates read (EntityKindRole above). SyncEnemiesOnly=1 is therefore a real
-// soldiers-only filter for characters now; =0 keeps the old every-human behaviour.
+// fighter filter for characters now (T21: kind 3 + a fighter role, see IsFighterRole); =0 keeps the
+// old every-human behaviour. Civilian (kind 2) bodies stay out either way.
 // On top of that, scope is PROXIMITY/RELEVANCE TO THE PEER:
 //   [Coop] SyncRadiusM      (default 60)  - keep candidates within this many metres of the peer
 //                                           (falls back to the local player if the peer is unknown;
@@ -2728,6 +2746,26 @@ static unsigned s_krLines    = 0;      // process total
 static unsigned s_krWinLines = 0;      // this 5 s window
 static inline bool KrLogDue() {
     return g_krLog != 0 && s_krLines < 600u && s_krWinLines < 96u;
+}
+
+// T21: which (kind,role) tuples the fighter filter rejected this window, so the role set can be
+// corrected from a real run instead of guessed. Bounded to 16 distinct pairs per window; counts stay
+// exact until that fills, and overflow is reported rather than silently dropped. Printed once/5 s.
+struct KrRejectRow { int kind, role; unsigned n; };
+static KrRejectRow s_krRej[16];
+static int        s_krRejN        = 0;
+static unsigned   s_krRejTotal    = 0;
+static unsigned   s_krRejOverflow = 0;
+static void KrRejectAdd(const KindRole& kr) {
+    ++s_krRejTotal;
+    for (int i = 0; i < s_krRejN; ++i)
+        if (s_krRej[i].kind == kr.kind && s_krRej[i].role == kr.role) { ++s_krRej[i].n; return; }
+    if (s_krRejN < 16) {
+        s_krRej[s_krRejN].kind = kr.kind; s_krRej[s_krRejN].role = kr.role; s_krRej[s_krRejN].n = 1;
+        ++s_krRejN;
+    } else {
+        ++s_krRejOverflow;
+    }
 }
 
 // ---- TASK 3 oracle: guest-side bind quality (5 s window) -------------------------------------
@@ -3250,7 +3288,7 @@ static void CaptureGuards(EntityPacket& pkt) {
             // is what actually narrows the snapshot. Ships are packed by CaptureShips and unaffected.
             const KindRole kr = EntityKindRole(e);
             ++s_krN;
-            if (IsSoldierBody(kr))       ++s_krSoldier;
+            if (IsFighterBody(kr))       ++s_krSoldier;   // "soldier" = kind 3 with a fighter role (T21)
             else if (IsCivilianBody(kr)) ++s_krCivilian;
             else                         ++s_krOther;
             // T17: per-body [KR] row, pre-filter, so a mis-decoded offset is visible against the
@@ -3263,7 +3301,7 @@ static void CaptureGuards(EntityPacket& pkt) {
                   kr.raw, kr.kind, kr.role,
                   (bhvC && readable(bhvC, 4)) ? *(uint32_t*)bhvC : 0u, skel ? 1u : 0u, (unsigned)n);
             }
-            if (SyncEnemiesOnly() && !IsSoldierBody(kr)) continue;
+            if (SyncEnemiesOnly() && !IsFighterBody(kr)) { KrRejectAdd(kr); continue; }
             // ---- scope counters ----
             // Candidates = every body that survived skeleton + BhvGenericNPC + the health service and
             // the T13 soldier filter above (so with SyncEnemiesOnly=1 this counts soldiers only; the
@@ -7819,13 +7857,26 @@ static void OnFrameInner(Human* updatedHuman) {
             L("[Sync] scope candidates=%u inRadius=%u enemies=%u sent=%u (SyncEnemiesOnly=%d, SyncRadiusM=%d, SyncMaxEntities=%d)\n",
               s_scopeCand, s_scopeInRadius, s_scopeEnemies, s_scopeSent,
               SyncEnemiesOnly(), SyncRadiusM(), SyncMaxEntities());
-            // T13 oracle: the soldier discriminator over every character candidate the walk reached in
+            // T13/T21 oracle: the discriminator over every character candidate the walk reached in
             // this window, BEFORE the SyncEnemiesOnly filter (so the numbers do not collapse to zero
-            // when the filter is on). soldier+civilian+other == n. With a populated street one run
-            // proves entity+0x9C classifies the population: soldier>0 while civilian>0, and the
-            // snapshot's candidates should equal soldier (radius permitting).
+            // when the filter is on). soldier = kind 3 with a fighter role from the T21 set;
+            // soldier+civilian+other == n. With a populated street one run proves entity+0x9C
+            // classifies the population: soldier>0 while civilian>0, and the snapshot's candidates
+            // should equal soldier (radius permitting).
             L("[Sync] kindrole n=%u soldier=%u civilian=%u other=%u\n",
               s_krN, s_krSoldier, s_krCivilian, s_krOther);
+            // T21: what the fighter filter rejected, as kind/role:count pairs. This is the line that
+            // tells us whether a missing role (e.g. a fighter the set does not list) is being dropped.
+            if (s_krRejTotal) {
+                char rej[512]; rej[0] = 0; int off = 0;
+                for (int i = 0; i < s_krRejN && off >= 0 && off < (int)sizeof(rej); ++i) {
+                    const int w = _snprintf_s(rej + off, sizeof(rej) - (size_t)off, _TRUNCATE, "%s%d/%d:%u",
+                                              off ? " " : "", s_krRej[i].kind, s_krRej[i].role, s_krRej[i].n);
+                    if (w < 0) break;
+                    off += w;
+                }
+                L("[Sync] krreject total=%u%s%s\n", s_krRejTotal, rej, s_krRejOverflow ? " (+overflow)" : "");
+            }
             // G7 oracle (TASK 3), guest side: did every character record get a body, and how far is
             // that body from where the host says it is at APPLY time? sent == bound + unmatched.
             {
@@ -7870,6 +7921,7 @@ static void OnFrameInner(Human* updatedHuman) {
             s_scopeCand = 0; s_scopeEnemies = 0; s_scopeInRadius = 0; s_scopeSent = 0;
             s_krN = 0; s_krSoldier = 0; s_krCivilian = 0; s_krOther = 0;
             s_krWinLines = 0;   // T17: the per-window [KR] budget refills with the other counters
+            s_krRejN = 0; s_krRejTotal = 0; s_krRejOverflow = 0;   // T21: rejection histogram
             // TASK 3 oracle counters, same window.
             s_bindSent = 0; s_bindBound = 0; s_bindUnmatched = 0;
             s_bindErrSum = 0.0; s_bindErrMax = 0.0f;
