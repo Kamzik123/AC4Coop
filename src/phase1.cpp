@@ -2664,27 +2664,52 @@ static void MarkPeerApplied(unsigned int e) {
 // (the archetype whitelist that used to live here was removed: the inventory probe proved the +0x14 id is
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
+// ---- T13: the soldier discriminator (RE, binary-verified) --------------------------------------
+// entity+0x9C is a packed u32: kind = (v & 7), role = ((v >> 3) & 0x3F). The engine's own predicates
+// read exactly this one dword - sub_73B4B0 = soldier (kind 3, role 1), sub_54EC00 = civilian
+// (kind 2, role 2), names in sub_1406C70. So the class question is one dword load: no component walk,
+// no vtable guess, no archetype id (+0x14 is proven unstable and stays a display value only).
+struct KindRole { uint32_t raw; int kind; int role; bool ok; };
+static KindRole EntityKindRole(const Entity* e) {
+    KindRole kr = { 0u, -1, -1, false };
+    if (!e || !readable((const void*)((const uint8_t*)e + 0x9C), 4)) return kr;
+    kr.raw  = *(const uint32_t*)((const uint8_t*)e + 0x9C);
+    kr.kind = (int)(kr.raw & 0x7u);
+    kr.role = (int)((kr.raw >> 3) & 0x3Fu);
+    kr.ok   = true;
+    return kr;
+}
+static inline bool IsSoldierBody(const KindRole& kr)  { return kr.ok && kr.kind == 3 && kr.role == 1; }
+static inline bool IsCivilianBody(const KindRole& kr) { return kr.ok && kr.kind == 2 && kr.role == 2; }
+
 // ---- sync scope (TASK: proximity to the PEER) ------------------------------------------------
 // History: the capture used to accept EVERY Skeleton + BhvGenericNPC + health-service entity, i.e.
 // the whole civilian crowd. The first attempt to narrow it was [Coop] SyncEnemiesOnly, which keyed
 // on two component vtable ids. That approach is DEAD: every human NPC in this build shares ONE AI
 // vtable (`[Sync] ai ... distinct=1`) and neither 0x027106A8 (WeaponComponent) nor 0x0269E9D0
 // (MapIconBehaviorGuard) is ever attached to a live body, so `enemies` stays 0 over any population.
-// There is no class discriminator; scope is therefore PROXIMITY/RELEVANCE TO THE PEER:
+// T13 (RE): the class discriminator DOES exist - entity+0x9C, the packed kind|role the engine's own
+// soldier/civilian predicates read (EntityKindRole above). SyncEnemiesOnly=1 is therefore a real
+// soldiers-only filter for characters now; =0 keeps the old every-human behaviour.
+// On top of that, scope is PROXIMITY/RELEVANCE TO THE PEER:
 //   [Coop] SyncRadiusM      (default 60)  - keep candidates within this many metres of the peer
 //                                           (falls back to the local player if the peer is unknown;
 //                                           0 disables the cutoff, like RelevanceRadiusM)
 //   [Coop] SyncMaxEntities  (default 32)  - emit at most this many, nearest to the peer first
 // Selection is deterministic (distance ascending, ties by objId then by enumeration index), so both
 // ends agree on the same set for the same world state.
-// SyncEnemiesOnly is kept as a key for ini compatibility ONLY: it is currently equivalent to 0
-// (it filters nothing), because no verified discriminator exists - see the block comment above.
 // Read once (lazy, -1 = not read yet) from the ini, like the other [Coop] flags.
 static int      s_syncEnemiesOnly = -1;
-static unsigned s_scopeCand     = 0;  // characters that passed skeleton+bhv+health this window
+static unsigned s_scopeCand     = 0;  // characters that passed skeleton+bhv+health (+ T13 soldier filter)
 static unsigned s_scopeEnemies  = 0;  // of those, the ones carrying the (dead) weapon/icon ids
 static unsigned s_scopeInRadius = 0;  // of those, the ones inside SyncRadiusM of the peer
 static unsigned s_scopeSent     = 0;  // character states actually packed into a snapshot
+// T13 oracle, same 5 s window: every character candidate the walk reached BEFORE the soldier filter,
+// split by entity+0x9C. soldier+civilian+other == n, so the line proves the classifier in one run.
+static unsigned s_krN        = 0;
+static unsigned s_krSoldier  = 0;
+static unsigned s_krCivilian = 0;
+static unsigned s_krOther    = 0;
 
 // ---- TASK 3 oracle: guest-side bind quality (5 s window) -------------------------------------
 // sent = kind==2 records the host sent this window, bound = ones a local body took, unmatched = the
@@ -3200,9 +3225,20 @@ static void CaptureGuards(EntityPacket& pkt) {
                 unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
                 if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
             }
-            // ---- [Coop] SyncEnemiesOnly scope gate ----
-            // Candidates = every body that survived skeleton + BhvGenericNPC + the health service, i.e.
-            // exactly what the capture shipped before this flag existed. Enemies = the subset carrying
+            // ---- T13: soldier discriminator + [Coop] SyncEnemiesOnly=1 filter ----
+            // KindRole is counted for every candidate BEFORE the filter, so the [Sync] kindrole line
+            // describes the population the walk reached and not just the survivors; the filter below
+            // is what actually narrows the snapshot. Ships are packed by CaptureShips and unaffected.
+            const KindRole kr = EntityKindRole(e);
+            ++s_krN;
+            if (IsSoldierBody(kr))       ++s_krSoldier;
+            else if (IsCivilianBody(kr)) ++s_krCivilian;
+            else                         ++s_krOther;
+            if (SyncEnemiesOnly() && !IsSoldierBody(kr)) continue;
+            // ---- scope counters ----
+            // Candidates = every body that survived skeleton + BhvGenericNPC + the health service and
+            // the T13 soldier filter above (so with SyncEnemiesOnly=1 this counts soldiers only; the
+            // pre-filter population is what [Sync] kindrole reports). Enemies = the subset carrying
             // WeaponComponent or MapIconBehaviorGuard. Counted before the relevance test on purpose: the
             // numbers must describe the SCOPE, not the radius, so `sent` can be read against `enemies`.
             const bool isEnemy = weapon || guardIcon;
@@ -3222,10 +3258,8 @@ static void CaptureGuards(EntityPacket& pkt) {
             }
             if (weapon)    ++s_compWeaponCand;
             if (guardIcon) ++s_compIconCand;
-            // SyncEnemiesOnly (kept as an ini key, currently equivalent to 0): there is no verified
-            // class discriminator in this build, so it filters nothing. The scope decision is made
-            // below, on distance to the peer.
-            (void)SyncEnemiesOnly();
+            // SyncEnemiesOnly is applied above, on entity+0x9C (T13); the scope decision here is
+            // distance to the peer.
             const float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             // [Relevance] Replicate a character if it is near the HOST's player (the original 80 m cap)
             // or anywhere within RelevanceRadiusM of the PEER. Without the peer term, a partner a few
@@ -7756,6 +7790,13 @@ static void OnFrameInner(Human* updatedHuman) {
             L("[Sync] scope candidates=%u inRadius=%u enemies=%u sent=%u (SyncEnemiesOnly=%d, SyncRadiusM=%d, SyncMaxEntities=%d)\n",
               s_scopeCand, s_scopeInRadius, s_scopeEnemies, s_scopeSent,
               SyncEnemiesOnly(), SyncRadiusM(), SyncMaxEntities());
+            // T13 oracle: the soldier discriminator over every character candidate the walk reached in
+            // this window, BEFORE the SyncEnemiesOnly filter (so the numbers do not collapse to zero
+            // when the filter is on). soldier+civilian+other == n. With a populated street one run
+            // proves entity+0x9C classifies the population: soldier>0 while civilian>0, and the
+            // snapshot's candidates should equal soldier (radius permitting).
+            L("[Sync] kindrole n=%u soldier=%u civilian=%u other=%u\n",
+              s_krN, s_krSoldier, s_krCivilian, s_krOther);
             // G7 oracle (TASK 3), guest side: did every character record get a body, and how far is
             // that body from where the host says it is at APPLY time? sent == bound + unmatched.
             {
@@ -7798,6 +7839,7 @@ static void OnFrameInner(Human* updatedHuman) {
             CompHistReset();
             AiHistReset();
             s_scopeCand = 0; s_scopeEnemies = 0; s_scopeInRadius = 0; s_scopeSent = 0;
+            s_krN = 0; s_krSoldier = 0; s_krCivilian = 0; s_krOther = 0;
             // TASK 3 oracle counters, same window.
             s_bindSent = 0; s_bindBound = 0; s_bindUnmatched = 0;
             s_bindErrSum = 0.0; s_bindErrMax = 0.0f;
