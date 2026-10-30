@@ -1923,15 +1923,11 @@ void Phase1::TryShipDupProbe() {
                     L("[FF] puppet bhv=%p +660=%08X +30=%08X +80=%08X +C0=%08X +1D0=%08X +1E0=%08X\n", bhv,
                       *(uint32_t*)(p+0x660), *(uint32_t*)(p+0x30), *(uint32_t*)(p+0x80),
                       *(uint32_t*)(p+0xC0), *(uint32_t*)(p+0x1D0), *(uint32_t*)(p+0x1E0));
-                    // Safety, not feature: +0x660 is a store into the behaviour component. Only touch it
-                    // when the whole dword is mapped - a fault here aborts the probe before its verdict
-                    // line, and the pre-image read above (+0x1E0) does not prove +0x660 is readable.
-                    if (!readable(p + 0x660, 4)) {
-                        L("[FF] puppet bhv=%p +660 unreadable - FocusFlags write skipped\n", bhv);
-                    } else {
-                        *(uint32_t*)(p+0x660) |= 0x51;   // IsTargetable|IsFightable|IsMeleeTargetable
-                        L("[FF] set puppet +660=%08X\n", *(uint32_t*)(p+0x660));
-                    }
+                    // READ-ONLY on purpose: +0x660 is NOT a flags word in this binary (RE T12). The
+                    // behaviour struct is 0xA0 B, so +0x660 sits 1472 B past its end, and the image has
+                    // no read-modify-write or test form against [reg+660h] - the old `|= 0x51` could not
+                    // set targetability, it only corrupted whatever really lives at that address.
+                    // The write was removed; this dump and the player dump below stay read-only.
                 } else {
                     L("[FF] no known behavior on puppet\n");
                 }
@@ -8448,6 +8444,10 @@ void Phase1::InstallFrameHook() {
     // Test-only: shift the puppet sideways so a single machine can test AI reaction to it.
     // 0 (default) = off, production behaviour unchanged. Read as an int in centimetres.
     g_puppetParkX = (float)GetPrivateProfileIntA("Coop", "PuppetParkX", 0, Paths::Ini());
+    // RE T12: the `|= 0x51` at bhv+0x660 is gone. That offset is not a flags word in this binary (1472 B
+    // past a 0xA0-byte behaviour struct, no RMW/test form against [reg+660h] in the image), so it was
+    // corrupting unrelated memory rather than making the puppet targetable. Dumps stay read-only.
+    L("[FF] +660 write removed: not a flags word (RE T12) - no targetability claim, dumps read-only\n");
     // G10 instrumentation gate (ops/AI-T5-G10.md 7.4): 0 = production, zero [G10] output.
     g_stageLog = GetPrivateProfileIntA("Coop", "StageLog", 0, Paths::Ini());
     g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, Paths::Ini());
