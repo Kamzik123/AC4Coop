@@ -888,7 +888,8 @@ void* Phase1::TryCrowdProbe() {
 
         // ---- 5) verdict line (the GO/NO-GO) ----
         uint32_t evt      = readable(ent, 8) ? (uint32_t)(uintptr_t)(*(void**)ent) : 0;
-        unsigned children = readable((char*)ent + 0x66, 2) ? *(unsigned short*)((char*)ent + 0x66) : 0;
+        // component count @ +0x66 (authoritative). Diagnostic only - no array walk here, so no clamp.
+        uint16_t children = readable((uint8_t*)ent + 0x66, 2) ? *(uint16_t*)((uint8_t*)ent + 0x66) : 0;
         uint32_t f5C      = readable((char*)ent + 0x5C, 4) ? (uint32_t)(uintptr_t)(*(void**)((char*)ent + 0x5C)) : 0;
         uint32_t fB0      = readable((char*)ent + 0xB0, 4) ? (uint32_t)(uintptr_t)(*(void**)((char*)ent + 0xB0)) : 0;
         unsigned anim8D0  = readable((char*)ent + 0x8D0, 4) ? *(unsigned*)((char*)ent + 0x8D0) : 0;
@@ -1829,7 +1830,8 @@ void Phase1::TryShipDupProbe() {
             BaseBigArray<Reference>& ents = w->m_EntityManager.m_Entities;
             int nobj = ents.GetSize();
             L("[Target] entities=%d\n", nobj);
-            // Dump each entity's component VTABLE pointers (m_Components data @ +0x60, size @ +0x64).
+            // Dump each entity's component VTABLE pointers (m_Components data @ +0x60, count @ +0x66).
+            // +0x64 is NOT the count: it is uint16 cap|flags (cap = v & 0x3FFF, bit15 = buffer not heap-owned).
             // Map the vtable addrs back to class names via vt_class_map to find the targeting component.
             for (int i = 0; i < nobj && shown < 16; ++i) {
                 Reference* ref = ents.GetElement(i);
@@ -1838,12 +1840,10 @@ void Phase1::TryShipDupProbe() {
                 if (!hc || !readable(hc, 4)) continue;
                 Entity* e = (Entity*)hc->m_Object;
                 if (!e || !readable(e, 4)) continue;
-                Component** data = *(Component***)((char*)e + 0x60);
-                unsigned short szLo = *(unsigned short*)((char*)e + 0x64);
-                unsigned short szHi = *(unsigned short*)((char*)e + 0x66);
-                int count = (szLo & 0xFFFF);
-                if (count <= 0 || count > 96) count = (szHi & 0xFFFF);
-                if (!data || !readable(data, 4) || count <= 0 || count > 96) continue;
+                uint16_t count = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                if (count < 1 || count > 96) continue;               // clamp: 1..96 safety net
+                Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
+                if (!data || !readable(data, 4)) continue;
                 // Character signature: SkeletonComponent / CharacterController (skip props which only have RigidBody)
                 bool isChar = false;
                 for (int k = 0; k < count; ++k) {
@@ -1869,9 +1869,9 @@ void Phase1::TryShipDupProbe() {
                 if (!hc || !readable(hc, 4)) continue;
                 Entity* e = (Entity*)hc->m_Object;
                 if (!e || !readable(e, 4)) continue;
-                Component** data = *(Component***)((char*)e + 0x60);
-                int count = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                if (count <= 0 || count > 96) count = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                uint16_t count = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                if (count < 1 || count > 96) count = 0;   // clamp: 1..96 safety net
+                Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                 if (!data || !readable(data, 4) || count <= 0 || count > 96) continue;
                 Component* bhv = 0, * eagle = 0;
                 for (int k = 0; k < count; ++k) {
@@ -1904,9 +1904,9 @@ void Phase1::TryShipDupProbe() {
             // FocusFlags (VERIFIED reflection): IsTargetable=0x1, IsFightable=0x10, IsMeleeTargetable=0x40.
             if (g_puppet) {
                 Entity* pe = g_puppet;
-                Component** pdata = *(Component***)((char*)pe + 0x60);
-                int pcount = (*(unsigned short*)((char*)pe + 0x64) & 0xFFFF);
-                if (pcount <= 0 || pcount > 96) pcount = (*(unsigned short*)((char*)pe + 0x66) & 0xFFFF);
+                uint16_t pcount = *(uint16_t*)((uint8_t*)pe + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                if (pcount < 1 || pcount > 96) pcount = 0;   // clamp: 1..96 safety net
+                Component** pdata = *(Component***)((uint8_t*)pe + 0x60);   // re-read live: a grow frees the old block
                 L("[FF] puppet=%p nComp=%d:", pe, pcount);
                 Component* bhv = 0;
                 if (pdata && readable(pdata, 4) && pcount > 0 && pcount <= 96) {
@@ -1923,16 +1923,23 @@ void Phase1::TryShipDupProbe() {
                     L("[FF] puppet bhv=%p +660=%08X +30=%08X +80=%08X +C0=%08X +1D0=%08X +1E0=%08X\n", bhv,
                       *(uint32_t*)(p+0x660), *(uint32_t*)(p+0x30), *(uint32_t*)(p+0x80),
                       *(uint32_t*)(p+0xC0), *(uint32_t*)(p+0x1D0), *(uint32_t*)(p+0x1E0));
-                    *(uint32_t*)(p+0x660) |= 0x51;   // IsTargetable|IsFightable|IsMeleeTargetable
-                    L("[FF] set puppet +660=%08X\n", *(uint32_t*)(p+0x660));
+                    // Safety, not feature: +0x660 is a store into the behaviour component. Only touch it
+                    // when the whole dword is mapped - a fault here aborts the probe before its verdict
+                    // line, and the pre-image read above (+0x1E0) does not prove +0x660 is readable.
+                    if (!readable(p + 0x660, 4)) {
+                        L("[FF] puppet bhv=%p +660 unreadable - FocusFlags write skipped\n", bhv);
+                    } else {
+                        *(uint32_t*)(p+0x660) |= 0x51;   // IsTargetable|IsFightable|IsMeleeTargetable
+                        L("[FF] set puppet +660=%08X\n", *(uint32_t*)(p+0x660));
+                    }
                 } else {
                     L("[FF] no known behavior on puppet\n");
                 }
                 // Compare with the LOCAL player (Edward) — the guards DO attack him.
                 if (pl) {
-                    Component** pd2 = *(Component***)((char*)pl + 0x60);
-                    int pc2 = (*(unsigned short*)((char*)pl + 0x64) & 0xFFFF);
-                    if (pc2 <= 0 || pc2 > 96) pc2 = (*(unsigned short*)((char*)pl + 0x66) & 0xFFFF);
+                    uint16_t pc2 = *(uint16_t*)((uint8_t*)pl + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                    if (pc2 < 1 || pc2 > 96) pc2 = 0;   // clamp: 1..96 safety net
+                    Component** pd2 = *(Component***)((uint8_t*)pl + 0x60);   // re-read live: a grow frees the old block
                     Component* plBhv = 0;
                     if (pd2 && readable(pd2, 4) && pc2 > 0 && pc2 <= 96) {
                         for (int k = 0; k < pc2; ++k) {
@@ -2661,20 +2668,96 @@ static void MarkPeerApplied(unsigned int e) {
 // (the archetype whitelist that used to live here was removed: the inventory probe proved the +0x14 id is
 // not a stable class discriminator - see the predicate in CaptureGuards/ApplyGuards)
 
-// ---- sync scope (TASK: enemies only) ---------------------------------------------------------
-// The capture used to accept EVERY Skeleton + BhvGenericNPC + health-service entity, i.e. the whole
-// civilian crowd. That is why a session shipped thousands of bodies and why guest matching drifted.
-// [Coop] SyncEnemiesOnly (default 1) narrows the capture to soldiers using the ALREADY-PROVEN
-// discriminator from the guard-enumeration probe (ProbeEntityEnum, src/phase1.cpp:3944-3982):
-//   WeaponComponent 0x027106A8  -> soldier
-//   MapIconBehaviorGuard 0x0269E9D0 -> soldier
-// The component walk that tests them is the one the capture loop already runs (:2647-2652), so this
-// adds no second walk. SyncEnemiesOnly=0 restores the previous "every human NPC" behaviour exactly.
+// ---- sync scope (TASK: proximity to the PEER) ------------------------------------------------
+// History: the capture used to accept EVERY Skeleton + BhvGenericNPC + health-service entity, i.e.
+// the whole civilian crowd. The first attempt to narrow it was [Coop] SyncEnemiesOnly, which keyed
+// on two component vtable ids. That approach is DEAD: every human NPC in this build shares ONE AI
+// vtable (`[Sync] ai ... distinct=1`) and neither 0x027106A8 (WeaponComponent) nor 0x0269E9D0
+// (MapIconBehaviorGuard) is ever attached to a live body, so `enemies` stays 0 over any population.
+// There is no class discriminator; scope is therefore PROXIMITY/RELEVANCE TO THE PEER:
+//   [Coop] SyncRadiusM      (default 60)  - keep candidates within this many metres of the peer
+//                                           (falls back to the local player if the peer is unknown;
+//                                           0 disables the cutoff, like RelevanceRadiusM)
+//   [Coop] SyncMaxEntities  (default 32)  - emit at most this many, nearest to the peer first
+// Selection is deterministic (distance ascending, ties by objId then by enumeration index), so both
+// ends agree on the same set for the same world state.
+// SyncEnemiesOnly is kept as a key for ini compatibility ONLY: it is currently equivalent to 0
+// (it filters nothing), because no verified discriminator exists - see the block comment above.
 // Read once (lazy, -1 = not read yet) from the ini, like the other [Coop] flags.
 static int      s_syncEnemiesOnly = -1;
-static unsigned s_scopeCand    = 0;   // characters that passed skeleton+bhv+health this window
-static unsigned s_scopeEnemies = 0;   // of those, the ones that passed the weapon/icon test
-static unsigned s_scopeSent    = 0;   // character states actually packed into a snapshot
+static unsigned s_scopeCand     = 0;  // characters that passed skeleton+bhv+health this window
+static unsigned s_scopeEnemies  = 0;  // of those, the ones carrying the (dead) weapon/icon ids
+static unsigned s_scopeInRadius = 0;  // of those, the ones inside SyncRadiusM of the peer
+static unsigned s_scopeSent     = 0;  // character states actually packed into a snapshot
+
+// ---- TASK 3 oracle: guest-side bind quality (5 s window) -------------------------------------
+// sent = kind==2 records the host sent this window, bound = ones a local body took, unmatched = the
+// rest. meanErr/maxErr are the distance between the host's reported position and the local body we
+// were about to drive, measured at APPLY time (before any transform write). A small mean with a
+// large max is one badly bound body; a large mean everywhere is a systematic binding error.
+static unsigned s_bindSent      = 0;
+static unsigned s_bindBound     = 0;
+static unsigned s_bindUnmatched = 0;
+static double   s_bindErrSum    = 0.0;
+static float    s_bindErrMax    = 0.0f;
+
+// ---- TASK 2: stable slot ids -----------------------------------------------------------------
+// The host gives every synced character a slot that lives as long as the entity does, and the peer
+// binds slot -> local body once, stickily. A slot is keyed on the host's objId (never on the
+// enumeration index, which m_Entities reorders), so the identity is independent of list order.
+// Host side: lowest free slot on first sight, lastSeen refreshed on every capture, released after
+// 10 s unseen. Guest side: slot -> body, refreshed by any packet that mentions the slot, evicted on
+// body death/despawn or 10 s without a packet. `key` on the wire already exists and is already the
+// reference index for characters / the list index for ships; characters now carry a slot instead.
+// That is a wire-SEMANTIC change only (same field, same size, no new message) and both ends are
+// this build, so it is safe.
+#define SYNC_SLOT_MAX  256
+#define SYNC_SLOT_NONE 0xFFFFFFFFu
+#define SYNC_SLOT_STALE_MS 10000ull
+struct SyncSlotEntry  { uint64_t objId; uint64_t lastSeenMs; unsigned char used; };
+struct GuestSlotEntry { uint64_t objId; uint64_t lastPktMs;  unsigned int ent; unsigned char used; };
+static SyncSlotEntry  s_syncSlot[SYNC_SLOT_MAX];    // host: slot -> objId
+static GuestSlotEntry s_guestSlot[SYNC_SLOT_MAX];   // guest: slot -> local body (sticky)
+
+// Host: slot for this objId, claiming the lowest free slot on first sight. Returns SYNC_SLOT_NONE
+// when there is no objId or the table is full (caller then falls back to the old index key).
+static uint32_t SyncSlotFor(uint64_t objId, uint64_t nowMs) {
+    if (!objId) return SYNC_SLOT_NONE;
+    for (int i = 0; i < SYNC_SLOT_MAX; ++i)
+        if (s_syncSlot[i].used && s_syncSlot[i].objId == objId) {
+            s_syncSlot[i].lastSeenMs = nowMs;
+            return (uint32_t)i;
+        }
+    for (int i = 0; i < SYNC_SLOT_MAX; ++i)
+        if (!s_syncSlot[i].used) {
+            s_syncSlot[i].used = 1; s_syncSlot[i].objId = objId; s_syncSlot[i].lastSeenMs = nowMs;
+            return (uint32_t)i;
+        }
+    return SYNC_SLOT_NONE;
+}
+
+// Host: release slots the capture has not seen for SYNC_SLOT_STALE_MS. Called AFTER the capture, so
+// the entities it just handled carry a fresh stamp and cannot be released here.
+static void SyncSlotSweep(uint64_t nowMs) {
+    for (int i = 0; i < SYNC_SLOT_MAX; ++i) {
+        SyncSlotEntry& s = s_syncSlot[i];
+        if (!s.used) continue;
+        if (nowMs - s.lastSeenMs <= SYNC_SLOT_STALE_MS) continue;
+        L("[Slot] release slot=%u reason=stale\n", i);
+        s.used = 0; s.objId = 0; s.lastSeenMs = 0;
+    }
+}
+
+// ---- proximity selection scratch -------------------------------------------------------------
+// Fixed-size, no allocation: one entry per candidate inside SyncRadiusM, capped at 256 (the packet
+// holds at most MAX_SYNC_ENTITIES=128 anyway). Insertion sort keeps the ordering stable.
+#define SCOPE_SEL_CAP 256
+struct ScopeSel { float d2; uint64_t objId; int idx; };
+static inline bool ScopeLess(const ScopeSel& a, const ScopeSel& b) {
+    if (a.d2 != b.d2) return a.d2 < b.d2;          // nearest to the peer first
+    if (a.objId != b.objId) return a.objId < b.objId;   // stable, machine-independent tie-break
+    return a.idx < b.idx;                          // last resort: the capture's own order
+}
 // ---- component histogram (diagnostic for the enemies-only filter) -----------------------------
 // `enemies=0` over thousands of candidates is either "no armed NPCs here" or "one/both vtable ids
 // are wrong for this build". One run has to tell those apart, so every CANDIDATE's component array
@@ -2799,6 +2882,224 @@ static inline int SyncEnemiesOnly() {
     return s_syncEnemiesOnly;
 }
 
+// [Coop] SyncRadiusM (default 60): the proximity scope that replaced the class filter. 0 = no cutoff.
+static inline int SyncRadiusM() {
+    static int v = -1;
+    if (v < 0) {
+        v = (int)GetPrivateProfileIntA("Coop", "SyncRadiusM", 60, Paths::Ini());
+        if (v < 0) v = 0;
+        if (v > 1000) v = 1000;
+    }
+    return v;
+}
+
+// [Coop] SyncMaxEntities (default 32): how many of the nearest candidates are actually emitted.
+static inline int SyncMaxEntities() {
+    static int v = -1;
+    if (v < 0) {
+        v = (int)GetPrivateProfileIntA("Coop", "SyncMaxEntities", 32, Paths::Ini());
+        if (v < 0) v = 0;
+        if (v > MAX_SYNC_ENTITIES) v = MAX_SYNC_ENTITIES;
+    }
+    return v;
+}
+
+// ---- G10 instrumentation: [Coop] StageLog (default 0) ------------------------------------------
+// Spec: ops/AI-T5-G10.md section 7. One [G10] line per guard, emitted here because this is the only
+// place es.stage is filled and then thrown away (it otherwise leaves the process only inside the wire
+// packet). stage/aggro say a guard COMMITTED to combat; dPeer vs dPlayer says whether it was the
+// peer's body or the host player that caused it, so the gate is decidable by one grep with no human
+// judgement. Host only by construction: CaptureGuards is not reached on the guest (C5).
+// Default 0 => no output at all, production logs byte-identical.
+static int g_stageLog = 0;                       // [Coop] StageLog, read once in InstallFrameHook
+
+struct StageLogSlot { uint64_t objId; uint32_t stage; uint32_t alias; uint64_t ms; bool used; };
+static StageLogSlot s_stageLogTbl[MAX_SYNC_ENTITIES];
+static uint64_t     s_stageLogWinMs = 0;         // global 10-lines/s budget, heartbeats only
+static int          s_stageLogWinN  = 0;
+
+static inline int StageAggro(uint32_t stage) {   // 4=Fight, 0xC=RangeCombat, 0x11=FleeFight
+    return (stage == 4u || stage == 0xCu || stage == 0x11u) ? 1 : 0;
+}
+
+// Rate: on-change is immediate (stage change always, alias change only while aggro); otherwise a 1 s
+// heartbeat, and the heartbeat is the only thing the 10/s global budget may drop - a change is never
+// lost. `was` is the previous stage for this key AND body (-1 on first sight or after the slot is
+// reused), so a recycled guard never inherits another body's history. `nowMs` is the CaptureGuards
+// GetTickCount64, not a new clock read.
+static void StageLogEmit(const EntityState& es, float gx, float gy, float gz,
+                         float px, float py, float pz, uint64_t nowMs) {
+    StageLogSlot&  s     = s_stageLogTbl[es.key % MAX_SYNC_ENTITIES];   // key may be a raw idx
+    const int      aggro = StageAggro(es.stage);
+    const bool     known = s.used && s.objId == es.objId;
+    const bool     change = !known || s.stage != es.stage || (aggro && s.alias != es.actionAlias);
+    if (!change) {
+        if (nowMs - s.ms < 1000) return;                          // heartbeat not due
+        if (nowMs - s_stageLogWinMs >= 1000) { s_stageLogWinMs = nowMs; s_stageLogWinN = 0; }
+        if (s_stageLogWinN >= 10) return;                         // over budget: drop this heartbeat
+        ++s_stageLogWinN;
+    }
+    float dPeer = -1.0f;
+    if (g_peerPosValid) {
+        // Full 3-D, not the sqrt(dx*dx+dz*dz)+|dy| form of NoteAppliedPos (:6673) - the up-axis is
+        // ambiguous between that code and peer9.py, and 3-D removes the question at 5 m scale.
+        const float dx = gx - (g_peerPos[0] + g_puppetParkX);
+        const float dy = gy - g_peerPos[1];
+        const float dz = gz - g_peerPos[2];
+        dPeer = sqrtf(dx*dx + dy*dy + dz*dz);
+    }
+    const float ax = gx - px, ay = gy - py, az = gz - pz;         // px/py/pz = player, read once per capture
+    const float dPlayer = sqrtf(ax*ax + ay*ay + az*az);
+    L("[G10] key=%u objId=%llu arch=%04X stage=%d was=%d aggro=%d alias=%08X dPeer=%6.1f dPlayer=%6.1f pos=(%.1f,%.1f,%.1f)\n",
+      (unsigned)es.key, (unsigned long long)es.objId, (unsigned)es.arch, (int)es.stage,
+      known ? (int)s.stage : -1, aggro, (unsigned)es.actionAlias, dPeer, dPlayer,
+      es.pos[0], es.pos[1], es.pos[2]);
+    s.used = true; s.objId = es.objId; s.stage = es.stage; s.alias = es.actionAlias; s.ms = nowMs;
+}
+
+// ---- one synced guard: pack its wire record ---------------------------------------------------
+// Extracted from CaptureGuards so the capture can select a set FIRST (nearest to the peer) and only
+// then serialise it. Callers run it inside CaptureGuards' __try, so the same readable() discipline
+// and the same SEH frame still cover every dereference here.
+static void EmitGuardEntity(EntityPacket& pkt, uint32_t& count, int idx, Entity* e, Component* bhvC,
+                            HandleContainer* hc, float px, float py, float pz, uint64_t nowMs) {
+    const float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
+    EntityState& es = pkt.ents[count];
+    // TASK 2: the wire `key` for a character is the host's STABLE SLOT for this objId, not the
+    // enumeration index - m_Entities ordering is not stable across frames or machines, so an
+    // index-keyed identity re-bound the peer to a different body whenever the list shifted.
+    // A slot lives as long as the entity (10 s unseen tolerance, see SyncSlotSweep). The fallback to
+    // `idx` only happens for objId==0 or a saturated table, both of which were already unmatchable.
+    es.objId = hc->GetObjectID();
+    {
+        const uint32_t slot = SyncSlotFor(es.objId, nowMs);
+        es.key = (slot != SYNC_SLOT_NONE) ? slot : (uint32_t)idx;
+    }
+    es.kind = 2;    // character (guard)
+    es.arch = (uint16_t)(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF);
+    es.pos[0]=x; es.pos[1]=y; es.pos[2]=z;
+    HookMath::Quaternion q; HookMath::FromMatrix(&e->m_GlobalMatrix, &q);
+    es.quat[0]=q.x; es.quat[1]=q.y; es.quat[2]=q.z; es.quat[3]=q.w;
+    // Death state. Verified: the engine's own is-dead predicate is sub_753330 ->
+    // *(BYTE*)(ai+0x8C), and a real death flips exactly that byte 0 -> 1 (field diff: AI+08C).
+    // The old +0xB8 test is wrong - a genuine death never touches +0xB8, so es.dead stayed 0
+    // and host kills were never replicated to the peer.
+    AbstractEntityAI* ai = AIEntityHelper::GetEntityAI(e);
+    // P0: identity + health that survive the AI being torn down after death.
+    unsigned int hpSvc = FindHealthInAI((unsigned int)ai);
+    bool hpSvcOk = HostHpSvcValid(hpSvc);          // D-016(1): validate before caching or reading
+    if (hpSvcOk) RememberEntityHealth((unsigned int)e, hpSvc);
+    else { hpSvc = CachedHealthForEntity((unsigned int)e); hpSvcOk = HostHpSvcValid(hpSvc); }
+    // es.objId was resolved above (before the slot lookup) and is the record's wire id.
+    // B: keep the wire identity alive past the next ObjMapReset, so a death looked up after the
+    // guard left m_Entities still resolves its objId instead of 0.
+    EntObjIdRemember((unsigned int)e, es.objId);
+    if (hpSvcOk) {
+        es.hp = *(unsigned short*)(hpSvc + 0x5C);
+        // Dead = the engine's own answer. Primary: the health dead flag (set by the engine on a
+        // real death); secondary: combat is-alive. Do NOT use ai+0x8C here - that is a different
+        // (AI-side) predicate, not the combat one.
+        bool flagsDead = (*(unsigned int*)(hpSvc + 0x60) & 0x01000000u) != 0;
+        es.dead = (flagsDead || !EngineIsAlive((unsigned int)e)) ? 1 : 0;
+    } else {
+        es.hp = 0;
+        es.dead = EngineIsAlive((unsigned int)e) ? 0 : 1;
+    }
+    ObjMapAdd(es.objId, (unsigned int)e, hpSvc);
+    // Host -> guest death lane. D-016(3/4): a death is a TRANSITION - the same objId must have been
+    // seen in the previous capture with a plausible Life and now read 0xFFFF. An entity first seen
+    // already at 0xFFFF (recycled service, dropped-out entity) is NOT an event, and once a watch has
+    // emitted it is tombstoned so neither garbage nor a repeated 0xFFFF can emit again.
+    // A1: read the entity's CURRENT action clip BEFORE the death decision, so that on the death
+    // frame the ring already holds the engine's own chosen death clip - that value is the mapping.
+    // Alertness: HumanGroundStage (Fight=4=aggro, Navigation=1=calm).
+    es.stage = 0;
+    es.actionAlias = 0;
+    Human* gh = AIEntityHelper::GetHuman(e);
+    if (gh && readable(gh, 4)) {
+        HumanDataBundle* gpB = gh->m_Data.m_HumanDataBundle;
+        if (gpB && readable(gpB, 4)) es.stage = (uint8_t)(int32_t)gpB->m_GroundData.m_HumanGroundStage;
+        // Current action clip (file alias) - for the mirror drive on the peer.
+        ActionComponent* ac = gh->GetActionComponent();
+        if (ac && readable(ac, 0x40)) {
+            unsigned char mirrored = 0;
+            void* act = ac->GetCurrentAction(&mirrored, 0, ACTLAYER_PRIMARY);
+            if (act && readable(act, 0x14)) es.actionAlias = *(uint32_t*)((char*)act + 8);
+        }
+    }
+    // G10 (ops/AI-T5-G10.md 7.2): es is fully populated and gh/gpB already range-checked; the statics
+    // in here only read es, so nothing on the apply/mirror path or the wire is touched.
+    if (g_stageLog) StageLogEmit(es, x, y, z, px, py, pz, nowMs);
+    if (s_adLog && es.objId) AdAliasPut(es.objId, es.actionAlias);   // A1 (OFF => no work)
+
+    uint64_t deathId = 0;
+    float deathPos[3] = { 0, 0, 0 };
+    if (es.objId) {
+        HostLifeWatch* w = HostLifeFor(es.objId);
+        if (w) {
+            w->gen = s_hostLifeGen;
+            if (!w->hpSvc && hpSvc && hpSvcOk) w->hpSvc = hpSvc;
+            if (!w->tombstoned && hpSvcOk) {
+                if (es.hp == 0xFFFFu) {
+                    if (w->seen && w->lastLife >= 1 && w->lastLife <= 2000) {
+                        deathId = es.objId;
+                        // The wire id was resolved at capture time from the entity still in
+                        // hand (hc->GetObjectID()), and the position likewise - neither depends
+                        // on the objId map, which ObjMapReset() has just rebuilt.
+                        deathPos[0] = x; deathPos[1] = y; deathPos[2] = z;
+                        if (KtOn(KT_LOCAL))
+                            L("[KT] local death detected objId=%llu ent=%08X hp=%u->%u\n",
+                              (unsigned long long)es.objId, (unsigned)e,
+                              (unsigned)w->lastLife, (unsigned)es.hp);
+                        // A1: one line per death transition, emitted here - there is exactly one
+                        // such site. Single-shot is structural: this needs a watch that already
+                        // had a plausible Life and now reads 0xFFFF, and the tombstone is set on
+                        // the next lines, so the same objId can never reach this block twice.
+                        // NOTE: this entity lane is NOT how a real assassination shows up - the
+                        // victim leaves m_Entities first, so the live capture never reads 0xFFFF
+                        // for it. The real path is the vanish lane below; `!w->adEmitted` keeps
+                        // the two from double-printing an objId that vanished and then reappeared.
+                        if (s_adLog && !w->adEmitted && s_adLines < 500) {
+                            uint32_t victim = AdAliasGet(es.objId);
+                            float adx = e->m_GlobalMatrix.M41 - px, ady = e->m_GlobalMatrix.M42 - py, adz = e->m_GlobalMatrix.M43 - pz;
+                            float dist = sqrtf(adx*adx + ady*ady + adz*adz);
+                            L("[AD] player=%u victim=%u objId=%llu dist=%.1f ent=%08X\n",
+                              g_capPlayerAlias, victim, (unsigned long long)es.objId, dist, (unsigned)e);
+                            ++s_adLines;
+                            w->adEmitted = true;
+                        }
+                        w->tombstoned = true;
+                        w->life = 0xFFFFu;
+                    }
+                } else if (es.hp >= 1 && es.hp <= 2000) {
+                    w->lastLife = es.hp;
+                    w->seen = true;
+                    w->life = es.hp;
+                    // Remember the last place the victim was seen alive: by the time it counts as
+                    // dead it is out of the entity list and `e` is unusable.
+                    w->lastX = x; w->lastY = y; w->lastZ = z;
+                    float vdx = x - px, vdy = y - py, vdz = z - pz;
+                    w->lastDist = sqrtf(vdx*vdx + vdy*vdy + vdz*vdz);
+                    w->lastEnt = (unsigned int)e;
+                }
+            }
+        }
+    }
+    if (es.dead) {
+        static void* s_capDead[64];
+        static int   s_capDeadN = 0;
+        bool seen = false;
+        for (int cq = 0; cq < s_capDeadN; ++cq) if (s_capDead[cq] == e) { seen = true; break; }
+        if (!seen && s_capDeadN < 64) {
+            s_capDead[s_capDeadN++] = e;
+            L("[Cap] ent=%08X dead=1 ai=%08X (captured into the snapshot)\n", e, ai);
+        }
+    }
+    ++count;
+    ++s_scopeSent;
+    if (deathId) PushHostDeath(deathId, (unsigned int)e, deathPos);
+}
+
 static void CaptureGuards(EntityPacket& pkt) {
     if (s_adLog < 0) s_adLog = GetPrivateProfileIntA("Coop", "ActionDeathLog", 0, Paths::Ini());
     ObjMapReset();                       // rebuild the objId table for this capture
@@ -2810,8 +3111,18 @@ static void CaptureGuards(EntityPacket& pkt) {
     BaseBigArray<Reference>& ents = world->m_EntityManager.m_Entities;
     int nobj = ents.GetSize();
     uint32_t count = pkt.count;   // append after the ships (kind=1)
+    // ---- proximity selection scratch (TASK 1) ----
+    // Reference point for the scope: the PEER when the host knows it, the local player otherwise.
+    // Fixed-size array on the stack; nothing here allocates.
+    const uint64_t nowMs = GetTickCount64();
+    float refX = px, refY = py, refZ = pz;
+    if (g_peerPosValid) { refX = g_peerPos[0]; refY = g_peerPos[1]; refZ = g_peerPos[2]; }
+    const float scopeR  = (float)SyncRadiusM();
+    const float scopeR2 = scopeR * scopeR;
+    ScopeSel sel[SCOPE_SEL_CAP];
+    int selN = 0;
     __try {
-        for (int i = 0; i < nobj && count < (uint32_t)MAX_SYNC_ENTITIES; ++i) {
+        for (int i = 0; i < nobj; ++i) {
             Reference* ref = ents.GetElement(i);
             if (!ref || !readable(ref, 4)) break;
             HandleContainer* hc = ref->m_HandleContainer;
@@ -2819,9 +3130,9 @@ static void CaptureGuards(EntityPacket& pkt) {
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4)) continue;
             if (e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel=false, weapon=false, guardIcon=false; Component* bhvC=0;
             // Component ids of THIS entity, kept only until the candidate gate below: the same walk
@@ -2915,8 +3226,11 @@ static void CaptureGuards(EntityPacket& pkt) {
             }
             if (weapon)    ++s_compWeaponCand;
             if (guardIcon) ++s_compIconCand;
-            if (SyncEnemiesOnly() && !isEnemy) continue;
-            float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
+            // SyncEnemiesOnly (kept as an ini key, currently equivalent to 0): there is no verified
+            // class discriminator in this build, so it filters nothing. The scope decision is made
+            // below, on distance to the peer.
+            (void)SyncEnemiesOnly();
+            const float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             // [Relevance] Replicate a character if it is near the HOST's player (the original 80 m cap)
             // or anywhere within RelevanceRadiusM of the PEER. Without the peer term, a partner a few
             // hundred metres away sees no NPCs at all; without the host term we lose the local scene
@@ -2925,129 +3239,60 @@ static void CaptureGuards(EntityPacket& pkt) {
             float dx=x-px, dy=y-py, dz=z-pz;
             const bool nearHost = (dx*dx + dy*dy + dz*dz) <= (80.0f * 80.0f);
             if (!nearHost && !IsRelevantToPeer(x, y, z, g_relevanceRadiusM)) continue;
-            EntityState& es = pkt.ents[count];
-            es.key = (uint32_t)i;
-            es.kind = 2;    // character (guard)
-            es.arch = (uint16_t)(*(uint32_t*)((char*)bhvC + 0x14) & 0xFFFF);
-            es.pos[0]=x; es.pos[1]=y; es.pos[2]=z;
-            HookMath::Quaternion q; HookMath::FromMatrix(&e->m_GlobalMatrix, &q);
-            es.quat[0]=q.x; es.quat[1]=q.y; es.quat[2]=q.z; es.quat[3]=q.w;
-            // Death state. Verified: the engine's own is-dead predicate is sub_753330 ->
-            // *(BYTE*)(ai+0x8C), and a real death flips exactly that byte 0 -> 1 (field diff: AI+08C).
-            // The old +0xB8 test is wrong — a genuine death never touches +0xB8, so es.dead stayed 0
-            // and host kills were never replicated to the peer.
-            AbstractEntityAI* ai = AIEntityHelper::GetEntityAI(e);
-            // P0: identity + health that survive the AI being torn down after death.
-            unsigned int hpSvc = FindHealthInAI((unsigned int)ai);
-            bool hpSvcOk = HostHpSvcValid(hpSvc);          // D-016(1): validate before caching or reading
-            if (hpSvcOk) RememberEntityHealth((unsigned int)e, hpSvc);
-            else { hpSvc = CachedHealthForEntity((unsigned int)e); hpSvcOk = HostHpSvcValid(hpSvc); }
-            es.objId = hc->GetObjectID();
-            // B: keep the wire identity alive past the next ObjMapReset, so a death looked up after the
-            // guard left m_Entities still resolves its objId instead of 0.
-            EntObjIdRemember((unsigned int)e, es.objId);
-            if (hpSvcOk) {
-                es.hp = *(unsigned short*)(hpSvc + 0x5C);
-                // Dead = the engine's own answer. Primary: the health dead flag (set by the engine on a
-                // real death); secondary: combat is-alive. Do NOT use ai+0x8C here — that is a different
-                // (AI-side) predicate, not the combat one.
-                bool flagsDead = (*(unsigned int*)(hpSvc + 0x60) & 0x01000000u) != 0;
-                es.dead = (flagsDead || !EngineIsAlive((unsigned int)e)) ? 1 : 0;
-            } else {
-                es.hp = 0;
-                es.dead = EngineIsAlive((unsigned int)e) ? 0 : 1;
+            // ---- proximity scope (TASK 1) ----
+            // Distance to the PEER (the local player when the peer position is unknown). Only bodies
+            // inside SyncRadiusM are collected; the nearest SyncMaxEntities of them are emitted after
+            // the loop, in a deterministic order. Collection costs one squared distance and one slot
+            // in a fixed array - no allocation, no engine call.
+            const float sdx = x - refX, sdy = y - refY, sdz = z - refZ;
+            const float sd2 = sdx*sdx + sdy*sdy + sdz*sdz;
+            if (scopeR2 > 0.0f && sd2 > scopeR2) continue;
+            ++s_scopeInRadius;
+            if (selN < SCOPE_SEL_CAP) {
+                ScopeSel& c = sel[selN++];
+                c.d2 = sd2;
+                c.objId = hc->GetObjectID();   // tie-break only; the emit pass re-reads it
+                c.idx = i;
             }
-            ObjMapAdd(es.objId, (unsigned int)e, hpSvc);
-            // Host -> guest death lane. D-016(3/4): a death is a TRANSITION - the same objId must have been
-            // seen in the previous capture with a plausible Life and now read 0xFFFF. An entity first seen
-            // already at 0xFFFF (recycled service, dropped-out entity) is NOT an event, and once a watch has
-            // emitted it is tombstoned so neither garbage nor a repeated 0xFFFF can emit again.
-            // A1: read the entity's CURRENT action clip BEFORE the death decision, so that on the death
-            // frame the ring already holds the engine's own chosen death clip — that value is the mapping.
-            // Alertness: HumanGroundStage (Fight=4=aggro, Navigation=1=calm).
-            es.stage = 0;
-            es.actionAlias = 0;
-            Human* gh = AIEntityHelper::GetHuman(e);
-            if (gh && readable(gh, 4)) {
-                HumanDataBundle* gpB = gh->m_Data.m_HumanDataBundle;
-                if (gpB && readable(gpB, 4)) es.stage = (uint8_t)(int32_t)gpB->m_GroundData.m_HumanGroundStage;
-                // Current action clip (file alias) — for the mirror drive on the peer.
-                ActionComponent* ac = gh->GetActionComponent();
-                if (ac && readable(ac, 0x40)) {
-                    unsigned char mirrored = 0;
-                    void* act = ac->GetCurrentAction(&mirrored, 0, ACTLAYER_PRIMARY);
-                    if (act && readable(act, 0x14)) es.actionAlias = *(uint32_t*)((char*)act + 8);
-                }
+        }
+        // Deterministic nearest-first selection (TASK 1). Insertion sort over a fixed array of at most
+        // SCOPE_SEL_CAP entries: bounded time, no allocation, and a tie-break of (objId, index) so two
+        // captures of the same world state always produce the same order.
+        for (int a = 1; a < selN; ++a) {
+            const ScopeSel v = sel[a];
+            int b = a - 1;
+            while (b >= 0 && ScopeLess(v, sel[b])) { sel[b + 1] = sel[b]; --b; }
+            sel[b + 1] = v;
+        }
+        const int maxEmit = SyncMaxEntities();
+        for (int s = 0; s < selN && s < maxEmit && count < (uint32_t)MAX_SYNC_ENTITIES; ++s) {
+            // Re-resolve from the index: everything the emit needs is re-read here, under the same
+            // __try, so a body that vanished mid-capture is skipped and never dereferenced.
+            const int i = sel[s].idx;
+            Reference* ref = ents.GetElement(i);
+            if (!ref || !readable(ref, 4)) continue;
+            HandleContainer* hc = ref->m_HandleContainer;
+            if (!hc || !readable(hc, 4)) continue;
+            Entity* e = (Entity*)hc->m_Object;
+            if (!e || !readable(e, 4) || e == player) continue;
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
+            if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
+            bool skel = false; Component* bhvC = 0;
+            for (int k = 0; k < n; ++k) {
+                Component* c = data[k];
+                uint32_t vt = (c && readable(c,4)) ? *(uint32_t*)c : 0;
+                if (vt == 0x01E41E58) skel = true;
+                if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only (excludes BhvAssassin player/puppet)
             }
-            if (s_adLog && es.objId) AdAliasPut(es.objId, es.actionAlias);   // A1 (OFF => no work)
-
-            uint64_t deathId = 0;
-            float deathPos[3] = { 0, 0, 0 };
-            if (es.objId) {
-                HostLifeWatch* w = HostLifeFor(es.objId);
-                if (w) {
-                    w->gen = s_hostLifeGen;
-                    if (!w->hpSvc && hpSvc && hpSvcOk) w->hpSvc = hpSvc;
-                    if (!w->tombstoned && hpSvcOk) {
-                        if (es.hp == 0xFFFFu) {
-                            if (w->seen && w->lastLife >= 1 && w->lastLife <= 2000) {
-                                deathId = es.objId;
-                                // The wire id was resolved at capture time from the entity still in
-                                // hand (hc->GetObjectID()), and the position likewise - neither depends
-                                // on the objId map, which ObjMapReset() has just rebuilt.
-                                deathPos[0] = x; deathPos[1] = y; deathPos[2] = z;
-                                if (KtOn(KT_LOCAL))
-                                    L("[KT] local death detected objId=%llu ent=%08X hp=%u->%u\n",
-                                      (unsigned long long)es.objId, (unsigned)e,
-                                      (unsigned)w->lastLife, (unsigned)es.hp);
-                                // A1: one line per death transition, emitted here — there is exactly one
-                                // such site. Single-shot is structural: this needs a watch that already
-                                // had a plausible Life and now reads 0xFFFF, and the tombstone is set on
-                                // the next lines, so the same objId can never reach this block twice.
-                                // NOTE: this entity lane is NOT how a real assassination shows up - the
-                                // victim leaves m_Entities first, so the live capture never reads 0xFFFF
-                                // for it. The real path is the vanish lane below; `!w->adEmitted` keeps
-                                // the two from double-printing an objId that vanished and then reappeared.
-                                if (s_adLog && !w->adEmitted && s_adLines < 500) {
-                                    uint32_t victim = AdAliasGet(es.objId);
-                                    float dx = e->m_GlobalMatrix.M41 - px, dy = e->m_GlobalMatrix.M42 - py, dz = e->m_GlobalMatrix.M43 - pz;
-                                    float dist = sqrtf(dx*dx + dy*dy + dz*dz);
-                                    L("[AD] player=%u victim=%u objId=%llu dist=%.1f ent=%08X\n",
-                                      g_capPlayerAlias, victim, (unsigned long long)es.objId, dist, (unsigned)e);
-                                    ++s_adLines;
-                                    w->adEmitted = true;
-                                }
-                                w->tombstoned = true;
-                                w->life = 0xFFFFu;
-                            }
-                        } else if (es.hp >= 1 && es.hp <= 2000) {
-                            w->lastLife = es.hp;
-                            w->seen = true;
-                            w->life = es.hp;
-                            // Remember the last place the victim was seen alive: by the time it counts as
-                            // dead it is out of the entity list and `e` is unusable.
-                            w->lastX = x; w->lastY = y; w->lastZ = z;
-                            w->lastDist = sqrtf(dx*dx + dy*dy + dz*dz);
-                            w->lastEnt = (unsigned int)e;
-                        }
-                    }
-                }
-            }
-            if (es.dead) {
-                static void* s_capDead[64];
-                static int   s_capDeadN = 0;
-                bool seen = false;
-                for (int q = 0; q < s_capDeadN; ++q) if (s_capDead[q] == e) { seen = true; break; }
-                if (!seen && s_capDeadN < 64) {
-                    s_capDead[s_capDeadN++] = e;
-                    L("[Cap] ent=%08X dead=1 ai=%08X (captured into the snapshot)\n", e, ai);
-                }
-            }
-            ++count;
-            ++s_scopeSent;
-            if (deathId) PushHostDeath(deathId, (unsigned int)e, deathPos);
+            if (!skel || !bhvC) continue;
+            EmitGuardEntity(pkt, count, i, e, bhvC, hc, px, py, pz, nowMs);
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
+    // TASK 2: release slots the capture has not seen for 10 s. Runs AFTER the capture, so everything
+    // this capture handled carries a fresh stamp; only entities that left the world can be released.
+    SyncSlotSweep(nowMs);
 
     // Anything we tracked last capture but did not see now either walked out of range or died. D-016(5):
     // only a VALIDATED service decides, and only for a watch that already had a plausible Life. A service
@@ -3504,9 +3749,9 @@ static Entity* ResolveEntityById(uint64_t id) {
 // Returns the behaviour component (needed for the archetype check and the disable call), else nullptr.
 static Component* MirrorCandidateBhv(Entity* e, Entity* player) {
     if (!e || e == player || !readable(e, 4)) return nullptr;
-    Component** data = *(Component***)((char*)e + 0x60);
-    int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-    if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+    uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+    if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+    Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
     if (!data || !readable(data, 4) || n <= 0 || n > 96) return nullptr;
     bool skel = false; Component* bhvC = 0;
     for (int k = 0; k < n; ++k) {
@@ -3570,13 +3815,43 @@ static void ApplyGuards(const EntityPacket& pkt) {
     int nobj = ents.GetSize();
     s_driveN = 0;                       // rebuild the per-frame drive cache
     unsigned int usedEnt[MAX_SYNC_ENTITIES]; int usedN = 0;   // one local body per host entity, per packet
+    const uint64_t nowMs = GetTickCount64();                  // slot table clock (TASK 2)
     __try {
         for (uint32_t i = 0; i < pkt.count; ++i) {
             const EntityState& es = pkt.ents[i];
             if (es.kind != 2) continue;
             // Never feed the engine a NaN/inf transform (see FiniteVec).
             if (!FiniteVec(es.pos, 3) || !FiniteVec(es.quat, 4)) continue;
+            ++s_bindSent;                    // TASK 3 oracle: one usable character record
             Entity* best = 0; Component* bestBhv = 0; float bestD = 1.5f * 1.5f;   // 1.5m match tolerance
+            // ---- TASK 2: sticky slot binding ----
+            // The host's `key` for a character is a STABLE SLOT (see SyncSlotFor), so slot -> local
+            // body is bound once and kept for as long as the body is still a valid mirror candidate.
+            // This survives both the host's entity ordering and a temporary gap in its snapshots,
+            // which is exactly what the old index key could not do. Only when the slot has no usable
+            // body do the resolver and the 1.5 m position match below run.
+            const char* via = "position";
+            uint32_t slotIdx = SYNC_SLOT_NONE;
+            if (es.key < (uint32_t)SYNC_SLOT_MAX) {
+                slotIdx = es.key;
+                GuestSlotEntry& gs = s_guestSlot[slotIdx];
+                gs.lastPktMs = nowMs;        // the host is still talking about this slot
+                if (gs.used && es.objId && gs.objId != es.objId) {
+                    // The host released this slot and handed it to another entity (its 10 s rule).
+                    L("[Slot] release slot=%u reason=reassigned\n", slotIdx);
+                    gs.used = 0; gs.ent = 0; gs.objId = 0;
+                    gs.lastPktMs = nowMs;
+                }
+                if (gs.used && gs.ent) {
+                    Component* sb = MirrorCandidateBhv((Entity*)gs.ent, player);
+                    if (sb) { best = (Entity*)gs.ent; bestBhv = sb; via = "sticky"; }
+                    else {
+                        // Body died, despawned or the address was reused: drop the binding.
+                        L("[Slot] release slot=%u reason=body-gone\n", slotIdx);
+                        gs.used = 0; gs.ent = 0; gs.objId = 0;
+                    }
+                }
+            }
             // [IdRes] Primary path: ask the engine's registry for the id directly. Purely additive - when
             // the resolver is off, misses, or the object fails validation, the legacy scan below runs
             // exactly as before, so the previous behaviour cannot regress.
@@ -3584,7 +3859,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 Entity* re = ResolveEntityById(es.objId);
                 Component* rb = re ? MirrorCandidateBhv(re, player) : nullptr;
                 if (rb && (!es.arch || (uint16_t)(*(uint32_t*)((char*)rb + 0x14) & 0xFFFF) == es.arch)) {
-                    best = re; bestBhv = rb;
+                    best = re; bestBhv = rb; via = "resolver";
                     if (IdResLogNow(&s_idResHit))
                         L("[IdRes] id=%016llX -> %p (resolver)\n", (unsigned long long)es.objId, re);
                 } else if (IdResLogNow(&s_idResMiss)) {
@@ -3599,9 +3874,9 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 if (!hc || !readable(hc, 4)) continue;
                 Entity* e = (Entity*)hc->m_Object;
                 if (!e || !readable(e, 4) || e == player) continue;
-                Component** data = *(Component***)((char*)e + 0x60);
-                int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+                Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                 if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
                 bool skel=false; Component* bhvC=0;
                 for (int k = 0; k < n; ++k) {
@@ -3640,7 +3915,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                     float sdy = e->m_GlobalMatrix.M42 - es.pos[1];
                     float sdz = e->m_GlobalMatrix.M43 - es.pos[2];
                     if (archOk && (sdx*sdx + sdy*sdy + sdz*sdz) < 100.0f * 100.0f) {
-                        best = e; bestBhv = bhvC; break;
+                        best = e; bestBhv = bhvC; via = "sticky"; break;   // the objId table's own binding
                     }
                     GuestObjForget(es.objId);
                 }
@@ -3650,7 +3925,7 @@ static void ApplyGuards(const EntityPacket& pkt) {
                 float d = dx*dx + dy*dy + dz*dz;
                 if (d < bestD) { bestD = d; best = e; bestBhv = bhvC; }
             }
-            if (!best) { ++s_covNoBody; continue; }
+            if (!best) { ++s_covNoBody; ++s_bindUnmatched; continue; }
             // Never let two host entities drive the same local body. With civilians in the pool a 4 m
             // radius routinely held several candidates, and a body could be taken over by a second NPC -
             // visible as one citizen being dragged tens of metres. Reject a body that already plays a
@@ -3667,11 +3942,44 @@ static void ApplyGuards(const EntityPacket& pkt) {
                           best, (unsigned long long)owner, (unsigned long long)es.objId);
                     }
                     ++s_covStolen;
+                    // If the body we wanted is the one this SLOT already holds, the slot binding is
+                    // what must give way, otherwise every packet re-offers the same stolen body and
+                    // this entry can never be applied. Drop it so the next packet re-matches.
+                    if (slotIdx != SYNC_SLOT_NONE && s_guestSlot[slotIdx].used
+                        && s_guestSlot[slotIdx].ent == (unsigned int)best) {
+                        L("[Slot] release slot=%u reason=stolen\n", slotIdx);
+                        s_guestSlot[slotIdx].used = 0; s_guestSlot[slotIdx].ent = 0;
+                        s_guestSlot[slotIdx].objId = 0;
+                    }
                     continue;
                 }
             }
             if (usedN < MAX_SYNC_ENTITIES) usedEnt[usedN++] = (unsigned int)best;
             ++s_covMatched;
+            // ---- TASK 3 oracle: bind quality ----
+            // The error is measured HERE, at apply time: the local body's own position before any
+            // transform write this packet. A body we drive well sits on the host's position; a body
+            // bound to the wrong NPC shows a large error even though `bound` counted it.
+            ++s_bindBound;
+            {
+                const float ex = ((Entity*)best)->m_GlobalMatrix.M41 - es.pos[0];
+                const float ey = ((Entity*)best)->m_GlobalMatrix.M42 - es.pos[1];
+                const float ez = ((Entity*)best)->m_GlobalMatrix.M43 - es.pos[2];
+                const float err = sqrtf(ex*ex + ey*ey + ez*ez);
+                s_bindErrSum += (double)err;
+                if (err > s_bindErrMax) s_bindErrMax = err;
+            }
+            // Commit / refresh the slot binding. Sticky: it is only replaced when the body actually
+            // changes, and exactly one line is emitted per transition - never once per packet.
+            if (slotIdx != SYNC_SLOT_NONE) {
+                GuestSlotEntry& gs = s_guestSlot[slotIdx];
+                if (!gs.used || gs.ent != (unsigned int)best || gs.objId != es.objId) {
+                    gs.used = 1; gs.ent = (unsigned int)best; gs.objId = es.objId;
+                    L("[Slot] bind slot=%u objId=%llu -> ent=%08X via=%s\n",
+                      slotIdx, (unsigned long long)es.objId, (unsigned int)best, via);
+                }
+                gs.lastPktMs = nowMs;
+            }
             // Guest relay: if OUR attack is what killed this mirror, report it to the host (which owns
             // the real guard). Skipped when the death came from the host snapshot, so it can't echo.
             GuestObjAdd(es.objId, (unsigned int)best);   // objId -> local mirror, for inbound events
@@ -3787,6 +4095,18 @@ static void ApplyGuards(const EntityPacket& pkt) {
             }
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {}
+
+    // TASK 2: evict slot bindings the host has stopped talking about. A record whose delta is empty
+    // is omitted from the wire (net.cpp:174), so a perfectly static body can legitimately go quiet;
+    // it re-binds on its next record and logs one [Slot] bind, which is the visible cost of the rule.
+    // The other eviction paths (body death/despawn, slot reassignment) run in the loop above.
+    for (int i = 0; i < SYNC_SLOT_MAX; ++i) {
+        GuestSlotEntry& gs = s_guestSlot[i];
+        if (!gs.used) continue;
+        if (nowMs - gs.lastPktMs <= SYNC_SLOT_STALE_MS) continue;
+        L("[Slot] release slot=%u reason=stale-packet\n", i);
+        gs.used = 0; gs.ent = 0; gs.objId = 0;
+    }
 }
 
 // ---- guest death scan --------------------------------------------------------------------------
@@ -3808,9 +4128,9 @@ static void GuestDeathScan() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -3983,9 +4303,9 @@ static void EntitySyncTick() {
                     if (!hc || !readable(hc, 4)) continue;
                     Entity* e = (Entity*)hc->m_Object;
                     if (!e || !readable(e, 4) || e == pl) continue;
-                    Component** data = *(Component***)((char*)e + 0x60);
-                    int cn = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                    if (cn <= 0 || cn > 96) cn = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                    uint16_t cn = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                    if (cn < 1 || cn > 96) cn = 0;   // clamp: 1..96 safety net
+                    Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                     if (!data || !readable(data, 4) || cn <= 0 || cn > 96) continue;
                     bool skel = false; Component* bhv = 0;
                     for (int k = 0; k < cn; ++k) {
@@ -4020,7 +4340,6 @@ static void EntitySyncTick() {
     // EntitySelfTest=1, so every incoming entity and kill packet was dropped.
     EntityPacket in;
     const bool haveIn = Net::GetEntities(in) && in.protoVer == NET_PROTO_VER;
-    if (haveIn) ProcessKillEvents(in);
     // B-4: drain the death entries the recv thread queued. A one-entry KIND_KILL packet is no longer
     // inside `in` at all (it cannot clobber the snapshot slot, net.cpp) and could not be relied on being
     // there even before, because the snapshot slot is last-writer-wins. This is the queue that guarantees
@@ -4029,6 +4348,12 @@ static void EntitySyncTick() {
         EntityPacket kp{};
         if (Net::GetKillEntities(kp, 16) > 0) ProcessKillEvents(kp);
     }
+    // Order is deliberate: the exactly-once ring is applied BEFORE the retained snapshot's kill lane.
+    // `in` stays in the slot and is re-processed on every throttled tick, so if it went first a replayed
+    // entry would consume DeathAppliedRecently and swallow the ring's fresh death - and on the guest a
+    // stale entry can still resolve through the 4 m position fallback onto whatever body is there now.
+    // Both lanes collapse duplicates in DeathAppliedRecently, so this only decides which lane wins.
+    if (haveIn) ProcessKillEvents(in);
 
     if (s_selfTest) {
         EntityPacket pkt;
@@ -4173,9 +4498,9 @@ static void ProbeEntityEnum() {
                     if (!hc || !readable(hc, 4)) continue;
                     Entity* e = (Entity*)hc->m_Object;
                     if (!e || !readable(e, 4)) continue;
-                    Component** data = *(Component***)((char*)e + 0x60);
-                    int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                    if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                    uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                    if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+                    Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                     if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
                     bool skel=false, weapon=false, guardIcon=false, cloth=false; uint32_t bhv=0; Component* bhvC=0;
                     for (int k = 0; k < n; ++k) {
@@ -4209,9 +4534,9 @@ static void ProbeEntityEnum() {
                     if (!hc || !readable(hc, 4)) continue;
                     Entity* e = (Entity*)hc->m_Object;
                     if (!e || !readable(e, 4)) continue;
-                    Component** data = *(Component***)((char*)e + 0x60);
-                    int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                    if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                    uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                    if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+                    Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                     if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
                     bool skel=false; Component* bhvC=0;
                     for (int k = 0; k < n; ++k) {
@@ -4257,9 +4582,9 @@ static void ProbeEntityEnum() {
                     if (!hc || !readable(hc, 4)) continue;
                     Entity* e = (Entity*)hc->m_Object;
                     if (!e || !readable(e, 4)) continue;
-                    Component** data = *(Component***)((char*)e + 0x60);
-                    int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                    if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                    uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                    if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+                    Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                     if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
                     bool skel=false; Component* bhvC=0;
                     for (int k = 0; k < n; ++k) {
@@ -4482,9 +4807,9 @@ static void ProbeGuardHealthMap() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -4698,9 +5023,9 @@ static void KillNearestGuard() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -4790,9 +5115,9 @@ static void ProbeDeathDiff() {
                 if (!hc || !readable(hc, 4)) continue;
                 Entity* e = (Entity*)hc->m_Object;
                 if (!e || !readable(e, 4) || e == player) continue;
-                Component** data = *(Component***)((char*)e + 0x60);
-                int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-                if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+                uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+                if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+                Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
                 if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
                 bool skel = false; Component* bhvC = 0;
                 for (int k = 0; k < n; ++k) {
@@ -4905,9 +5230,9 @@ static void ArmLifeWriteTrap() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -5017,9 +5342,9 @@ static void ArmGuardPage() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -5077,9 +5402,9 @@ static Entity* FindNearestSoldierTo(float x, float y, float z, float radius) {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -5976,9 +6301,9 @@ static void TickDieClipWatch() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || !readable(e, 4) || e == player) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -6163,9 +6488,9 @@ static void ShipEntityDiff() {
     if (s_ssState == 0) {
         memset(&s_ss, 0, sizeof(s_ss));
         s_ss.ent = (unsigned int)ship;
-        Component** data = *(Component***)((char*)ship + 0x60);
-        int n = (*(unsigned short*)((char*)ship + 0x64) & 0xFFFF);
-        if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)ship + 0x66) & 0xFFFF);
+        uint16_t n = *(uint16_t*)((uint8_t*)ship + 0x66);   // authoritative count @ +0x66 (never +0x64)
+        if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+        Component** data = *(Component***)((uint8_t*)ship + 0x60);   // re-read live: a grow frees the old block
         if (data && readable(data, 4) && n > 0 && n <= 96) {
             for (int k = 0; k < n && s_ss.ncomps < 16; ++k) {
                 Component* c = data[k];
@@ -6830,9 +7155,9 @@ static void ProbeIdentityOnce() {
             if (!e || !readable(e, 4)) continue;
 
             uint32_t arch = 0, bhvVt = 0;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int nc = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (nc <= 0 || nc > 96) nc = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t nc = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (nc < 1 || nc > 96) nc = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (data && readable(data, 4) && nc > 0 && nc <= 96) {
                 for (int k = 0; k < nc; ++k) {
                     Component* c = data[k];
@@ -7062,9 +7387,9 @@ static void IdentityBandTick() {
             if (!e || e == player || !readable(e, 0x70)) continue;
             // "Is this really an entity?" - the same component-array shape test CaptureGuards uses.
             // Props/dev objects that fail it never reach the id call.
-            Component** data = *(Component***)((char*)e + 0x60);
-            int nc = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (nc <= 0 || nc > 96) nc = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t nc = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (nc < 1 || nc > 96) nc = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || nc <= 0 || nc > 96 || !readable(data, 4)) continue;
 
             const float dx = e->m_GlobalMatrix.M41 - px;
@@ -7215,9 +7540,9 @@ static void CombatTestKill() {
             if (!hc || !readable(hc, 4)) continue;
             Entity* e = (Entity*)hc->m_Object;
             if (!e || e == player || !readable(e, 0x70)) continue;
-            Component** data = *(Component***)((char*)e + 0x60);
-            int n = (*(unsigned short*)((char*)e + 0x64) & 0xFFFF);
-            if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
+            uint16_t n = *(uint16_t*)((uint8_t*)e + 0x66);   // authoritative count @ +0x66 (never +0x64)
+            if (n < 1 || n > 96) n = 0;   // clamp: 1..96 safety net
+            Component** data = *(Component***)((uint8_t*)e + 0x60);   // re-read live: a grow frees the old block
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel = false; Component* bhvC = 0;
             for (int k = 0; k < n; ++k) {
@@ -7429,8 +7754,19 @@ static void OnFrameInner(Human* updatedHuman) {
             // filter: candidates minus enemies is the civilian mass that used to be shipped, sent is
             // what actually went out (it also includes ships, which are packed before the characters).
             // The guest never runs CaptureGuards, so candidates/enemies/sent stay 0 there by design.
-            L("[Sync] scope candidates=%u enemies=%u sent=%u (SyncEnemiesOnly=%d)\n",
-              s_scopeCand, s_scopeEnemies, s_scopeSent, SyncEnemiesOnly());
+            // Scope (TASK 1): candidates that passed the validity gate, how many of them are inside
+            // SyncRadiusM of the peer, and how many were actually emitted (nearest-first, capped by
+            // SyncMaxEntities; `sent` also includes ships, packed before the characters).
+            L("[Sync] scope candidates=%u inRadius=%u enemies=%u sent=%u (SyncEnemiesOnly=%d, SyncRadiusM=%d, SyncMaxEntities=%d)\n",
+              s_scopeCand, s_scopeInRadius, s_scopeEnemies, s_scopeSent,
+              SyncEnemiesOnly(), SyncRadiusM(), SyncMaxEntities());
+            // G7 oracle (TASK 3), guest side: did every character record get a body, and how far is
+            // that body from where the host says it is at APPLY time? sent == bound + unmatched.
+            {
+                const double meanErr = s_bindBound ? (s_bindErrSum / (double)s_bindBound) : 0.0;
+                L("[Sync] bind sent=%u bound=%u unmatched=%u meanErr=%.2f maxErr=%.2f\n",
+                  s_bindSent, s_bindBound, s_bindUnmatched, meanErr, (double)s_bindErrMax);
+            }
             // Component histogram, same window. ALL non-zero distinct component vtable ids by
             // descending count (32 slots), then the two ids the enemies-only filter trusts, each as
             // "candidates carrying it". If enemies=0 while weapon_A8/icon_D0 are non-zero, the scope
@@ -7465,7 +7801,10 @@ static void OnFrameInner(Human* updatedHuman) {
             }
             CompHistReset();
             AiHistReset();
-            s_scopeCand = 0; s_scopeEnemies = 0; s_scopeSent = 0;
+            s_scopeCand = 0; s_scopeEnemies = 0; s_scopeInRadius = 0; s_scopeSent = 0;
+            // TASK 3 oracle counters, same window.
+            s_bindSent = 0; s_bindBound = 0; s_bindUnmatched = 0;
+            s_bindErrSum = 0.0; s_bindErrMax = 0.0f;
             // One-shot receive watchdog: counters reset every poll, so 2 polls with tx and no rx
             // means ~10 s of transmitting into the void. Say so once - silence is the failure mode
             // that cost us a whole two-machine session.
@@ -8109,6 +8448,8 @@ void Phase1::InstallFrameHook() {
     // Test-only: shift the puppet sideways so a single machine can test AI reaction to it.
     // 0 (default) = off, production behaviour unchanged. Read as an int in centimetres.
     g_puppetParkX = (float)GetPrivateProfileIntA("Coop", "PuppetParkX", 0, Paths::Ini());
+    // G10 instrumentation gate (ops/AI-T5-G10.md 7.4): 0 = production, zero [G10] output.
+    g_stageLog = GetPrivateProfileIntA("Coop", "StageLog", 0, Paths::Ini());
     g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, Paths::Ini());
     g_minBlendIn = GetPrivateProfileIntA("Coop", "MinBlendInMs", 100, Paths::Ini()) / 1000.0f;
     // DriveContextMask: read as a string so hex ("0x440") or decimal both parse. Empty -> keep the safe
