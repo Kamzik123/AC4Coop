@@ -101,6 +101,11 @@ unsigned g_ctxMask = (1u << 6) | (1u << 10);
 HookMath::Vector4  g_offset = { 2.0f, 0.0f, 0.0f, 0.0f }; // puppet stands +2m on X from the player
 static float     g_puppetParkX = 0.0f;   // [Coop] PuppetParkX: test-only sideways shift of the puppet
 
+// PS3 debug ELF (ops/PS3-SYMBOLS.md 2): scimitar's Layer enum is Disabled = 40 (0x28),
+// FloatingObject = 41 (0x29). Both collision-filter call sites used to pass 0x29 and call it
+// "Disabled" - 0x29 is FloatingObject, i.e. the body kept a live physical layer. FIX A: 0x28.
+static const int kCollisionLayerDisabled = 0x28;   // Layer::Disabled (0x29 was FloatingObject)
+
 // [Coop] ShipPassenger: deck offset, in the LOCAL ship's local space (metres), where the peer's puppet is
 // placed when BOTH peers are aboard their own ships. Axes are a first guess for this build (X right,
 // Y up, Z fore/aft) — tune this ONE constant; the rotation is applied from the ship's global matrix below.
@@ -1274,12 +1279,13 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
                 cc->m_DriveEntity = false;
                 // [Coop] PuppetPhysics=0: the puppet is not a body. Disable its collision capsule with the
                 // same proven call the guard/corpse lane uses (0x636480 = collision-filter setter on
-                // &CharacterController::m_FilterInfo, 0x29 = Disabled) so it can neither push the player
+                // &CharacterController::m_FilterInfo, 0x28 = Layer::Disabled - FIX A, it used to pass
+                // 0x29 = FloatingObject, which is a live layer) so it can neither push the player
                 // nor be blocked by geometry. One-shot per puppet (re-armed on respawn).
                 if (!phys && s_pupCollisionEnt != (void*)g_puppet) {
-                    ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, 0x29);
+                    ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, kCollisionLayerDisabled);
                     s_pupCollisionEnt = (void*)g_puppet;
-                    L("[Pup] collision filter -> Disabled(0x29) puppet=%p\n", (void*)g_puppet);
+                    L("[Pup] collision filter -> Disabled(0x%02X) puppet=%p\n", kCollisionLayerDisabled, (void*)g_puppet);
                 }
             }
         }
@@ -5971,8 +5977,8 @@ static void KillGuardEntityInner(Entity* e, bool notifyPeer) {
             // Only the collision filter is changed. m_DriveEntity=false is deliberately NOT set here:
             // it stopped the controller applying the animation's root motion, which left the corpse
             // standing. Keep the controller fully functional and make it non-colliding instead.
-            ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, 0x29);
-            L("[KF] collision layer -> Disabled(0x29) (controller left untouched)\n");
+            ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, kCollisionLayerDisabled);
+            L("[KF] collision layer -> Disabled(0x%02X) (controller left untouched)\n", kCollisionLayerDisabled);
         } else L("[KF] no CharacterController\n");
     }
 
