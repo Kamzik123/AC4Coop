@@ -1166,6 +1166,24 @@ bool Phase1::CaptureLocalState(PlayerState& s) {
     } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
 }
 
+// [Coop] PuppetPhysics (default 0). 0 = "position" mode: the puppet is a pure render mirror — its matrix is
+// written with updatePhysics=false (no physics/capsule solve) and its collision filter is disabled, so it
+// can neither push the player nor be blocked by geometry. 1 = legacy behaviour: every applied snapshot is a
+// SetGlobalMatrixInternal(...,true) physics warp, exactly as before this flag existed.
+// Read once (lazy, same idiom as g_entSync at the entity-sync tick).
+static int s_puppetPhysics = -1;
+static void* s_pupCollisionEnt = nullptr;   // puppet whose collision filter we already disabled (one-shot)
+static inline int PuppetPhysicsMode() {
+    if (s_puppetPhysics < 0)
+        s_puppetPhysics = GetPrivateProfileIntA("Coop", "PuppetPhysics", 0, Paths::Ini()) != 0 ? 1 : 0;
+    return s_puppetPhysics;
+}
+static void LogPuppetMode() {
+    int phys = PuppetPhysicsMode();
+    L("[Pup] mode=%s physics=%d collision=%s\n",
+      phys ? "physics" : "position", phys, phys ? "untouched" : "disabled");
+}
+
 // Apply a remote peer's state to the puppet (absolute position — shared world coords, no offset).
 // Never nulls g_puppet on a transient fault (that would trigger endless respawns).
 void Phase1::ApplyRemoteState(const PlayerState& s) {
@@ -1191,17 +1209,23 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
     }
     if (!g_puppet || !s.valid) return;
     __try {
-        // Position + orientation of the entity: SetGlobalMatrixInternal(updatePhysics=true) sets the entity
-        // matrix, updates the graphic node/skeleton and pushes into the physic components — this drives
-        // rendering and rotation for every context. It does NOT move the character controller, though, which
-        // is what FSM/physics-driven contexts (swim) actually position from — that's handled by the kamikaze
-        // controller warp just below. s.matrix is pack(1)/const, so copy to an aligned local for the call.
+        // Position + orientation of the entity. SetGlobalMatrixInternal writes the entity matrix and updates
+        // the graphic node/skeleton unconditionally; only the physics components are touched when
+        // updatePhysics!=0 (verified at the 0x00528200 detour, and relied on by the entity-sync override
+        // which clears that same bool). PuppetPhysics=1 therefore keeps today's physics warp
+        // (updatePhysics=true); PuppetPhysics=0 writes the matrix with updatePhysics=false -> render-only,
+        // no capsule push, no physics invalidation. s.matrix is pack(1)/const, so copy to an aligned local.
+        const bool phys = (PuppetPhysicsMode() != 0);
         HookMath::Transform m = s.matrix;
         // [Coop] PuppetParkX: test-only. Shifts the puppet sideways off the peer's exact position so a
         // single machine can see whether local AI treats it as a real body (loopback otherwise puts the
         // puppet exactly inside the player, which makes "did the guard attack the puppet" unobservable).
         if (g_puppetParkX != 0.0f) m.M41 += g_puppetParkX;
-        g_puppet->SetGlobalMatrixInternal(&m, true);
+        g_puppet->SetGlobalMatrixInternal(&m, phys);
+        // First apply on this puppet: report the effective mode once (the spawn site logs the other one).
+        { static void* s_applyLogged = nullptr;
+          if (s_applyLogged != (void*)g_puppet) { s_applyLogged = (void*)g_puppet; LogPuppetMode(); } }
+
         Human* h = AIEntityHelper::GetHuman(g_puppet);
         HumanDataBundle* qB = h->m_Data.m_HumanDataBundle;
         bool bok = readable((void*)qB, 0x150);
@@ -1245,7 +1269,18 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
         // from the HumanGroundData intention we feed below, not from the puppet actually moving through space.
         {
             CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
-            if (readable(cc, 0x600)) cc->m_DriveEntity = false;
+            if (readable(cc, 0x600)) {
+                cc->m_DriveEntity = false;
+                // [Coop] PuppetPhysics=0: the puppet is not a body. Disable its collision capsule with the
+                // same proven call the guard/corpse lane uses (0x636480 = collision-filter setter on
+                // &CharacterController::m_FilterInfo, 0x29 = Disabled) so it can neither push the player
+                // nor be blocked by geometry. One-shot per puppet (re-armed on respawn).
+                if (!phys && s_pupCollisionEnt != (void*)g_puppet) {
+                    ((char (__thiscall*)(void*, int))0x636480)((void*)&cc->m_FilterInfo, 0x29);
+                    s_pupCollisionEnt = (void*)g_puppet;
+                    L("[Pup] collision filter -> Disabled(0x29) puppet=%p\n", (void*)g_puppet);
+                }
+            }
         }
         // Braindead only (no action replication AND no FSM): kill the ActionComponent update (flag @ +0x159)
         // so nothing poses the skeleton. Never reached in hybrid (there's always an animator).
@@ -1314,6 +1349,11 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
             // which the entity-matrix push doesn't move — so force the controller to the peer's position via
             // the kamikaze target + flag (field-write form of CharacterController::SetGlobalPositionKamikaze).
             // Swim-gated only: on ground the FSM is really moving the character and this fights it -> jitter.
+            // [Coop] PuppetPhysics=0: the kamikaze warp IS a controller/physics solve (it is how the swim FSM
+            // places the body), so it is skipped - the render matrix above is the only position authority.
+            // The HumanSwimScope writes below are animation inputs (direction/speed/blend) and are kept in
+            // both modes, so the stroke still plays.
+            if (phys) {
             CharacterController* cc = (CharacterController*)h->GetCharacterComponent();
             if (readable(cc, 0x600)) {
                 cc->m_KamikaziPosition.x  = s.matrix.M41;
@@ -1329,6 +1369,8 @@ void Phase1::ApplyRemoteState(const PlayerState& s) {
                 arrToVec(cc->m_Force,    s.ctx.swim.ccForce);
                 arrToVec(cc->m_Impulse,  s.ctx.swim.ccImpulse);
             }
+            }
+
             HumanSwimScope* sc = swimScope(h);
             if (sc) {
                 sc->m_DestDirection.x   = s.ctx.swim.destDir[0];
@@ -2633,6 +2675,125 @@ static int      s_syncEnemiesOnly = -1;
 static unsigned s_scopeCand    = 0;   // characters that passed skeleton+bhv+health this window
 static unsigned s_scopeEnemies = 0;   // of those, the ones that passed the weapon/icon test
 static unsigned s_scopeSent    = 0;   // character states actually packed into a snapshot
+// ---- component histogram (diagnostic for the enemies-only filter) -----------------------------
+// `enemies=0` over thousands of candidates is either "no armed NPCs here" or "one/both vtable ids
+// are wrong for this build". One run has to tell those apart, so every CANDIDATE's component array
+// is tallied into a small fixed histogram of component vtable ids, and each of the two ids the
+// filter trusts gets its own candidate count. The ids are collected on the component walk the
+// capture already performs (:2708) and flushed into the histogram only once the entity passes the
+// candidate gate, so no second array walk and no change to what is captured.
+#define COMP_HIST_CAP 32          // component vtable ids per window (was 16; the discriminator is in the tail)
+#define AI_HIST_CAP   32          // AI object vtable ids per window
+#define HIST_CAP_MAX  32          // upper bound of both tables (sizes the sort scratch below)
+static uint32_t s_compVt[COMP_HIST_CAP];    // distinct component vtable ids, first-seen order
+static unsigned s_compCnt[COMP_HIST_CAP];   // sightings per id (saturating)
+static float    s_compPos[COMP_HIST_CAP][3];// last sighting of that id (cluster hint)
+static unsigned s_compSeen      = 0;        // total component sightings over all candidates
+static int      s_compDistinct  = 0;        // ids stored in the table (<= COMP_HIST_CAP)
+static unsigned s_compOverflow  = 0;        // sightings that did not fit (table was full)
+static unsigned s_compWeaponCand = 0;       // candidates carrying 0x027106A8 WeaponComponent
+static unsigned s_compIconCand   = 0;       // candidates carrying 0x0269E9D0 MapIconBehaviorGuard
+// ---- AI object vtable histogram ---------------------------------------------------------------
+// The component list did not separate soldiers from civilians, so the AI object itself is tallied
+// too. The pointer is the one the candidate gate already obtains from
+// AIEntityHelper::GetEntityAI(ent) for the health service - same call, no new accessor, no extra
+// engine call - and only its vtable word (*(uint32_t*)ai) is read, through AiVtOf's SEH guard.
+// Recorded/printed/reset on exactly the same candidates and the same 5 s window as the comps table.
+static uint32_t s_aiVt[AI_HIST_CAP];
+static unsigned s_aiCnt[AI_HIST_CAP];
+static float    s_aiPos[AI_HIST_CAP][3];
+static unsigned s_aiSeen      = 0;          // total AI sightings over all candidates
+static int      s_aiDistinct  = 0;
+static unsigned s_aiOverflow  = 0;
+
+// Vtable id of an AI object, read defensively. File-scope so this __try is never nested inside the
+// capture's outer __try; a bad page yields 0 instead of taking the game down.
+static uint32_t AiVtOf(const void* ai) {
+    if (!ai) return 0;
+    __try { return *(const uint32_t*)ai; }
+    __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
+}
+
+static void CompHistAdd(uint32_t vt, float x, float y, float z) {
+    if (!vt) return;
+    ++s_compSeen;
+    for (int i = 0; i < s_compDistinct; ++i)
+        if (s_compVt[i] == vt) {
+            if (s_compCnt[i] != 0xFFFFFFFFu) ++s_compCnt[i];   // saturate instead of wrapping
+            s_compPos[i][0] = x; s_compPos[i][1] = y; s_compPos[i][2] = z;   // most recent sighting
+            return;
+        }
+    if (s_compDistinct < COMP_HIST_CAP) {
+        s_compVt[s_compDistinct] = vt; s_compCnt[s_compDistinct] = 1;
+        s_compPos[s_compDistinct][0] = x; s_compPos[s_compDistinct][1] = y;
+        s_compPos[s_compDistinct][2] = z;
+        ++s_compDistinct;
+    } else {
+        // Table full: this sighting may or may not be a new id (we cannot tell without the table),
+        // so it is only counted, and the window is flagged as truncated in the log.
+        ++s_compOverflow;
+    }
+}
+
+static void AiHistAdd(uint32_t vt, float x, float y, float z) {
+    if (!vt) return;
+    ++s_aiSeen;
+    for (int i = 0; i < s_aiDistinct; ++i)
+        if (s_aiVt[i] == vt) {
+            if (s_aiCnt[i] != 0xFFFFFFFFu) ++s_aiCnt[i];
+            s_aiPos[i][0] = x; s_aiPos[i][1] = y; s_aiPos[i][2] = z;
+            return;
+        }
+    if (s_aiDistinct < AI_HIST_CAP) {
+        s_aiVt[s_aiDistinct] = vt; s_aiCnt[s_aiDistinct] = 1;
+        s_aiPos[s_aiDistinct][0] = x; s_aiPos[s_aiDistinct][1] = y;
+        s_aiPos[s_aiDistinct][2] = z;
+        ++s_aiDistinct;
+    } else {
+        ++s_aiOverflow;
+    }
+}
+
+// Index of the highest-count entry (first seen wins ties), or -1 for an empty table.
+static int HistBestIndex(const unsigned* cnts, int distinct) {
+    int best = -1;
+    for (int i = 0; i < distinct; ++i)
+        if (best < 0 || cnts[i] > cnts[best]) best = i;
+    return best;
+}
+
+// Format up to maxN entries, descending count, as " vt=%08X x%u". Returns chars written.
+static int HistFormatTop(char* buf, size_t cap, const uint32_t* vts, const unsigned* cnts,
+                         int distinct, int maxN) {
+    int idx[HIST_CAP_MAX];
+    int m = distinct > HIST_CAP_MAX ? HIST_CAP_MAX : distinct;
+    for (int i = 0; i < m; ++i) idx[i] = i;
+    for (int i = 1; i < m; ++i) {                     // insertion sort, descending; m <= 32
+        int v = idx[i], j = i - 1;
+        while (j >= 0 && cnts[idx[j]] < cnts[v]) { idx[j + 1] = idx[j]; --j; }
+        idx[j + 1] = v;
+    }
+    int hl = 0;
+    for (int i = 0; i < m && i < maxN; ++i) {
+        if ((size_t)hl + 24 >= cap) break;
+        int wr = _snprintf_s(buf + hl, cap - (size_t)hl, _TRUNCATE,
+                             " vt=%08X x%u", vts[idx[i]], cnts[idx[i]]);
+        if (wr > 0) hl += wr;
+    }
+    return hl;
+}
+
+static void CompHistReset() {
+    for (int i = 0; i < COMP_HIST_CAP; ++i) { s_compVt[i] = 0; s_compCnt[i] = 0; }
+    s_compSeen = 0; s_compDistinct = 0; s_compOverflow = 0;
+    s_compWeaponCand = 0; s_compIconCand = 0;
+}
+
+static void AiHistReset() {
+    for (int i = 0; i < AI_HIST_CAP; ++i) { s_aiVt[i] = 0; s_aiCnt[i] = 0; }
+    s_aiSeen = 0; s_aiDistinct = 0; s_aiOverflow = 0;
+}
+
 static inline int SyncEnemiesOnly() {
     if (s_syncEnemiesOnly < 0) s_syncEnemiesOnly = GetPrivateProfileIntA("Coop", "SyncEnemiesOnly", 1, Paths::Ini());
     return s_syncEnemiesOnly;
@@ -2663,9 +2824,13 @@ static void CaptureGuards(EntityPacket& pkt) {
             if (n <= 0 || n > 96) n = (*(unsigned short*)((char*)e + 0x66) & 0xFFFF);
             if (!data || !readable(data, 4) || n <= 0 || n > 96) continue;
             bool skel=false, weapon=false, guardIcon=false; Component* bhvC=0;
+            // Component ids of THIS entity, kept only until the candidate gate below: the same walk
+            // feeds the histogram, so the array is never traversed twice. n was clamped to 1..96.
+            uint32_t entVt[96]; int entVtN = 0;
             for (int k = 0; k < n; ++k) {
                 Component* c = data[k];
                 uint32_t vt = (c && readable(c,4)) ? *(uint32_t*)c : 0;
+                if (vt && entVtN < 96) entVt[entVtN++] = vt;
                 if (vt == 0x01E41E58) skel = true;
                 if (vt == 0x026E34D8) bhvC = c;   // BhvGenericNPC only (excludes BhvAssassin player/puppet)
                 // Same soldier predicate the guard-enumeration probe proved (:3968-3969). Collected on
@@ -2718,8 +2883,13 @@ static void CaptureGuards(EntityPacket& pkt) {
             // archetype id is NOT a reliable filter - the inventory probe found live NPCs with ids 35F7,
             // 318C, 31EC, 3594, 0000, 0001 and 0484, and a dead body reading 0400. "Full class list"
             // therefore means every human NPC, including civilians, not a hard-coded set.
+            // [Sync diag] Hoisted out of the gate block: this is the same GetEntityAI the health
+            // service already needs, reused for the AI vtable histogram so the number of engine calls
+            // per candidate is unchanged (observation only).
+            AbstractEntityAI* aiCand = 0;
             {
                 AbstractEntityAI* aiPre = AIEntityHelper::GetEntityAI(e);
+                aiCand = aiPre;
                 unsigned int hpPre = FindHealthInAI((unsigned int)aiPre);
                 if (!aiPre || !hpPre || !readable(aiPre, 0xC0)) continue;
             }
@@ -2731,6 +2901,20 @@ static void CaptureGuards(EntityPacket& pkt) {
             const bool isEnemy = weapon || guardIcon;
             ++s_scopeCand;
             if (isEnemy) ++s_scopeEnemies;
+            // Diagnostic only: fold this candidate's component ids (already collected on the walk
+            // above) into the window histogram, plus its AI object vtable from the pointer the gate
+            // above already obtained. Counted before any `continue`, so both tables describe the same
+            // population as candidates/enemies. Position is kept per id as a cluster hint.
+            {
+                const float hx = e->m_GlobalMatrix.M41;
+                const float hy = e->m_GlobalMatrix.M42;
+                const float hz = e->m_GlobalMatrix.M43;
+                for (int k = 0; k < entVtN; ++k) CompHistAdd(entVt[k], hx, hy, hz);
+                if (aiCand && readable((void*)aiCand, 4))
+                    AiHistAdd(AiVtOf(aiCand), hx, hy, hz);
+            }
+            if (weapon)    ++s_compWeaponCand;
+            if (guardIcon) ++s_compIconCand;
             if (SyncEnemiesOnly() && !isEnemy) continue;
             float x=e->m_GlobalMatrix.M41, y=e->m_GlobalMatrix.M42, z=e->m_GlobalMatrix.M43;
             // [Relevance] Replicate a character if it is near the HOST's player (the original 80 m cap)
@@ -7247,6 +7431,40 @@ static void OnFrameInner(Human* updatedHuman) {
             // The guest never runs CaptureGuards, so candidates/enemies/sent stay 0 there by design.
             L("[Sync] scope candidates=%u enemies=%u sent=%u (SyncEnemiesOnly=%d)\n",
               s_scopeCand, s_scopeEnemies, s_scopeSent, SyncEnemiesOnly());
+            // Component histogram, same window. ALL non-zero distinct component vtable ids by
+            // descending count (32 slots), then the two ids the enemies-only filter trusts, each as
+            // "candidates carrying it". If enemies=0 while weapon_A8/icon_D0 are non-zero, the scope
+            // gate is broken; if both stay 0 across a populated scene, those ids are absent here.
+            {
+                char hist[1024]; hist[0] = 0;
+                HistFormatTop(hist, sizeof(hist), s_compVt, s_compCnt, s_compDistinct, COMP_HIST_CAP);
+                L("[Sync] comps n=%u%s  weapon_A8=%u icon_D0=%u  distinct=%d%s\n",
+                  s_compSeen, hist, s_compWeaponCand, s_compIconCand, s_compDistinct,
+                  s_compOverflow ? " (truncated)" : "");
+            }
+            // AI object vtable histogram: top 12 by descending count. If a single AI vtable dominates
+            // the candidate population while comps shows no single dominant id, this is the real
+            // discriminator for "soldier" in this scene.
+            {
+                char hist[1024]; hist[0] = 0;
+                HistFormatTop(hist, sizeof(hist), s_aiVt, s_aiCnt, s_aiDistinct, 12);
+                L("[Sync] ai n=%u%s  distinct=%d%s\n",
+                  s_aiSeen, hist, s_aiDistinct, s_aiOverflow ? " (truncated)" : "");
+            }
+            // One example position per table for the highest-count id, so a guard cluster can be
+            // located on the map. 0x00000000 with count 0 means "no data this window".
+            {
+                int ci = HistBestIndex(s_compCnt, s_compDistinct);
+                if (ci >= 0)
+                    L("[Sync] sample comp vt=%08X pos=(%.1f,%.1f,%.1f)\n",
+                      s_compVt[ci], s_compPos[ci][0], s_compPos[ci][1], s_compPos[ci][2]);
+                int ai2 = HistBestIndex(s_aiCnt, s_aiDistinct);
+                if (ai2 >= 0)
+                    L("[Sync] sample ai vt=%08X pos=(%.1f,%.1f,%.1f)\n",
+                      s_aiVt[ai2], s_aiPos[ai2][0], s_aiPos[ai2][1], s_aiPos[ai2][2]);
+            }
+            CompHistReset();
+            AiHistReset();
             s_scopeCand = 0; s_scopeEnemies = 0; s_scopeSent = 0;
             // One-shot receive watchdog: counters reset every poll, so 2 polls with tx and no rx
             // means ~10 s of transmitting into the void. Say so once - silence is the failure mode
@@ -7477,7 +7695,9 @@ static void OnFrameInner(Human* updatedHuman) {
                         g_bhvState = -1; g_switchCd = 0;  // re-establish the new puppet's behavior state
                         g_casActivated = false;           // re-activate its CharacterActionSet
                         __try { g_puppetVtbl = *(void**)g_puppet; } __except (EXCEPTION_EXECUTE_HANDLER) { g_puppetVtbl = nullptr; }
+                        s_pupCollisionEnt = nullptr;      // new puppet -> re-arm the one-shot collision disable
                         L("[Net] spawn succeeded, g_puppet=%p\n", g_puppet);
+                        LogPuppetMode();
                     }
                 }
             }
