@@ -2711,6 +2711,19 @@ static unsigned s_krSoldier  = 0;
 static unsigned s_krCivilian = 0;
 static unsigned s_krOther    = 0;
 
+// T17 oracle ([Coop] KrLog, default 0): the aggregate above is counted BY the predicate under test, so
+// it can never disagree with itself - a wrong shift or a wrong offset returning plausible garbage still
+// prints n>0/soldier>0/civilian>0/other>0. This emits one line per BODY instead, with the raw dword and
+// the independent signals the walk already computed (Skeleton present, BhvGenericNPC vtable, component
+// count), so a bad decode shows up as a mismatch on a row. No new engine calls. Bounded twice so a dense
+// street cannot flood the log: 96 lines per 5 s window and 600 per process.
+static int      g_krLog      = 0;      // [Coop] KrLog, read once in InstallFrameHook
+static unsigned s_krLines    = 0;      // process total
+static unsigned s_krWinLines = 0;      // this 5 s window
+static inline bool KrLogDue() {
+    return g_krLog != 0 && s_krLines < 600u && s_krWinLines < 96u;
+}
+
 // ---- TASK 3 oracle: guest-side bind quality (5 s window) -------------------------------------
 // sent = kind==2 records the host sent this window, bound = ones a local body took, unmatched = the
 // rest. meanErr/maxErr are the distance between the host's reported position and the local body we
@@ -3234,6 +3247,16 @@ static void CaptureGuards(EntityPacket& pkt) {
             if (IsSoldierBody(kr))       ++s_krSoldier;
             else if (IsCivilianBody(kr)) ++s_krCivilian;
             else                         ++s_krOther;
+            // T17: per-body [KR] row, pre-filter, so a mis-decoded offset is visible against the
+            // component walk on the SAME body (skel / BhvGenericNPC 0x026E34D8 / comps). objId comes
+            // from the handle already in hand; nothing here is a new engine call.
+            if (KrLogDue()) {
+                ++s_krLines; ++s_krWinLines;
+                L("[KR] ent=%08X objId=%llu raw=%08X kind=%d role=%d bhv=%08X skel=%u comps=%u\n",
+                  (unsigned)e, (unsigned long long)hc->GetObjectID(),
+                  kr.raw, kr.kind, kr.role,
+                  (bhvC && readable(bhvC, 4)) ? *(uint32_t*)bhvC : 0u, skel ? 1u : 0u, (unsigned)n);
+            }
             if (SyncEnemiesOnly() && !IsSoldierBody(kr)) continue;
             // ---- scope counters ----
             // Candidates = every body that survived skeleton + BhvGenericNPC + the health service and
@@ -7840,6 +7863,7 @@ static void OnFrameInner(Human* updatedHuman) {
             AiHistReset();
             s_scopeCand = 0; s_scopeEnemies = 0; s_scopeInRadius = 0; s_scopeSent = 0;
             s_krN = 0; s_krSoldier = 0; s_krCivilian = 0; s_krOther = 0;
+            s_krWinLines = 0;   // T17: the per-window [KR] budget refills with the other counters
             // TASK 3 oracle counters, same window.
             s_bindSent = 0; s_bindBound = 0; s_bindUnmatched = 0;
             s_bindErrSum = 0.0; s_bindErrMax = 0.0f;
@@ -8492,6 +8516,8 @@ void Phase1::InstallFrameHook() {
     L("[FF] +660 write removed: not a flags word (RE T12) - no targetability claim, dumps read-only\n");
     // G10 instrumentation gate (ops/AI-T5-G10.md 7.4): 0 = production, zero [G10] output.
     g_stageLog = GetPrivateProfileIntA("Coop", "StageLog", 0, Paths::Ini());
+    // T17 per-body encoding probe ([KR]): 0 = production, zero [KR] output.
+    g_krLog = GetPrivateProfileIntA("Coop", "KrLog", 0, Paths::Ini());
     g_seekOnSwitch = GetPrivateProfileIntA("Coop", "SeekOnSwitch", 1, Paths::Ini());
     g_minBlendIn = GetPrivateProfileIntA("Coop", "MinBlendInMs", 100, Paths::Ini()) / 1000.0f;
     // DriveContextMask: read as a string so hex ("0x440") or decimal both parse. Empty -> keep the safe
