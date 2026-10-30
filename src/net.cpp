@@ -21,6 +21,8 @@ namespace {
     bool               g_haveRemote = false;
     EntityPacket       g_remoteEntities{};
     bool               g_haveEntities = false;
+    uint64_t           g_entitiesMs = 0;      // GetTickCount64() of the last write to g_remoteEntities
+    const uint64_t     NET_ENTITIES_TTL_MS = 3000;   // a snapshot older than this is from a dead peer
     bool               g_strictPeer = true;   // reject datagrams from any source but the configured peer
     uint64_t           g_lastRecvMs = 0;      // GetTickCount64() of the last ACCEPTED packet (0 = none yet)
 
@@ -35,6 +37,7 @@ namespace {
     // death is rare. A kill-only packet is also kept OUT of g_remoteEntities so it cannot displace a
     // snapshot (and cannot be processed twice).
     #define NET_KILLQ 32
+    #define NET_KILL_DROP_LOGS 8      // log only the first N ring overflows (a burst must not spam)
     const uint8_t      NET_KIND_KILL = 3;     // phase1.cpp:2379 KIND_KILL (wire value, unchanged)
     EntityState        g_killRing[NET_KILLQ];
     int                g_killHead = 0;        // next write slot
@@ -175,7 +178,19 @@ namespace {
             const uint8_t idKind = (e.objId ? 0 : 1);   // 0 = real objId, 1 = synthesised from kind+key
             const uint64_t wireId = e.objId ? e.objId
                                             : (((uint64_t)(e.kind & 3) << 32) | (uint64_t)e.key);
-            if (o + 16 > cap) return 0;
+            // Bounds: the fixed part is 16 B and the optional field bytes add up to 42 more, so the
+            // old check (fixed 16 only) let a record near the end of the buffer write up to 42 bytes
+            // past `cap`. Compute the REAL record size from the mask before writing anything.
+            size_t need = 16;
+            if (mask & EF_POS)    need += 12;
+            if (mask & EF_QUAT)   need += 16;
+            if (mask & EF_ACTION) need += 4;
+            if (mask & EF_HULLHP) need += 4;
+            if (mask & EF_HP)     need += 2;
+            if (mask & EF_ARCH)   need += 2;
+            if (mask & EF_DEAD)   need += 1;
+            if (mask & EF_STAGE)  need += 1;
+            if (o + need > cap) break;   // full: send the records that fit; h.count is patched to `written` below
             std::memcpy(out + o, &e.key, 4); o += 4;
             out[o++] = e.kind;
             out[o++] = idKind;
@@ -323,7 +338,8 @@ namespace {
                             dbg(m);
                         }
                     } else {
-                        EntityPacket decoded;
+                        EntityPacket decoded{};
+                        int killDrops = 0;   // kill-ring entries overwritten by this datagram
                         const bool entityOk = !entityPkt ||
                             DecodeEntityPacket((const uint8_t*)buf, (size_t)n, decoded);
                         EnterCriticalSection(&g_lock);
@@ -344,18 +360,36 @@ namespace {
                             for (uint32_t ki = 0; ki < decoded.count; ++ki) {
                                 const EntityState& ks = decoded.ents[ki];
                                 if (ks.kind != NET_KIND_KILL) { hadNonKill = true; continue; }
+                                // A full ring silently overwrote the OLDEST death - that is how a death
+                                // could vanish with no trace. Count it here, log the first few below
+                                // (outside the lock).
+                                if (g_killCount == NET_KILLQ) ++killDrops;
                                 g_killRing[g_killHead] = ks;
                                 g_killHead = (g_killHead + 1) % NET_KILLQ;
                                 if (g_killCount < NET_KILLQ) ++g_killCount;
                             }
                             if (hadNonKill || decoded.count == 0) {
                                 g_remoteEntities = decoded; g_haveEntities = true;
+                                g_entitiesMs = GetTickCount64();
                             }
                         }
-                        g_lastRecvMs = GetTickCount64();   // heartbeat for the presence check
+                        // A header-only entity packet carries no state at all: it is a heartbeat, not
+                        // evidence that the peer is alive, so it must NOT refresh the presence timer.
+                        const bool heartbeatOnly = entityPkt && entityOk && decoded.count == 0;
+                        if (!heartbeatOnly) g_lastRecvMs = GetTickCount64();   // liveness for the presence check
                         InterlockedIncrement(&g_rxPackets);
                         InterlockedAdd(&g_rxBytes, (LONG)n);
                         LeaveCriticalSection(&g_lock);
+                        if (killDrops) {
+                            static int s_dropLogs = 0;
+                            if (s_dropLogs < NET_KILL_DROP_LOGS) {
+                                ++s_dropLogs;
+                                char m[128];
+                                wsprintfA(m, "[Net] kill ring FULL: oldest death overwritten (drop #%d)\n",
+                                          s_dropLogs);
+                                dbg(m);
+                            }
+                        }
                     }
                 }
             } else if (n == SOCKET_ERROR) {
@@ -488,6 +522,19 @@ bool GetEntities(EntityPacket& out) {
     if (!g_enabled) return false;
     bool have;
     EnterCriticalSection(&g_lock);
+    // The snapshot slot is only ever overwritten, never cleared, so a peer that dies mid-session
+    // would have its last snapshot re-applied by the frame forever. Expire it after
+    // NET_ENTITIES_TTL_MS with no snapshot write; the world then falls back to no-drive.
+    if (g_haveEntities && g_entitiesMs != 0 &&
+        (GetTickCount64() - g_entitiesMs) > NET_ENTITIES_TTL_MS) {
+        g_haveEntities = false;
+        std::memset(&g_remoteEntities, 0, sizeof(g_remoteEntities));
+        static bool s_logged = false;
+        if (!s_logged) {
+            s_logged = true;
+            dbg("[Net] entity snapshot expired: no update for 3 s, dropping peer snapshot\n");
+        }
+    }
     have = g_haveEntities;
     if (have) out = g_remoteEntities;
     LeaveCriticalSection(&g_lock);
