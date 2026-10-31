@@ -1,0 +1,377 @@
+{
+ "known_exe": "D:\\SteamLibrary\\steamapps\\common\\Assassin's Creed IV Black Flag\\AC4BFSP.exe",
+ "target_exe": "D:\\Games\\Assassins's Creed 4 - Black Flag\\AC4BFSP.exe.repack-54ca73af",
+ "rows": [
+  {
+   "known": 4194304,
+   "sig_len": 48,
+   "target": 4194304,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 4259840,
+   "sig_len": 32,
+   "target": 6926528,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 5046273,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 5255984,
+   "sig_len": 32,
+   "target": 8308144,
+   "ambiguous": true,
+   "n": 2
+  },
+  {
+   "known": 5407232,
+   "sig_len": 24,
+   "target": 4592760,
+   "ambiguous": true,
+   "n": 6
+  },
+  {
+   "known": 5559504,
+   "sig_len": 48,
+   "target": 5972448,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 5593634,
+   "sig_len": 48,
+   "target": 6026994,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6269952,
+   "sig_len": 12,
+   "target": 7295733,
+   "ambiguous": true,
+   "n": 3
+  },
+  {
+   "known": 6281008,
+   "sig_len": 24,
+   "target": 6301934,
+   "ambiguous": true,
+   "n": 2
+  },
+  {
+   "known": 6513792,
+   "sig_len": 48,
+   "target": 4952752,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6787616,
+   "sig_len": 20,
+   "target": 4563200,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 6787623,
+   "sig_len": 24,
+   "target": 7061111,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788605,
+   "sig_len": 40,
+   "target": 6409805,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788611,
+   "sig_len": 40,
+   "target": 6409811,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788613,
+   "sig_len": 32,
+   "target": 6409813,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788619,
+   "sig_len": 32,
+   "target": 6409819,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788625,
+   "sig_len": 24,
+   "target": 6409825,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6788944,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6789078,
+   "sig_len": 24,
+   "target": 6893766,
+   "ambiguous": true,
+   "n": 3
+  },
+  {
+   "known": 6789084,
+   "sig_len": 24,
+   "target": 22135420,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6789092,
+   "sig_len": 48,
+   "target": 4266884,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 6789109,
+   "sig_len": 40,
+   "target": 4436293,
+   "ambiguous": true,
+   "n": 7
+  },
+  {
+   "known": 6796010,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821855,
+   "sig_len": 20,
+   "target": 6097551,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 6821882,
+   "sig_len": 12,
+   "target": 5281130,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 6821887,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821889,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821891,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821893,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821902,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6821911,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6822118,
+   "sig_len": 20,
+   "target": 5620118,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6822272,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6822631,
+   "sig_len": 24,
+   "target": 6739255,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6822650,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6822691,
+   "sig_len": 32,
+   "target": 5497811,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6822710,
+   "sig_len": 12,
+   "target": 5497830,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6822729,
+   "sig_len": 24,
+   "target": 5443481,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 6822748,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6822753,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 6822773,
+   "sig_len": 16,
+   "target": 5274469,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 7064928,
+   "sig_len": 12,
+   "target": 4309216,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 7298928,
+   "sig_len": 24,
+   "target": 4240592,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 7399440,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 7552944,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 7552946,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 7552953,
+   "sig_len": 48,
+   "target": 5468553,
+   "ambiguous": true,
+   "n": 2
+  },
+  {
+   "known": 7552984,
+   "sig_len": 48,
+   "target": 5468584,
+   "ambiguous": false,
+   "n": 1
+  },
+  {
+   "known": 7554144,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 7554191,
+   "sig_len": 16,
+   "target": 4225439,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 7621872,
+   "sig_len": 12,
+   "target": 4280624,
+   "ambiguous": true,
+   "n": 8
+  },
+  {
+   "known": 7977168,
+   "sig_len": 0,
+   "target": null,
+   "ambiguous": false,
+   "n": 0
+  },
+  {
+   "known": 8158624,
+   "sig_len": 40,
+   "target": 4681984,
+   "ambiguous": false,
+   "n": 1
+  }
+ ]
+}

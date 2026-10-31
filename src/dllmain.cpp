@@ -486,17 +486,67 @@ static HANDLE WINAPI MyCreateMutexW(LPSECURITY_ATTRIBUTES sa, BOOL owner, LPCWST
     return g_realCreateMutexW(sa, owner, name);
 }
 
+// The IAT slot below is a hardcoded RVA. If it is wrong, the mutex is never renamed and a second
+// instance exits while the game focuses the first window. Log the verdict to a file so ONE launch
+// proves whether the slot is right (OutputDebugString is invisible in normal play).
+static void MiLog(const char* fmt, ...)
+{
+    char line[512];
+    va_list ap; va_start(ap, fmt);
+    _vsnprintf_s(line, sizeof(line), _TRUNCATE, fmt, ap);
+    va_end(ap);
+    OutputDebugStringA(line);
+    char path[MAX_PATH];
+    GetModuleFileNameA((HMODULE)&MiLog, path, MAX_PATH);
+    char* slash = strrchr(path, '\\');
+    if (slash) strcpy_s(slash + 1, MAX_PATH - (int)(slash + 1 - path), "AC4Coop_multiinstance.log");
+    FILE* f = nullptr;
+    fopen_s(&f, path, "a");
+    if (f) { fputs(line, f); fclose(f); }
+}
+
 static void InstallMultiInstance()
 {
     uintptr_t base = (uintptr_t)GetModuleHandleW(nullptr);
     void** iat = (void**)(base + 0x1A3A20C);   // CreateMutexW IAT slot (fileVA 0x1E3A20C)
+    FARPROC real = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CreateMutexW");
+    MiLog("[MI] pid=%u base=%p slot=%p *slot=%p real=%p slot_ok=%d\n",
+          GetCurrentProcessId(), (void*)base, (void*)iat, (void*)*iat, (void*)real,
+          (*iat == (void*)real) ? 1 : 0);
+
+    // The hardcoded slot is a guess that can rot. If it does not hold CreateMutexW, walk the
+    // PE's Import Address Table and hook the entry that actually does. This is build-independent.
+    if (*iat != (void*)real) {
+        __try {
+            IMAGE_DOS_HEADER* dos = (IMAGE_DOS_HEADER*)base;
+            IMAGE_NT_HEADERS* nt = (IMAGE_NT_HEADERS*)(base + dos->e_lfanew);
+            IMAGE_DATA_DIRECTORY* dir =
+                &nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT];
+            void** first = (void**)(base + dir->VirtualAddress);
+            size_t n = dir->Size / sizeof(void*);
+            MiLog("[MI] iat dir rva=%08X size=%u entries=%u\n",
+                  (unsigned)dir->VirtualAddress, (unsigned)dir->Size, (unsigned)n);
+            for (size_t i = 0; i < n; ++i) {
+                if (first[i] == (void*)real) {
+                    iat = &first[i];
+                    MiLog("[MI] found CreateMutexW at iat[%u]=%p (rva=%08X)\n",
+                          (unsigned)i, (void*)iat, (unsigned)((uintptr_t)iat - base));
+                    break;
+                }
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            MiLog("[MI] iat scan faulted\n");
+        }
+    }
+
     if (*iat == (void*)&MyCreateMutexW) return;
     g_realCreateMutexW = (CreateMutexW_t)*iat;
     DWORD old = 0;
     VirtualProtect(iat, sizeof(void*), PAGE_READWRITE, &old);
     *iat = (void*)&MyCreateMutexW;
     VirtualProtect(iat, sizeof(void*), old, &old);
-    OutputDebugStringA("[AC4Coop] multi-instance: CreateMutexW IAT hooked\n");
+    MiLog("[MI] hooked=%d at %p (rva=%08X)\n", (*iat == (void*)&MyCreateMutexW) ? 1 : 0,
+          (void*)iat, (unsigned)((uintptr_t)iat - base));
 }
 
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID)

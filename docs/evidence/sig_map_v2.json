@@ -1,0 +1,618 @@
+{
+ "known": "D:\\SteamLibrary\\steamapps\\common\\Assassin's Creed IV Black Flag\\AC4BFSP.exe",
+ "target": "D:\\Games\\Assassins's Creed 4 - Black Flag\\AC4BFSP.exe.repack-54ca73af",
+ "rows": [
+  {
+   "known": 4194304,
+   "target": 4194304,
+   "n": 1,
+   "insns": 7
+  },
+  {
+   "known": 4259840,
+   "target": 6926528,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 5046273,
+   "target": 6891313,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 5255984,
+   "target": 5883648,
+   "n": 6,
+   "insns": 14
+  },
+  {
+   "known": 5407232,
+   "target": null,
+   "n": 0,
+   "insns": 0
+  },
+  {
+   "known": 5559504,
+   "target": 5972448,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 5593634,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6269952,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6281008,
+   "target": 4613157,
+   "n": 7,
+   "insns": 2
+  },
+  {
+   "known": 6513792,
+   "target": 4952752,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6787616,
+   "target": 4220126,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 6787623,
+   "target": 5151655,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 6788605,
+   "target": null,
+   "n": 0,
+   "insns": 13
+  },
+  {
+   "known": 6788611,
+   "target": 6409811,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6788613,
+   "target": 6409813,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6788619,
+   "target": 6409819,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6788625,
+   "target": 6409825,
+   "n": 1,
+   "insns": 13
+  },
+  {
+   "known": 6788944,
+   "target": 6893632,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6789078,
+   "target": 6893766,
+   "n": 4,
+   "insns": 14
+  },
+  {
+   "known": 6789084,
+   "target": 6893772,
+   "n": 3,
+   "insns": 14
+  },
+  {
+   "known": 6789092,
+   "target": 4200340,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 6789109,
+   "target": 4247141,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 6796010,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821855,
+   "target": 6097551,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 6821882,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821887,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821889,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821891,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821893,
+   "target": null,
+   "n": 0,
+   "insns": 0
+  },
+  {
+   "known": 6821902,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6821911,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6822118,
+   "target": 5620118,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822272,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6822631,
+   "target": 6739255,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822650,
+   "target": 5497770,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822691,
+   "target": 5497811,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822710,
+   "target": 5497830,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822729,
+   "target": 5443481,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 6822748,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 6822753,
+   "target": null,
+   "n": 0,
+   "insns": 2
+  },
+  {
+   "known": 6822773,
+   "target": 4223333,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 7064928,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 7298928,
+   "target": 4216369,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 7399440,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 7552944,
+   "target": 5468544,
+   "n": 4,
+   "insns": 14
+  },
+  {
+   "known": 7552946,
+   "target": 5468546,
+   "n": 4,
+   "insns": 14
+  },
+  {
+   "known": 7552953,
+   "target": 5468553,
+   "n": 3,
+   "insns": 14
+  },
+  {
+   "known": 7552984,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 7554144,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 7554191,
+   "target": 4225439,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 7621872,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 7977168,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 8158624,
+   "target": 4681984,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 9471818,
+   "target": 9729658,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 10423120,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 10613088,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 12907168,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 13117456,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 13238272,
+   "target": 13312896,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 16462368,
+   "target": 19320569,
+   "n": 3,
+   "insns": 14
+  },
+  {
+   "known": 16777216,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 17311760,
+   "target": 31226704,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 17758400,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 19901133,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 20182352,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 22514512,
+   "target": 4194328,
+   "n": 7,
+   "insns": 1
+  },
+  {
+   "known": 24184512,
+   "target": 18009696,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 24371600,
+   "target": 27788192,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 27243712,
+   "target": 19600720,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 27501068,
+   "target": 4277596,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 31694848,
+   "target": 31787392,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 31695372,
+   "target": 31787916,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 31727192,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31745912,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31760680,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31772304,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31815568,
+   "target": null,
+   "n": 0,
+   "insns": 12
+  },
+  {
+   "known": 31815648,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31815728,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31856952,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31890824,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 31911440,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 37631604,
+   "target": 37545628,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 38475404,
+   "target": 32376584,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 40445760,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40495568,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40544120,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40627392,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40634323,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40713432,
+   "target": 40777096,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 40776920,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40820816,
+   "target": 32028416,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 40872088,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40961704,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 40972128,
+   "target": 40661200,
+   "n": 1,
+   "insns": 14
+  },
+  {
+   "known": 41054344,
+   "target": null,
+   "n": 0,
+   "insns": 14
+  },
+  {
+   "known": 42669708,
+   "target": 42912156,
+   "n": 2,
+   "insns": 14
+  },
+  {
+   "known": 42691400,
+   "target": 4194329,
+   "n": 7,
+   "insns": 6
+  },
+  {
+   "known": 44819748,
+   "target": 4194329,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 44821696,
+   "target": 4194329,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 44828627,
+   "target": 4194329,
+   "n": 7,
+   "insns": 14
+  },
+  {
+   "known": 44834408,
+   "target": 4194329,
+   "n": 7,
+   "insns": 14
+  }
+ ]
+}
