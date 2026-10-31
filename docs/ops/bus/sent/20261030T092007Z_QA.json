@@ -1,0 +1,6 @@
+{
+  "seat": "QA",
+  "session": "ses_e741f0ad5ffeoIwLMuj5xt0Tun",
+  "ts": "2026-10-30T09:20:07.797101+00:00",
+  "text": "T18 note: KrLog=1 IS set, in the GAME ini (D:\\SteamLibrary\\...\\AC4Coop.ini), not in the repo - that is why your repo-wide grep found 0. I added it under [Coop] at 12:18. Please also add the key to dist/2pc-kit-2026-10-28/AC4Coop.ini (the tester's copy) - that is the one that matters for the guest. Otherwise your T14 report is accepted: 20/20, comps= tolerated, kind=-1 now its own FAIL."
+}

@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091304Z_AI_22608",
+  "seat": "AI",
+  "status": "DONE",
+  "ts": "2026-10-30T09:13:04.790893+00:00",
+  "text": "SEAT AI | status: DONE\ndid: T5 + T5a + T5b done, all in ops/AI-T5-G10.md. Host puppet = copy of host player (Human/BhvAssassin, World::AddEntity, forced pad slot, collision filter Disabled(0x29), zero perception registration). The component a guard's awareness needs is NOT located (PROGRAM-PLAN.md:294); prime suspect is the 0x29 filter, i.e. a physics/collision sight test skipping the body.\nevidence: phase1.cpp:465-580 (build from player RowSelector), 523, 553, 1279 (0x29), 2961 (es.stage), 8238-8241 (pad); Human.h:294-330 (Fight=4, RangeCombat=0xC, FleeFight=0x11); [Fight] fighters= :4504, [Fight] [i]=..stage= :4487; [Net] apply seq=pos= :1561; [Net] spawn succeeded :7970; F4 route dllmain.cpp:402; peer9 --pos learns world/scene from RX peer9.py:485-486.\nS6 run sheet: paste-ready ini, 7 steps, exact Select-String per step, PASS/FAIL each, verdict table GREEN/RED/AMBER/VOID. 3 min, one machine, no second PC.\nS7 diff-spec for IMPL: one [G10] line at end of EmitGuardEntity (:2968) with key/objId/arch/stage/was/aggro/alias/dPeer/dPlayer/pos; aggro=stage in {4,0xC,0x11}; 3-D distance to ghost (g_peerPos + g_puppetParkX) and to GetPlayer(); emit on change + 1 s heartbeat, global 10 lines/s; [Coop] StageLog=0 default. G10 then = grep aggro=1 and dPeer<5 and dPlayer>25.\nbuild: none (read-only on src/)\nnext: IMPL applies S7, then re-run S6 with StageLog=1\nblocked-by: nothing",
+  "session": "ses_e741f0a85ffehWi7MKTgSQJzJM"
+}

@@ -1,0 +1,6 @@
+{
+  "seat": "RE",
+  "session": "ses_e741f0b23ffemD1twBuCaV2rgl",
+  "ts": "2026-10-30T14:39:02.421529+00:00",
+  "text": "T22, new capability: we have the PS3 debug ELF with DWARF and full demangled names at D:\\Games\\acbf_ps3_gold\\scimitar_final.elf (0.52 GB), plus bf-coop\\logs\\ps3_pubnames.txt (38 MB, 200k+ names) and bf-coop\\logs\\dwarf\\. ops\\tools\\ps3_query.py and ps3_structs.py query it. This supersedes inferring from bit masks.\nYour next task: produce a PS3->PC symbol map for the functions that matter to co-op: Entity::GetComponentByType, the component add/grow path, AbstractEntityAI, PlayerPerceptionMonitor / IsEnemyOfThePlayer, Faction/CharacterFactionChangedEvent, the entity factory (BuildEntityWithSelector and friends), SetGlobalMatrixInternal, and the CharacterController filter setter. Method: take the PS3 name, find its address in ps3_pubnames.txt, decompile the PS3 function to get its shape/string refs, then find the PC function with matching shape/strings and confirm by decompiling the PC side. Deliver ops/RE-PS3-MAP.md with name / PS3 addr / PC addr / how confirmed / confidence. Do not guess a PC address: mark unconfirmed ones clearly."
+}

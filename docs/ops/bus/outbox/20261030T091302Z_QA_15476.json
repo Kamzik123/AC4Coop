@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091302Z_QA_15476",
+  "seat": "QA",
+  "status": "DONE",
+  "ts": "2026-10-30T09:13:02.109218+00:00",
+  "text": "T4 done: C3/C4/C5/C6 all DISPROVEN as current statements. Pinned to net.cpp 965F9D0E4F7265D3 and phase1.cpp CE5671594EA88B09; both files were rewritten 11:17 today, mid-audit. C3: max packet 20+128x58 = 7444 B vs g_txBuf 16384 B, break-even 282 entities, so it was never reachable; bounded correctly now, need computed from the mask then break, net.cpp:184-193. Also not a heap buffer: net.cpp:99 is a static array. C4: cleared by a 3 s TTL, net.cpp:528-531, TTL net.cpp:25, stamp written net.cpp:372-373. Residual: net.cpp:522 returns before the TTL branch when !g_enabled. C5: CaptureGuards is host-only on the normal path (gate 4305, call 4315, guest branch 4320-4324) but the guest now has GuestDeathScan, defined :4054, called :4328; the claim's cited :3415 is a tombstone check inside GuestPushDeath. C6: kill-only packets are kept out of the snapshot slot (hadNonKill, net.cpp:359-371) and go through a 32-slot ring, net.cpp:37, drained phase1.cpp:4287. Residuals: ring overflow is logged only via OutputDebugString, net.cpp:388, so it is invisible to the log oracle; mixed packets are still last-writer-wins. Ledger hygiene: CLAIMS.md line refs are stale by 15-20 lines and C3's 'heap overflow' wording is wrong. T6: coop_report.py accepted; one defect found by its own selftest - check_deaths applies the run-wide kt_recv_applied total to both lanes, so case 'death pushed, never applied' passes for the wrong reason; fix is to join death recv objId per lane. Artifacts: ops/QA-T4-verification.md, ops/tools/coop_report.py.",
+  "session": "ses_e741f0ad5ffeoIwLMuj5xt0Tun"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091954Z_QA_19764",
+  "seat": "QA",
+  "status": "DONE",
+  "ts": "2026-10-30T09:19:54.925592+00:00",
+  "text": "[KR] row check added to coop_report.py --kindrole and verified against the shipped format at phase1.cpp:3255. Parsed as key=value, not one positional regex, so comps= (and any later field) cannot stop a row matching; a row without comps= still parses (tested). Checks: kindrole read = FAIL if kind<0 or role<0; kindrole packing = kind==raw&7 AND role==(raw>>3)&0x3F AND no bits above bit 8; kindrole vs components = every skel=1 && bhv==0x026E34D8 row must be kind in {2,3}. Selftest now 20/20, including the exact deployed format, the no-comps variant, and a read failure. End-to-end demo on a synthetic log: the independent check caught a (5,5) body that the aggregate counter would have silently bucketed as other. Two format facts worth knowing: kind/role are signed %%d, so a body whose +0x9C read fails prints raw=00000000 kind=-1 role=-1 - that is now its own FAIL instead of being dropped by a \\\\d+ regex; and the shipped line has NO stage= (nor d2=), so 'every attacker is (3,1)' is NOT evaluable per row - kindrole attackers is INFO with that reason, and fleers stays INFO as before. BLOCKER for the run: KrLog defaults to 0 and no ini on disk sets it (0 hits repo-wide), so a deployed run emits zero [KR] rows and the oracle will say field absent. Add KrLog=1 under [Coop] before the C21 run. Still no [KR] row in any log; ASI on disk is 80F9A9A7E588, 303616 B, 12:18:33. Doc updated: ops/QA-T14-C21-probe.md.",
+  "session": "ses_e741f0ad5ffeoIwLMuj5xt0Tun"
+}

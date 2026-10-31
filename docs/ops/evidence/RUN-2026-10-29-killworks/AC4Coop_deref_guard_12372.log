@@ -1,0 +1,12 @@
+[DG] vtable range 0x00400000..0x0527E000 (module image)
+[SIG] sub_679750 resolved 0x00679750 (pattern, 1 match)
+[SIG] sub_681980 resolved 0x00681980 (pattern, 1 match)
+[DG] cave (unhinted) = 074A0000
+[DG] 6 null-deref sites guarded, cave=074A0000
+[DG] stale cave (unhinted) = 07780000
+[DG] stale-target guard @ 0x006795FD (vtable range)
+[NR] site 0x006817FA call -> 0x00733FB0 verified
+[DG] null-return cave (unhinted) = 078A0000
+[NR] trampoline 0x078A0000 (cave) installed; NULL now returns via 0x006818E6
+[DG] null-observer cave (unhinted) = 078B0000
+[NO] observer installed @ 0x00733FB0 (steal=9, tramp=0x078B0000)

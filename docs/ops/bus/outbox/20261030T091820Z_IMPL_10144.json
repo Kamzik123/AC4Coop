@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091820Z_IMPL_10144",
+  "seat": "IMPL",
+  "status": "DONE",
+  "ts": "2026-10-30T09:18:20.266846+00:00",
+  "text": "T17 DONE. [KR] per-body probe added at phase1.cpp:3253-3257, emitted right BEFORE the SyncEnemiesOnly filter so civilians are sampled too: [KR] ent=%08X objId=%llu raw=%08X kind=%d role=%d bhv=%08X skel=%u comps=%u. Fields are all already in hand at that point (kr from EntityKindRole, objId from hc->GetObjectID(), bhv vtable and skel from the same walk, comps = the +0x66 count) - zero new engine calls. Flag [Coop] KrLog default 0, read once in InstallFrameHook :8520; gate helper KrLogDue() :2723. Rate: 96 lines per 5s window (:7866 reset with the other counters) AND 600 per process (:2721) - a dense street cannot flood it. No change to the [Sync] kindrole aggregate, the wire, or the apply path. compile: Rule 9 lock, MSBuild clean 0 warnings, throwaway D587F158031C discarded (bin only). commit ed332a8 (parent b221394), src/phase1.cpp only, 26+, tree clean. next: build REL, run QA T14 with KrLog=1, then coop_report.py --kindrole: every row must satisfy kind==raw&7, role==(raw>>3)&0x3F, no bits above bit 8, and every skel=1 bhv=0x026E34D8 row must be kind 2 or 3. blocked-by: nothing. NOTE: I added comps= because you asked for the component-walk count; QA doc line had no comps field - tell QA if the parser is strict.",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx"
+}

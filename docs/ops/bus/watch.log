@@ -1,0 +1,65 @@
+2026-10-29T14:21:16 DRY would wake for NET 0.3 NULL-return observer: 'One clean rebuild so the embedded `[Build]` stamp reflects the commit instead of'
+2026-10-29T14:21:16 DRY would wake for BIN: name the IDB + define structs: 'Re-checked with byte-level evidence. My original claim stands, and the rejection'
+2026-10-29T14:21:16 DRY would wake for NET 0.3 feasibility analysis: '## 0.3 — Is a single root-cause guard possible?\n\nSession note: the IDA worker re'
+2026-10-29T14:21:16 DRY would wake for COMBAT: stage-2A patch proposal: 'DONE: `bf-coop/ops/patches/stage2a-observe.patch.md` (1008 lines) — full `combat'
+2026-10-29T14:21:16 DRY would wake for NET 0.2 build hash log: 'Ordering is proven by line numbers (open at 173/222, emit at 179-181/230-232, fi'
+2026-10-29T14:21:16 DRY would wake for QA: offline log->gate parser: 'All paths work. Cleaning console encoding and capturing final output for the rep'
+2026-10-29T14:21:16 DRY would wake for DOC seat: contradictions + status: 'DONE: all ten contradictions resolved on my side, STATUS regenerated, audit re-r'
+2026-10-29T14:21:16 DRY would wake for BIN seat: identity experiment E1.1: 'Now appending the facts block to ida_findings.json as valid JSON:\n\nDONE: analysi'
+2026-10-29T14:21:16 DRY would wake for NET 0.1 caller-wrap fix: 'DONE: task 0.1 implemented in `src/deref_guard.cpp` (+ the ini key), built clean'
+2026-10-29T14:21:16 DRY would wake for COMBAT seat: event schema + stage 2A: 'Cap reached. Writing the deliverable now.\n\nDONE: wrote `bf-coop/ops/experiments/'
+2026-10-29T14:21:16 DRY would wake for QA seat: evidence + experiment cards: 'DONE: wrote the three files.\n\nPaths:\n- `bf-coop\\ops\\evidence\\README.md`\n- `bf-co'
+2026-10-29T14:21:16 once: 11 wake(s)
+2026-10-29T14:21:47 seeded 11 seat(s); only messages after this point wake the orchestrator
+2026-10-29T14:21:47 once: 0 wake(s)
+2026-10-29T14:22:15 watching seats ['ses_e78c2af7fffeK2X9V6QKLnhpKU', 'ses_e78cdbfecffe5E4DsuPWOlgLbP', 'ses_e78cc507effevfeaz67ONyN0U3', 'ses_e78cdbfe5ffexSCiRR4lW5Xkkn', 'ses_e78cc5080ffeMDGVqGS5ZuBdGp', 'ses_e78cdbfeaffeL3EV6VlJHlz0Tg', 'ses_e78d2b1b3ffewc85tbpGONwFAl', 'ses_e78da1dc2ffeQAoxxTDUtNU6BS', 'ses_e78d05de6ffeaLSC7oBtPkJ5iL', 'ses_e78da1dc1ffe43fNgD1pWERezh', 'ses_e78da1dbeffeywJKeJhRsG4fWs']
+2026-10-29T14:54:40 woke orch for NET (HTTP 200)
+2026-10-29T14:55:27 seeded 12 seat(s) at now; only later messages wake the orchestrator
+2026-10-29T14:55:28 watching 12 seat(s)
+2026-10-29T14:56:58 woke orch for NET D-018 instance marker (HTTP 200)
+2026-10-29T14:57:13 woke orch for NET D-018 instance marker (HTTP 200)
+2026-10-29T14:57:28 woke orch for NET D-018 instance marker (HTTP 200)
+2026-10-29T14:57:43 woke orch for NET D-018 instance marker (HTTP 200)
+2026-10-29T14:57:46 seeded 13 seat(s) at now; only later messages wake the orchestrator
+2026-10-29T14:57:46 watching 13 seat(s)
+2026-10-29T14:59:23 seeded 13 seat(s) at now; only later messages wake the orchestrator
+2026-10-29T14:59:23 watching 13 seat(s)
+2026-10-29T15:02:28 once: 0 wake(s)
+2026-10-29T15:03:35 seeded 13 seat(s) at now; only later messages wake the orchestrator
+2026-10-29T15:03:36 watching 13 seat(s)
+2026-10-29T15:10:45 woke orch for QA: proto-9 synthetic peer (HTTP 200)
+2026-10-29T15:17:48 woke orch for QA: proto-9 synthetic peer (HTTP 200)
+2026-10-29T15:40:53 woke orch for NET (HTTP 200)
+2026-10-29T15:43:09 woke orch for NET (HTTP 200)
+2026-10-29T15:46:25 woke orch for NET (HTTP 200)
+2026-10-29T15:49:25 woke orch for NET (HTTP 200)
+2026-10-29T15:52:26 woke orch for NET (HTTP 200)
+2026-10-29T15:54:42 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T15:57:12 woke orch for NET (HTTP 200)
+2026-10-29T16:01:58 woke orch for NET (HTTP 200)
+2026-10-29T16:03:29 woke orch for NET (HTTP 200)
+2026-10-29T16:05:44 woke orch for NET (HTTP 200)
+2026-10-29T16:06:30 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T16:09:46 woke orch for NET (HTTP 200)
+2026-10-29T16:11:16 woke orch for NET (HTTP 200)
+2026-10-29T16:13:01 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T16:20:03 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T16:32:51 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T16:41:09 woke orch for BIN: remaining three structs (HTTP 200)
+2026-10-29T16:41:23 watching 15 seat(s)
+2026-10-29T18:51:57 woke orch for NET (HTTP 200)
+2026-10-29T18:55:44 woke orch for NET (HTTP 200)
+2026-10-29T18:57:29 woke orch for NET (HTTP 200)
+2026-10-29T20:11:18 woke orch for NET (HTTP 200)
+2026-10-29T20:15:04 woke orch for NET (HTTP 200)
+2026-10-30T10:16:36 poll error: URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-10-30T10:59:17 seeded 15 seat(s) at now; only later messages wake the orchestrator
+2026-10-30T11:13:32 woke orch for QA: verification and oracles lane (HTTP 200)
+2026-10-30T11:16:48 woke orch for QA: verification and oracles lane (HTTP 200)
+2026-10-30T11:17:07 watching 11 seat(s)
+2026-10-30T11:22:23 woke orch for AI: stealth and combat parity lane (HTTP 200)
+2026-10-30T11:26:39 woke orch for AI: stealth and combat parity lane (HTTP 200)
+2026-10-30T11:26:57 watching 7 seat(s)
+2026-10-30T11:28:42 woke orch for AI: stealth and combat parity lane (HTTP 200)
+2026-10-30T11:30:12 woke orch for NET: protocol and identity lane (HTTP 200)
+2026-10-30T11:31:28 woke orch for NET: protocol and identity lane (HTTP 200)

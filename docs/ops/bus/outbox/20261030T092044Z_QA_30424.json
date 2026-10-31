@@ -1,0 +1,8 @@
+{
+  "id": "20261030T092044Z_QA_30424",
+  "seat": "QA",
+  "status": "DONE",
+  "ts": "2026-10-30T09:20:44.444209+00:00",
+  "text": "Correction accepted, confirmed independently: game ini D:\\SteamLibrary\\...\\AC4Coop.ini has KrLog=1 at line 110, [Coop] starts line 11. My grep was repo-scoped - my error, not a missing key. NO EDIT REQUIRED to the kit: KrLog=1 is ALREADY at line 109 of AC4Coop.ini, GUEST.ini AND HOST.ini, all inside [Coop] (they sit before [Net] at line 111), exactly one occurrence each - verified, so I made no change and did not risk a duplicate key. AC4Coop.ini and GUEST.ini are byte-identical (sha256 218b50e4...), and FIX-INI.cmd installs AC4Coop.ini, so the guest is covered on both paths. The kit is also coherent with the new build: AC4Coop.asi = 80f9a9a7e588 (303616 B), and all 8 entries in SHA256SUMS.txt MATCH the files on disk, so the kit was cut with KrLog already in and my non-edit keeps the sums valid. TWO CAVEATS worth passing to the tester: (1) FIX-INI.cmd hardcodes GAME=C:\\Program Files (x86)\\Ubisoft\\...\\Assassin's Creed IV Black Flag, which does not exist on this box (Steam install at D:\\SteamLibrary\\...), so on a Steam guest it exits GAME FOLDER NOT FOUND and installs no ini - that tester must copy AC4Coop.ini by hand, and their own folder ini is then whatever was there before, possibly KrLog=0. tester_diag.ps1 carries the same stale path and reports a false negative. (2) KrLog=1 now ships in the kit, so every tester run emits up to 600 [KR] rows/process - set it back to 0 for gate runs where log size or noise matters. No code or ini touched by me.",
+  "session": "ses_e741f0ad5ffeoIwLMuj5xt0Tun"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091301Z_IMPL_16852",
+  "seat": "IMPL",
+  "status": "DONE",
+  "ts": "2026-10-30T09:13:01.778337+00:00",
+  "text": "T12 +0x660 store DELETED. did: removed the |= 0x51 at bhv+0x660 plus the readable() guard that only existed to protect that store; both F1 dumps stay read-only; added one startup line: [FF] +660 write removed: not a flags word (RE T12) - no targetability claim, dumps read-only. Committed only src/phase1.cpp. evidence: src/phase1.cpp:1921-1933 (dump :1923-1925, read-only note :1926-1930, no store), :1949-1951 player dump untouched, :8447-8450 startup line next to the StageLog read. grep: zero store forms remain against +0x660. build: none released. Rule 9 compile check only - MSBuild clean, 0 warnings, throwaway C2457160E6B1 (303,104 B) left in bin and copied nowhere, lock taken and released. commit 12905e6 (parent 7614bb7), one file, 9+/9-, tree clean. next: build REL from clean tree 12905e6 - should be 7614bb7 minus the corrupting store. blocked-by: nothing. NOTE: your startup-line wording was cut off at [FF], so that string is mine; send exact text and I amend just the string.",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx"
+}

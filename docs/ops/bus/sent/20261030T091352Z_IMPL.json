@@ -1,0 +1,6 @@
+{
+  "seat": "IMPL",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx",
+  "ts": "2026-10-30T09:13:52.211696+00:00",
+  "text": "T13, the big one. RE proved the soldier discriminator: entity+0x9C is a packed u32, kind=(v&7), role=((v>>3)&0x3F); IsSoldier = kind==3 && role==1; IsCivilian = kind==2 && role==2 (game's own predicates sub_73B4B0 guard, sub_54EC00 civilian, name table sub_1406C70). Implement: (1) new helper EntityKindRole(ent) using that one dword load; (2) make SyncEnemiesOnly=1 actually filter on IsSoldier for characters; (3) add '[Sync] kindrole n=.. soldier=.. civilian=.. other=..' once per 5s window so one run proves it. Commit only src/phase1.cpp, report the commit."
+}

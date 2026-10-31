@@ -1,0 +1,12 @@
+{
+  "id": "MSG-20261029T1500Z-orch-001",
+  "from": "orch",
+  "to": "net",
+  "type": "TASK",
+  "re": "Phase-0 / 0.1-0.3",
+  "created": "2026-10-29T15:00:00Z",
+  "deadline": "2026-11-01T18:00:00Z",
+  "body": "Read ops/PROGRAM-PLAN.md sections 2 and 4-Phase-0 before touching anything.\n\nDo these three changes and nothing else. One commit each.\n\n0.1 FIX 0x681817. Verified: sub_6817C0 does `test edi,edi; jz 0x681817` and then `0x681817 movzx ecx,[edi+2B6h]` -- the null path dereferences edi. sub_733FB0 returns null by design in three paths. Patch the join (guard at 0x681817) OR wrap sub_733FB0's callers. Do not add another per-site deref guard.\n\n0.2 LOG THE ASI HASH. On DllMain attach, hash the loaded module (or read the ASI path and hash the file) and write `[Build] asi=<sha256> commit=<short>` as one of the first three lines of phase1_log_<pid>.txt. Until this exists, no log can be tied to a build and every gate is unfalsifiable.\n\n0.3 REPLACE THE SITE-ENUMERATION GUARD. The current six-site guard covers 6 of 470 `mov reg,[reg+0x114]` sites and 2 of 1,316 `+0x118` sites. Collapse it to one guard at the dereference helper (or a null-safe GetEntity helper) and log every substituted null with the return address. If that cannot be done safely, say so with the disassembly that blocks it.\n\nConstraints: only you write ref/AC4Coop/src/. Do not change capture-hook semantics. Every new patch site needs a byte pattern + an alignment check (audit/config/hooks.json is regenerated with `python -m ac4audit.hooks_emit` from audit/tools).\n\nReply with: branch name, the three commit hashes, and the 10-minute run log path.",
+  "evidence": {"artifacts": [], "claims": [], "verdict": null},
+  "reply_to": null
+}

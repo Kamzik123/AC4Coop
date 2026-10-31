@@ -1,0 +1,182 @@
+{
+  "updated": "2026-10-30T09:18:39Z",
+  "plan": "ops/PROGRAM-PLAN.md",
+  "build": {
+    "asi_head": "80f9a9a7e588",
+    "asi_deployed": "80f9a9a7e588",
+    "exe": "bc11ad7924e1eca7363ee86aa3332c05386d0a05896c0b7370131daee9ab5150",
+    "commit": "ed332a8",
+    "branch": "fix/live-game-udp-bind",
+    "dirty": [],
+    "note": "REL-80f9a9a7e588 303616 B: adds per-body [KR] encoding probe (KrLog) so C21 is checkable; +soldier discriminator, +0x66 count, +0x660 removed, kill-ring order, net hardening. Unverified in game."
+  },
+  "gates": {
+    "M0": "unknown",
+    "M1": "unknown",
+    "M2": "unknown",
+    "M3": "unknown",
+    "M4": "unknown",
+    "M5": "unknown"
+  },
+  "gates_blocked_by": {
+    "M0": "build changed",
+    "M1": "build changed",
+    "M2": "build changed",
+    "M3": "C3 read route unverified (world+0x8E0 is the player's slot); needs the per-entity alert object",
+    "M4": "build changed",
+    "M5": "build changed"
+  },
+  "seats": {
+    "orch": {
+      "state": "active"
+    },
+    "bin": {
+      "state": "running",
+      "task": "IDB naming + 6 structs",
+      "session": "ses_e78cdbfecffe5E4DsuPWOlgLbP"
+    },
+    "qa": {
+      "state": "done",
+      "delivered": [
+        "ops/tools/gate_parse.py (selftest 6/6)",
+        "ops/evidence/PARSER-SELFTEST.md",
+        "E0-A card",
+        "M1..M5 evidence rules"
+      ]
+    },
+    "combat": {
+      "state": "done",
+      "delivered": [
+        "ops/experiments/E2-combat.md",
+        "ops/patches/stage2a-observe.patch.md",
+        "ops/tools/e2_site_patterns.py"
+      ]
+    },
+    "doc": {
+      "state": "done",
+      "delivered": [
+        "10 contradictions -> 0",
+        "ops/tools/gen_status.py",
+        "STATUS.md generated"
+      ]
+    },
+    "net": {
+      "state": "active",
+      "done": [
+        "0.1 FixNullReturn @0x6817FA",
+        "0.2 [Build] line"
+      ],
+      "next": "rework CombatObserve to byte-patch hooks (no DR/thread manipulation), then build; do not deploy",
+      "session": "ses_e988712e4ffdYTcGC8j4bxedc3"
+    },
+    "ai": {
+      "state": "pending"
+    },
+    "naval": {
+      "state": "pending"
+    },
+    "mission": {
+      "state": "pending"
+    }
+  },
+  "experiments": {
+    "E0": "RETIRED - Steam/Uplay will not launch the game twice on one PC",
+    "E1.1": "LIVE PASS (pid 24456): objId non-zero, push and apply agree, no position fallback",
+    "E2.1": "observer built (1dd449b), default off, 4 sites armed when on; needs a session to produce hits",
+    "E2.2": "carded",
+    "E3.1": "BLOCKED: find the per-entity alert route first; then test whether ctx+0x146 is writable/stable",
+    "E3.2": "carded",
+    "E4.1": "carded",
+    "E5.1": "carded",
+    "E2.3": "PASS on one machine: SetLife(-1) rc=0 -> real death (pid 12372, 6/6)",
+    "E2.4": "PASS (pid 13616, build e0870d53): 0 false deaths, 15 kills, objId non-zero across 2 fast travels, no crash",
+    "A1": "carded (ops/experiments/A1-animation-context.md); capture needs a build with [AD] logging",
+    "E0-B": "in flight: proto-9 synthetic peer (ops/tools/peer9.py) - one game, two sockets"
+  },
+  "decisions_open": [
+    "D-004",
+    "D-007",
+    "D-008"
+  ],
+  "next": [
+    "NET: [AD] vanished + [Map]/IdMapLog diagnostics in one commit",
+    "deploy, then one short run: 8 kill attempts for [AD] + a peer kill for the map",
+    "ad_table.py --emit -> death_clips.h",
+    "C3: [node+0x0C] writer, else coarse fallback"
+  ],
+  "facts": {
+    "null_join_candidates": 146,
+    "null_join_scan": "ops/evidence/null-join-scan.json",
+    "identity_live_pid": 24456,
+    "false_deaths_pid24456": 59,
+    "true_deaths_pid24456": 16,
+    "false_death_cause": "capture loop: cached hpSvc read without vtable validation; scene change recycles the address -> +0x5C reads 0xFFFF",
+    "false_deaths_pid13616": 0,
+    "one_machine_c2_loop": "COMPLETE: kill -> push(id) -> apply(id) -> real death; no false deaths; identity survives scene change",
+    "scene_change_lines_pid13616": 5637,
+    "reuseaddr_two_binds": "PROVEN: with SO_REUSEADDR on Windows both binds succeed and the FIRST binder receives; the net.cpp fallback can never fire",
+    "e0a_blocked_by": "instance slot must come from a marker (D-018), not a bind failure",
+    "e0a_second_consequence": "IsSecondInstance() never fires -> phase1.cpp 'if (Net::IsSecondInstance()) g_entHost = 0' never runs -> BOTH instances claim host and both send the guard stream",
+    "watch_transport": "ops/tools/watch_seats.py, ts-watermarked, wakes ORCH via POST /api/session/<orch>/prompt; DMs cap ~2000 chars",
+    "two_game_instances": "NOT AVAILABLE on one PC (Steam blocks the second launch); the plugin mutex hook only defeats the game's own guard",
+    "second_endpoint": "a Python peer speaking NET_PROTO_VER=9 is a valid second endpoint; no second copy needed",
+    "sizeof_PlayerState_v9": 545,
+    "sizeof_PlayerState_derivation": "pack(1): 12 hdr +8 worldId +8 scene +64 matrix(4x4 f32) +4+4 speeds +16 heading +4 bool +2 u8 +3 i32 +5 bool +6 i32 +3 u32 +1 blendCount +184 blendFactors[46] +4 ratio +4+4+4 blendIn +2 flags +1 isTransition +4 timeScale +128 ctx +1 shipValid +12 shipPos +16 shipQuat +4 shipHP +1 valid",
+    "netstate_stale_comment": "netstate.h:107 still documents shipHP as *(int*)(*(void**)(ship+0x5C)+0x84) - the offset the project disproved (it regenerates +6/tick). Comment only; the field is unused.",
+    "e0b_player_lane": "PASS: peer9 -> game PlayerState applied (log shows [Net] apply with our circle positions); game -> peer decode clean at 560 bytes, 0 failures",
+    "sizeof_PlayerState_actual": 560,
+    "sizeof_PlayerState_trap": "545 was wrong. HookMath::Transform and Vector4 are __declspec(align(16)) and pack(1) does NOT override it: matrix@32 (4 pad), heading@112 (8 pad), size rounds 557->560. cl.exe is the oracle.",
+    "e0b_kill_lane_blocked": "EntitySyncTick returns at the EntitySelfTest branch BEFORE the host branch that calls ProcessKillEvents, so with EntitySelfTest=1 the game ignores incoming entity/kill packets.",
+    "combat_observer": "stage 2A observer must be thread-agnostic: byte-patch via Hook::DetourFunc (the idiom used at 18 sites), not DR registers. No cross-thread SetThreadContext, no SuspendThread. Skip and log a site whose prologue cannot be stolen cleanly.",
+    "idb_engine_structs": "7 defined (Entity, AIActor, AIAlertState, CSrvNPCHealth, Human, EntityGroup, CharacterController) - C-03 passes",
+    "human_chain": "Entity+0xE8 -> AIComponent* ; +0x1C -> AbstractEntityAI* ; AI+0x20 -> +0x84 -> +0x24 ; vtbl[18](p5,0) -> &Human->IHuman ; Human = that - 0x10C",
+    "entity_components_offset": "the component array is +0x60 (data) / +0x66 (u16 count) / +0xF0 (version); 0xE8 is AIComponent*, not m_Components",
+    "stealth_alert_chain": "OPEN, narrowed. World+0x8E0 -> +0x1C is the PLAYER's alert state (proven). A per-entity AIAlertState exists at arg1+0x0C (writer sub_17AE740; bitset +0x40, u16 +0x146), but arg1 is a GLOBAL detection state-machine node (dword_4E1982C, built by sub_9FDF50 from one root) whose +0x0C is populated per tick with whichever entity is being processed. The entity-side storage field is unmapped. Next read: the writer of [node+0x0C].",
+    "combat_observe": "byte-patch hook, 4 sites, no DR/VEH, no thread manipulation; [CO] armed N/4 + per-site va/steal/stub + hit lines with this/a2/a3 values only. Disarm to come via the existing PollThread.",
+    "idb_named_loadbearing": "20 of 22 (C-02 PASS); refused 0x173E190 (attack/interaction dispatcher, no single verb)",
+    "animnode_class": "AnimNode_Update 0x679750 / AnimNode_Dispatch 0x681980 / AnimNode_Reset 0x6817C0 share one POD node class: this = sub-object at outer+0xE0, outer vtable 0x1E47678",
+    "open_re_questions": "ONE: writer of [detectionNode+0x0C]. Everything else in the plan has an instruction per hop.",
+    "c3_fallback": "If the storage field is not found in one more session, derive a COARSE alert level from es.actionAlias + es.stage (already on the wire) and label it coarse, never as the engine's state.",
+    "fast_death_removal": "MEASURED (pid 29900): real assassinations remove the victim from m_EntityManager.m_Entities before any capture reads life==0xFFFF. The run produced 61 '[Relay] vanished dead=0 life=24' and ZERO dead=1. Both the D-016 death lane and the [AD] logger are blind to fast deaths; the [AD] fix emits on vanish.",
+    "kill_lane_status": "transport+dispatch PROVEN (329 '[Kill] event objId=... unresolved' lines = ApplyPeerHealth ran). Identity resolution FAILS: ObjMapFind(objId) misses even for an id decoded from the host's own entity packet. IdMapLog diagnostic is being added to see the map.",
+    "ac4_up_axis": "Z is up (the small component in the game's own position packets); a horizontal circle is X/Y"
+  },
+  "audit": {
+    "claims": "30/35",
+    "gates": {
+      "G0": "PASS",
+      "G1": "FAIL",
+      "G2": "PASS",
+      "G3": "FAIL",
+      "G4": "PASS",
+      "G5": "PASS"
+    }
+  },
+  "hive": {
+    "model": "deepseek-flash (explicit; a bare POST /api/session inherits a FREE default that times out)",
+    "taskboard": "ops/TASKBOARD.md",
+    "claims": "ops/CLAIMS.md",
+    "seats": {
+      "NET": "ses_e741f0becffevKuDnylqDe7rph",
+      "IMPL": "ses_e741f0b73ffeeVFuPV4Qu0iltx",
+      "RE": "ses_e741f0b23ffemD1twBuCaV2rgl",
+      "QA": "ses_e741f0ad5ffeoIwLMuj5xt0Tun",
+      "AI": "ses_e741f0a85ffehWi7MKTgSQJzJM"
+    },
+    "rules": [
+      "one writer per file",
+      "evidence or it did not happen",
+      "fixed SEAT report format",
+      "QA verifies what IMPL/NET claim"
+    ]
+  },
+  "docs": {
+    "journal": "ops/JOURNAL-2026-10-30.md",
+    "plan": "ops/PLAN-2026-10-30-enemy-sync.md",
+    "claims": "ops/CLAIMS.md",
+    "board": "ops/TASKBOARD.md",
+    "hive": "ops/HIVE.md",
+    "agents": "ops/AGENT-LOG.md"
+  },
+  "blocking": "one two-machine run on 280D652169d0; coop_report.py judges G6/G7/G9"
+}

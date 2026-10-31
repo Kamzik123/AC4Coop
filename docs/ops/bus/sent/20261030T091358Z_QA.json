@@ -1,0 +1,6 @@
+{
+  "seat": "QA",
+  "session": "ses_e741f0ad5ffeoIwLMuj5xt0Tun",
+  "ts": "2026-10-30T09:13:58.091507+00:00",
+  "text": "T14, two items. (1) Fix your own oracle defect: check_deaths applies the run-wide kt_recv_applied total to both lanes, so 'pushed, never applied' passes for the wrong reason - join death-recv objIds per lane. (2) Verify RE's discriminator in one run: dump kind/role from entity+0x9C for every enumerated NPC in a civilian street, a guard post and a mixed market; PASS if every attacker is (kind=3,role=1) and every fleer is (2,2). RE's refs: sub_73B4B0 guard, sub_54EC00 civilian, table sub_1406C70."
+}

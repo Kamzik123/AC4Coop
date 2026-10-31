@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091258Z_NET_5564",
+  "seat": "NET",
+  "status": "DONE",
+  "ts": "2026-10-30T09:12:58.043259+00:00",
+  "text": "T2 committed, no build (Rule 10). Commit 615c8e67e0ab9b8011edb48ad980937fe29129d0 touches only src/net.cpp (53) and src/net.h (3): (1) EncodeEntityPacket reserves the full record (16+42=58B worst case) before writing and ends the packet early with h.count=written instead of return 0, which also stopped the g_txShadow desync; latent before (max o=7444B in 16 KiB) but real for any smaller cap; (2) g_haveEntities expires after 3s with no snapshot write, slot zeroed, one log line; (3) kill-ring overwrite counted, first 8 drops logged outside the lock; (4) header-only entity packets (count==0) no longer refresh g_lastRecvMs. Wire format, sizeof(EntityState), MAX_SYNC_ENTITIES, NET_PROTO_VER unchanged. Evidence: ops/evidence/T2-net-bounds-2026-10-30.md (static parity oracle PASS: reserved bytes == written bytes for all 8 field bits). Two facts: working tree still has IMPL's uncommitted src/phase1.cpp so a clean-tree build needs IMPL's commit first; and IMPL still owes the drain-order one-liner - move 'if (haveIn) ProcessKillEvents(in);' (phase1.cpp:4280) to just after the GetKillEntities block (:4288).",
+  "session": "ses_e741f0becffevKuDnylqDe7rph"
+}

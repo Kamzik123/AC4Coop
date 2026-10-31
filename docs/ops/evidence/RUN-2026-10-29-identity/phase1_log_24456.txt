@@ -1,0 +1,2383 @@
+[Build] asi=5e0f71103313dfdaf9de7b6548154f03c7c37c56baf692ffaa6a256c425e68ec commit=f063ea1 tree=clean
+[Phase1] DriveContext=0 ctxMask=0x440
+[Phase1] RelevanceRadiusM=250 (characters), ShipRelevanceRadiusM=1000 (ships); peer-relative, 0 = off
+[IdRes] entity identity: scan only
+[Hook] GetUnusedPadID detour: installed
+[SGM] CHARACTER (vt 0x01E4CE90) reached SetGlobalMatrixInternal -> guard render override GO
+[Id] world=2484AB60 worldId=0000000032E21E58 count=18
+[Id] idx=0 objId=4026532617 ent=30D7F0B0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=1 objId=420982877 ent=320EFD90 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=2 objId=853679922 ent=2486F3F0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=3 objId=20143895943 ent=30E7E190 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.27,-0.83)
+[Id] idx=4 objId=35677645477 ent=3151AD10 evt=01E4CE90 bhv=00000000 arch=0000 pos=(5.78,-2.51,0.27)
+[Id] idx=5 objId=12438318502 ent=3283F450 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-0.05,-1.01,0.00)
+[Id] idx=6 objId=16852032057 ent=30E2E4C0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-0.51,-1.01,0.00)
+[Id] idx=7 objId=8200524827 ent=320EE8D0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,2.81,0.00)
+[Id] idx=8 objId=35724969930 ent=30E30910 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=9 objId=35914154362 ent=31269E90 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=10 objId=955820763 ent=31BDB0D0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.51,-0.22,1.00)
+[Id] idx=11 objId=4026532892 ent=30EFA220 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=12 objId=4026532893 ent=30EFA330 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=13 objId=4026532895 ent=30EFAC80 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=14 objId=4026532896 ent=30EFAD90 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=15 objId=4026532897 ent=30EFAF70 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=16 objId=4026532898 ent=30EFB150 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=17 objId=4026532901 ent=327AEEB0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,-0.03)
+[Enum] world=2484AB60 player=327AEEB0
+[Enum] NavalManager=00000000 (via descriptor *(void**)0x028b168c)
+[Enum] ship list unreachable (mgr=00000000)
+[Enum] m_CharacterList size=1
+[Enum]   char[0]=327AEEB0 vt=01E4CE90 pos=(0,0,-0)
+[Enum] m_ObjectList size=0
+[Enum] m_EntityManager.m_Entities size=18
+[Enum]   ent[0]=30D7F0B0 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[1]=320EFD90 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[2]=2486F3F0 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[3]=30E7E190 vt=01E4CE90 pos=(0,0,-0)
+[Enum]   ent[4]=3151AD10 vt=01E4CE90 pos=(5,-2,0)
+[Enum]   ent[5]=3283F450 vt=01E4CE90 pos=(-0,-1,0)
+[Enum]   ent[6]=30E2E4C0 vt=01E4CE90 pos=(-0,-1,0)
+[Enum]   ent[7]=320EE8D0 vt=01E4CE90 pos=(0,2,0)
+[Enum]   ent[8]=30E30910 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[9]=31269E90 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[10]=31BDB0D0 vt=01E4CE90 pos=(0,-0,1)
+[Enum]   ent[11]=30EFA220 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[12]=30EFA330 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[13]=30EFAC80 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[14]=30EFAD90 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[15]=30EFAF70 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[16]=30EFB150 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[17]=327AEEB0 vt=01E4CE90 pos=(0,0,-0)
+[Guard] [17]=327AEEB0 bhv=026FA898 cloth=1 arch=00000001 pos=(0,0,-0) d=0
+[Guard] nearbyChars=1 guards=0
+[Fight] fighters=0
+[Tpl] spawnMgr=*(world+0x924)=FD2C3FC0
+[Tpl] arr84=FD2A0CE0 cnt=4 | arr94=FD264380 cnt=0
+[Net] init=1  (bound/peer line goes to OutputDebugString)
+[Net] cfg enabled=1 peer=127.0.0.1 local=47801 peerPort=47801 strictPeer=1
+[Smooth] frames=0 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=0 avgD=0.0000 maxD=0.0000
+[Net] stats tx=0 pkt, 0 B, 0 ent  rx=0 pkt, 0 B  |  0.0 kB/s up, 0.0 kB/s down  |  mirror ok=0 nobod=0 steal=0
+[Smooth] frames=0 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=0 avgD=0.0000 maxD=0.0000
+[Net] stats tx=0 pkt, 0 B, 0 ent  rx=0 pkt, 0 B  |  0.0 kB/s up, 0.0 kB/s down  |  mirror ok=0 nobod=0 steal=0
+[Smooth] frames=0 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=0 avgD=0.0000 maxD=0.0000
+[Net] stats tx=0 pkt, 0 B, 0 ent  rx=0 pkt, 0 B  |  0.0 kB/s up, 0.0 kB/s down  |  mirror ok=0 nobod=0 steal=0
+[Id] world=30E26DD0 worldId=000000029816CCA1 count=4928
+[Id] idx=0 objId=4026535559 ent=3C49EBF0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=1 objId=32421166846 ent=40B4F950 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-448.00,0.00)
+[Id] idx=2 objId=32421166973 ent=3A32FB60 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-448.00,0.00)
+[Id] idx=3 objId=32421166972 ent=3A32FC70 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-320.00,0.00)
+[Id] idx=4 objId=32421166971 ent=3BEFECC0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-320.00,0.00)
+[Id] idx=5 objId=32421166970 ent=3BEFEDD0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-448.00,0.00)
+[Id] idx=6 objId=32421166969 ent=3BEFE470 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-448.00,0.00)
+[Id] idx=7 objId=32421166968 ent=3BEFE580 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-320.00,0.00)
+[Id] idx=8 objId=32421166967 ent=3BEFE690 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-320.00,0.00)
+[Id] idx=9 objId=32421166966 ent=3ABEF750 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-192.00,0.00)
+[Id] idx=10 objId=32421166965 ent=3ABEF860 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-192.00,0.00)
+[Id] idx=11 objId=32421166964 ent=3C66C100 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-64.00,0.00)
+[Id] idx=12 objId=32421166963 ent=3C66C210 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-64.00,0.00)
+[Id] idx=13 objId=32421166962 ent=3C66C320 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-192.00,0.00)
+[Id] idx=14 objId=32421166961 ent=3BEFF620 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-192.00,0.00)
+[Id] idx=15 objId=32421166960 ent=3A7DA2F0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-64.00,0.00)
+[Id] idx=16 objId=32421166959 ent=3A7DA550 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-64.00,0.00)
+[Id] idx=17 objId=32421166958 ent=30EFC710 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-448.00,0.00)
+[Id] idx=18 objId=32421166957 ent=30EFC820 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-448.00,0.00)
+[Id] idx=19 objId=32421166956 ent=311B9320 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-320.00,0.00)
+[Id] idx=20 objId=32421166955 ent=311B9430 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-320.00,0.00)
+[Id] idx=21 objId=32421166954 ent=311B9540 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-448.00,0.00)
+[Id] idx=22 objId=32421166953 ent=3C257DC0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(448.00,-448.00,0.00)
+[Id] idx=23 objId=32421166952 ent=3C257ED0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-320.00,0.00)
+[Id] idx=24 objId=32421166951 ent=3C257FE0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(448.00,-320.00,0.00)
+[Id] idx=25 objId=32421166950 ent=4091C9B0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-192.00,0.00)
+[Id] idx=26 objId=32421166949 ent=4091CC50 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-192.00,0.00)
+[Id] idx=27 objId=32421166948 ent=4091CD60 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-64.00,0.00)
+[Id] idx=28 objId=32421166947 ent=4091CFB0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-64.00,0.00)
+[Id] idx=29 objId=32421166946 ent=4091D0C0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-192.00,0.00)
+[Ident] --- world=30E26DD0 worldId=11141565601 entities=4928 ---
+[Ident] objId=4026538246 arch=31EC pos=(-61.16,-74.78,8.42) ent=3A629940
+[Ident] objId=4026538261 arch=31EC pos=(-54.79,-55.79,8.46) ent=3A6296D0
+[Ident] objId=4026538266 arch=35F7 pos=(-68.92,-40.08,16.92) ent=4039FF50
+[Ident] objId=4026538270 arch=31EC pos=(-53.92,-57.00,8.46) ent=3FEC9300
+[Ident] objId=4026538273 arch=35F7 pos=(-42.80,-36.99,17.87) ent=3FEC9140
+[Ident] objId=4026538277 arch=31EC pos=(-53.45,-55.65,8.39) ent=3FF422D0
+[Ident] objId=4026538280 arch=31EC pos=(-53.54,-50.73,8.15) ent=3C745FD0
+[Ident] objId=4026538283 arch=31EC pos=(-51.57,-51.08,8.10) ent=3C7579D0
+[Ident] objId=4026538286 arch=31EC pos=(-44.43,-56.32,8.39) ent=3BF41030
+[Ident] objId=4026538343 arch=31EC pos=(-42.99,-57.71,8.42) ent=2472DC60
+[Ident] objId=4026538346 arch=35F7 pos=(-76.50,-48.63,8.83) ent=2CFD0FC0
+[Ident] objId=4026538384 arch=31EC pos=(-48.75,-75.54,8.40) ent=32EE4E00
+[Ident] objId=4026538387 arch=35F7 pos=(-77.38,-48.54,8.94) ent=32EE4B90
+[Ident] objId=4026538390 arch=31EC pos=(-55.41,-79.23,8.40) ent=3D462280
+[Ident] objId=4026538393 arch=31EC pos=(-55.22,-80.64,8.40) ent=3D466DB0
+[Ident] objId=4026538398 arch=31EC pos=(-54.50,-80.63,8.40) ent=3D4A1C30
+[Ident] objId=4026538401 arch=31EC pos=(-55.70,-82.49,8.41) ent=3D4EC0B0
+[Ident] objId=4026538404 arch=31EC pos=(-54.21,-82.89,8.40) ent=3D453B60
+[Ident] objId=4026538530 arch=31EC pos=(-69.05,-77.90,8.59) ent=3D890060
+[Ident] objId=4026538553 arch=31EC pos=(-67.40,-67.59,8.39) ent=3BFCC9B0
+[Ident] objId=4026538556 arch=31EC pos=(-68.32,-67.70,8.39) ent=3FE0F770
+[Ident] objId=4026538559 arch=31EC pos=(-57.19,-26.64,7.83) ent=4014FBB0
+[Ident] objId=4026538562 arch=31EC pos=(-51.71,-84.67,8.40) ent=40193540
+[Ident] objId=4026538565 arch=31EC pos=(-58.29,-25.58,7.86) ent=401A4B80
+[Ident] objId=4026538570 arch=31EC pos=(-57.00,-25.15,7.78) ent=404B6FF0
+[Ident] objId=4026538573 arch=3594 pos=(-67.89,-25.69,7.79) ent=3BFCC7C0
+[Ident] objId=4026538576 arch=318C pos=(-26.61,-67.30,6.07) ent=3FE0BB20
+[Ident] objId=4026538581 arch=31EC pos=(-44.69,-86.22,8.40) ent=405BED60
+[Ident] objId=4026538626 arch=3594 pos=(-69.20,-25.13,7.79) ent=406D6010
+[Ident] objId=4026538629 arch=31EC pos=(-44.35,-86.41,8.40) ent=407857D0
+[Ident] objId=4026538632 arch=318C pos=(-25.54,-65.84,6.00) ent=4078FB10
+[Ident] objId=4026538639 arch=3594 pos=(-67.08,-24.16,7.79) ent=4078F9D0
+[Ident] objId=4026538642 arch=318C pos=(-25.45,-67.91,6.00) ent=408FC440
+[Ident] objId=4026538647 arch=3594 pos=(-68.59,-23.84,7.79) ent=408FC260
+[Ident] objId=4026538650 arch=31EC pos=(-45.05,-87.67,8.40) ent=4098E4C0
+[Ident] objId=4026538653 arch=31EC pos=(-36.11,-28.89,4.17) ent=40A134F0
+[Ident] objId=4026538656 arch=31EC pos=(-34.85,-29.85,4.08) ent=40788E00
+[Ident] objId=4026538659 arch=318C pos=(-24.48,-67.18,6.00) ent=40A871A0
+[Ident] objId=4026538708 arch=35F7 pos=(-20.23,-68.65,6.00) ent=401D1820
+[Ident] objId=4026538711 arch=35F7 pos=(-20.16,-69.54,6.03) ent=407D4EE0
+[Ident] objId=4026538714 arch=31EC pos=(-26.47,-86.48,6.58) ent=40A87E70
+[Ident] objId=4026538724 arch=31EC pos=(-26.41,-87.83,6.69) ent=40195040
+[Ident] objId=4026538727 arch=31EC pos=(-70.72,-43.05,7.79) ent=40D71F20
+[Ident] objId=4026538730 arch=31EC pos=(-73.35,-66.28,11.56) ent=40D83C80
+[Ident] objId=4026538735 arch=31EC pos=(-74.42,-67.29,11.73) ent=40D954F0
+[Ident] objId=4026538740 arch=31EC pos=(-64.44,-75.39,8.41) ent=40DAE790
+[Ident] objId=4026538743 arch=31EC pos=(-65.26,-76.76,8.41) ent=409E5D50
+[Ident] objId=4026538746 arch=31EC pos=(-57.35,-79.77,8.40) ent=40DD9C10
+[Ident] objId=4026538786 arch=31EC pos=(-58.03,-80.57,8.40) ent=401ACD10
+[Ident] objId=4026538789 arch=31EC pos=(-61.68,-81.21,8.41) ent=40D72CA0
+[Ident] objId=4026538792 arch=31EC pos=(-59.94,-82.06,8.41) ent=40F1B910
+[Ident] objId=4026538796 arch=31EC pos=(-61.82,-82.39,8.41) ent=401ACB50
+[Ident] objId=4026538801 arch=31EC pos=(-60.82,-83.41,8.41) ent=40F47AF0
+[Ident] objId=4026538806 arch=31EC pos=(-64.35,-81.10,8.41) ent=40F58FF0
+[Ident] objId=4026538809 arch=31EC pos=(-39.96,-78.30,8.59) ent=40F72770
+[Ident] objId=4026538812 arch=31EC pos=(-59.33,-84.41,8.41) ent=40F84020
+[Ident] objId=4026538817 arch=31EC pos=(-59.97,-85.64,8.40) ent=40F95890
+[Ident] objId=4026538820 arch=31EC pos=(-58.95,-86.07,8.40) ent=40FAF010
+[Ident] objId=4026538860 arch=31EC pos=(-64.70,-84.22,8.41) ent=40FFD130
+[Ident] objId=4026538863 arch=31EC pos=(-65.07,-85.45,8.41) ent=410331A0
+[Ident] objId=4026538866 arch=31EC pos=(-39.04,-80.16,8.59) ent=410248B0
+[Ident] objId=4026538869 arch=31EC pos=(-54.32,-86.94,8.69) ent=40597D20
+[Ident] objId=4026538876 arch=31EC pos=(-91.29,-53.60,12.28) ent=41082730
+[Ident] objId=4026538879 arch=31EC pos=(-91.29,-52.10,12.25) ent=41086D30
+[Ident] objId=4026538882 arch=31EC pos=(-45.27,-90.39,8.60) ent=41098A80
+[Ident] objId=4026539351 arch=31EC pos=(-43.43,-53.18,8.18) ent=4157C5D0
+[Ident] objId=4026538934 arch=31EC pos=(-66.35,-44.26,7.64) ent=41087F10
+[Ident] objId=4026538937 arch=31EC pos=(-65.33,-44.90,7.69) ent=41087D20
+[Ident] objId=4026538949 arch=31EC pos=(-66.99,-45.27,7.64) ent=410D4DC0
+[Ident] objId=4026538954 arch=31EC pos=(-62.78,-23.33,7.79) ent=41118EC0
+[Ident] objId=4026538959 arch=31EC pos=(-63.65,-24.17,7.79) ent=41132220
+[Ident] objId=4026538962 arch=31EC pos=(-64.48,-23.31,7.79) ent=4114B9A0
+[Ident] objId=4026538967 arch=31EC pos=(-64.48,-23.30,7.79) ent=4115D100
+[Ident] objId=4026538972 arch=31EC pos=(-63.67,-39.77,7.79) ent=411766C0
+[Ident] objId=4026539010 arch=31EC pos=(-32.54,-55.04,7.22) ent=40F8C540
+[Ident] objId=4026539019 arch=31EC pos=(-34.91,-60.92,6.94) ent=40E71C70
+[Ident] objId=4026539024 arch=31EC pos=(-36.16,-58.87,7.36) ent=401423C0
+[Ident] objId=4026539029 arch=31EC pos=(-34.51,-59.27,7.05) ent=41088C30
+[Ident] objId=4026539032 arch=31EC pos=(-88.44,-68.43,11.88) ent=41470C20
+[Ident] objId=4026539035 arch=31EC pos=(-87.06,-69.42,11.91) ent=414826F0
+[Ident] objId=4026539040 arch=31EC pos=(-86.07,-68.03,11.85) ent=414A65E0
+[Ident] objId=4026539043 arch=31EC pos=(-86.08,-68.03,11.85) ent=414B5580
+[Ident] objId=4026539046 arch=31EC pos=(-32.13,-57.41,6.83) ent=414C71C0
+[Ident] objId=4026539049 arch=31EC pos=(-31.15,-56.02,6.96) ent=40E71A30
+[Ident] objId=4026539080 arch=31EC pos=(-33.51,-56.43,7.08) ent=4102C7C0
+[Ident] objId=4026539105 arch=31EC pos=(-79.29,-56.58,10.14) ent=40E78850
+[Ident] objId=4026539122 arch=31EC pos=(-77.01,-57.32,10.07) ent=41615EB0
+[Ident] objId=4026539166 arch=31EC pos=(-77.78,-55.81,9.92) ent=41648870
+[Ident] objId=4026539186 arch=31EC pos=(-78.53,-58.09,10.32) ent=41CD8230
+[Ident] objId=4026539219 arch=31EC pos=(-20.98,-63.89,6.05) ent=41DA5540
+[Ident] objId=4026539245 arch=31EC pos=(-21.89,-65.44,6.00) ent=431527D0
+[Ident] objId=4026539261 arch=31EC pos=(-20.66,-65.12,6.03) ent=435C4FD0
+[Ident] objId=4026539278 arch=31EC pos=(-22.22,-64.21,6.03) ent=40784470
+[Ident] objId=4026539297 arch=31EC pos=(-98.48,-45.78,12.55) ent=43779F50
+[Ident] objId=4026540046 arch=31EC pos=(-68.53,-85.09,8.59) ent=3BF61D90
+[Ident] objId=4026540142 arch=31EC pos=(-81.71,-91.04,11.85) ent=41361900
+[Ident] objId=4026540177 arch=31EC pos=(-68.81,-82.83,8.59) ent=40E602D0
+[Ident] objId=4026540264 arch=31EC pos=(-67.07,-83.92,8.59) ent=40EEFA70
+[Ident] objId=4026540225 arch=31EC pos=(-68.41,-83.93,8.59) ent=40EF5B90
+[Ident] objId=4026540243 arch=31EC pos=(-67.59,-82.50,8.59) ent=43AD04C0
+[Ident] --- 100 humans logged ---
+[Net] cap SWITCH 0 -> 48 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[ShipSync] ship list count=1 captured=1
+[Arch] vt=00000000 id=0000 skel=0 ent=3C49EBF0 evt=01E4CE90 human=0 life=0/0 stage=-1 alias=00000000 comps=4 d2=6461 accepted=0
+[Arch] vt=00000000 id=0000 skel=1 ent=3A8C8C90 evt=01E4CE90 human=0 life=0/0 stage=-1 alias=00000000 comps=11 d2=42 accepted=0
+[Arch] vt=026E34D8 id=31EC skel=1 ent=3A629940 evt=01E4CE90 human=1 life=24/24 stage=1 alias=536EB11A comps=20 d2=373 accepted=1
+[Cap] ent=3A629940 dead=1 ai=3A62B270 (captured into the snapshot)
+[Arch] vt=026E34D8 id=35F7 skel=1 ent=4039FF50 evt=01E4CE90 human=1 life=36/36 stage=1 alias=2EFCE64D comps=20 d2=460 accepted=1
+[Cap] ent=3D890060 dead=1 ai=3A625920 (captured into the snapshot)
+[Arch] vt=026E34D8 id=3594 skel=1 ent=3BFCC7C0 evt=01E4CE90 human=1 life=30/30 stage=1 alias=0AE33004 comps=20 d2=1026 accepted=1
+[Arch] vt=026E34D8 id=318C skel=1 ent=3FE0BB20 evt=01E4CE90 human=1 life=24/24 stage=1 alias=0AE33047 comps=23 d2=1069 accepted=1
+[Mirror] ent=3A629940 -> playback dummy objId=4026538246 pos=(-61.1,-74.7,8.4) dead=1
+[Mirror] ent=3A629940 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=3A629940 host says dead -> visual death locally
+[Mirror] dead ent=3A629940 left in place (no flags, no teleport)
+[Mirror] ent=3A6296D0 -> playback dummy objId=4026538261 pos=(-54.7,-55.7,8.4) dead=0
+[Mirror] ent=4039FF50 -> playback dummy objId=4026538266 pos=(-68.9,-40.0,16.9) dead=0
+[Mirror] ent=3FEC9300 -> playback dummy objId=4026538270 pos=(-53.9,-57.0,8.4) dead=0
+[Mirror] ent=3FEC9140 -> playback dummy objId=4026538273 pos=(-42.8,-36.9,17.8) dead=0
+[Mirror] ent=3FF422D0 -> playback dummy objId=4026538277 pos=(-53.4,-55.6,8.3) dead=0
+[Mirror] ent=3C745FD0 -> playback dummy objId=4026538280 pos=(-53.5,-50.7,8.1) dead=0
+[Mirror] ent=3C7579D0 -> playback dummy objId=4026538283 pos=(-51.5,-51.0,8.1) dead=0
+[Mirror] ent=3BF41030 -> playback dummy objId=4026538286 pos=(-44.4,-56.3,8.3) dead=0
+[Mirror] ent=2472DC60 -> playback dummy objId=4026538343 pos=(-42.9,-57.7,8.4) dead=0
+[Mirror] ent=40EF5B90 -> playback dummy objId=4026540225 pos=(-68.4,-83.9,8.5) dead=0
+[Mirror] ent=2CFD0FC0 -> playback dummy objId=4026538346 pos=(-76.5,-48.6,8.8) dead=0
+[Mirror] ent=32EE4E00 -> playback dummy objId=4026538384 pos=(-48.7,-75.5,8.4) dead=0
+[Mirror] ent=32EE4B90 -> playback dummy objId=4026538387 pos=(-77.3,-48.5,8.9) dead=0
+[Mirror] ent=3D462280 -> playback dummy objId=4026538390 pos=(-55.4,-79.2,8.4) dead=0
+[Mirror] ent=3D466DB0 -> playback dummy objId=4026538393 pos=(-55.2,-80.6,8.4) dead=0
+[Mirror] ent=3D4A1C30 -> playback dummy objId=4026538398 pos=(-54.5,-80.6,8.4) dead=0
+[Mirror] ent=3D4EC0B0 -> playback dummy objId=4026538401 pos=(-55.7,-82.4,8.4) dead=0
+[Mirror] ent=3D453B60 -> playback dummy objId=4026538404 pos=(-54.2,-82.8,8.4) dead=0
+[Mirror] ent=3D890060 -> playback dummy objId=4026538530 pos=(-69.0,-77.9,8.5) dead=1
+[Mirror] ent=3D890060 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=3D890060 host says dead -> visual death locally
+[Mirror] dead ent=3D890060 left in place (no flags, no teleport)
+[Mirror] ent=41361900 -> playback dummy objId=4026540142 pos=(-81.7,-91.0,11.8) dead=0
+[Mirror] ent=40E602D0 -> playback dummy objId=4026540177 pos=(-68.8,-82.8,8.5) dead=0
+[Mirror] ent=3BF61D90 -> playback dummy objId=4026540046 pos=(-68.5,-85.0,8.5) dead=0
+[Mirror] ent=3BFCC9B0 -> playback dummy objId=4026538553 pos=(-67.4,-67.5,8.3) dead=0
+[Mirror] ent=3FE0F770 -> playback dummy objId=4026538556 pos=(-68.3,-67.7,8.3) dead=0
+[Mirror] ent=4014FBB0 -> playback dummy objId=4026538559 pos=(-57.1,-26.6,7.8) dead=0
+[Mirror] ent=40193540 -> playback dummy objId=4026538562 pos=(-51.7,-84.6,8.4) dead=0
+[Mirror] ent=401A4B80 -> playback dummy objId=4026538565 pos=(-58.2,-25.5,7.8) dead=0
+[Mirror] ent=404B6FF0 -> playback dummy objId=4026538570 pos=(-57.0,-25.1,7.7) dead=0
+[Mirror] ent=3BFCC7C0 -> playback dummy objId=4026538573 pos=(-67.8,-25.6,7.7) dead=0
+[Mirror] ent=3FE0BB20 -> playback dummy objId=4026538576 pos=(-26.6,-67.3,6.0) dead=0
+[Mirror] ent=405BED60 -> playback dummy objId=4026538581 pos=(-44.6,-86.2,8.4) dead=0
+[Mirror] ent=406D6010 -> playback dummy objId=4026538626 pos=(-69.2,-25.1,7.7) dead=0
+[Mirror] ent=407857D0 -> playback dummy objId=4026538629 pos=(-44.3,-86.4,8.4) dead=0
+[Mirror] ent=4078FB10 -> playback dummy objId=4026538632 pos=(-25.5,-65.8,6.0) dead=0
+[Mirror] ent=4078F9D0 -> playback dummy objId=4026538639 pos=(-67.0,-24.1,7.7) dead=0
+[Mirror] ent=408FC440 -> playback dummy objId=4026538642 pos=(-25.4,-67.9,6.0) dead=0
+[Mirror] ent=408FC260 -> playback dummy objId=4026538647 pos=(-68.5,-23.8,7.7) dead=0
+[Mirror] ent=4098E4C0 -> playback dummy objId=4026538650 pos=(-45.0,-87.6,8.4) dead=0
+[Mirror] ent=40A134F0 -> playback dummy objId=4026538653 pos=(-36.1,-28.8,4.1) dead=0
+[Mirror] ent=40788E00 -> playback dummy objId=4026538656 pos=(-34.8,-29.8,4.0) dead=0
+[Mirror] ent=40A871A0 -> playback dummy objId=4026538659 pos=(-24.4,-67.1,6.0) dead=0
+[Mirror] ent=401D1820 -> playback dummy objId=4026538708 pos=(-20.2,-68.6,6.0) dead=0
+[Mirror] ent=407D4EE0 -> playback dummy objId=4026538711 pos=(-20.1,-69.5,6.0) dead=0
+[Mirror] ent=40A87E70 -> playback dummy objId=4026538714 pos=(-26.4,-86.4,6.5) dead=0
+[Mirror] ent=40195040 -> playback dummy objId=4026538724 pos=(-26.4,-87.8,6.6) dead=0
+[Mirror] ent=40D71F20 -> playback dummy objId=4026538727 pos=(-70.7,-43.0,7.7) dead=0
+[Mirror] ent=40D83C80 -> playback dummy objId=4026538730 pos=(-73.3,-66.2,11.5) dead=0
+[Mirror] ent=40D954F0 -> playback dummy objId=4026538735 pos=(-74.4,-67.2,11.7) dead=0
+[Mirror] ent=40DAE790 -> playback dummy objId=4026538740 pos=(-64.4,-75.3,8.4) dead=0
+[Mirror] ent=409E5D50 -> playback dummy objId=4026538743 pos=(-65.2,-76.7,8.4) dead=0
+[Mirror] ent=40DD9C10 -> playback dummy objId=4026538746 pos=(-57.3,-79.7,8.4) dead=0
+[Mirror] ent=401ACD10 -> playback dummy objId=4026538786 pos=(-58.0,-80.5,8.4) dead=0
+[Mirror] ent=40D72CA0 -> playback dummy objId=4026538789 pos=(-61.6,-81.2,8.4) dead=0
+[Mirror] ent=40F1B910 -> playback dummy objId=4026538792 pos=(-59.9,-82.0,8.4) dead=0
+[Mirror] ent=401ACB50 -> playback dummy objId=4026538796 pos=(-61.8,-82.3,8.4) dead=0
+[Mirror] ent=40F47AF0 -> playback dummy objId=4026538801 pos=(-60.8,-83.4,8.4) dead=0
+[Mirror] ent=40F58FF0 -> playback dummy objId=4026538806 pos=(-64.3,-81.1,8.4) dead=0
+[Mirror] ent=40F72770 -> playback dummy objId=4026538809 pos=(-39.9,-78.3,8.5) dead=0
+[Mirror] ent=40F84020 -> playback dummy objId=4026538812 pos=(-59.3,-84.4,8.4) dead=0
+[Mirror] ent=40F95890 -> playback dummy objId=4026538817 pos=(-59.9,-85.6,8.4) dead=0
+[Mirror] ent=40FAF010 -> playback dummy objId=4026538820 pos=(-58.9,-86.0,8.4) dead=0
+[Mirror] ent=40FFD130 -> playback dummy objId=4026538860 pos=(-64.7,-84.2,8.4) dead=0
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] cap SWITCH 48 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.000
+[Net] peer in world (id=000000029816CCA1) -> spawning puppet (try 1)
+[Phase1] HC: [0]=30E2E600 [1]=0000002E [2]=80000001  builderID=00000002`C0A3FCE0
+[Phase1] selector=268D4440 builderHC=157BA2E0 builder(masked)=30E2E600
+[Phase1] builder.vtbl=01E57790 selector.vtbl=00000000
+[Phase1] dupSelector=3D450A50
+[Phase1] BuildEntityWithSelector rc=0 entity=3104EC90
+[Phase1] entity.vtbl=01E4CE90
+[Phase1] GetPlayer AFTER build = 4038E920 (orig=4038E920 new=3104EC90)
+[Phase1] AddEntity issued; GetPlayer now = 4038E920 (orig=4038E920 new=3104EC90)
+[Net] spawn succeeded, g_puppet=3104EC90
+[Net] puppet behavior disabled (ctx=4)
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] CAS set from local player (pac=415E6E00 lac=40392360)
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 48)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93E3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F93E3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026538954 vanished dead=0 life=24
+[Relay] objId=4026539278 vanished dead=0 life=24
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Relay] host DEATH objId=4026538954 -> peer
+[Relay] objId=4026539010 vanished dead=0 life=24
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:0.43 2:0.56} ts=1.00 VEL=0.029
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Net] apply seq=91 pos=(-57.1,-56.3,8.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:0.01 2:0.97} pupBlend(n=8)={1:0.01 2:0.97} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F8FE3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE3 peerKey=004F8FE3 -> puppet shown
+[Relay] host DEATH objId=4026539278 -> peer
+[Net] cap SWITCH 110764536 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.13
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={17:0.01 18:0.26 20:0.01 23:0.00 24:0.19 26:0.48 27:0.01} ts=1.00 VEL=0.093
+[Net] scene change: localKey=004F8FE4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.13 blendIn=0.20 (puppet, cur was 110764536)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=004F8FE4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] cap SWITCH 194060297 -> 3595255830 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=004F8FE4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE4 peerKey=004F8FE4 -> puppet shown
+[Net] scene change: localKey=004F8FE5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE5 peerKey=004F8FE5 -> puppet shown
+[Net] scene change: localKey=004F8FE5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FE5 peerKey=004F8FE5 -> puppet shown
+[Net] action -> 3595255830 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=3595255830 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=132 pos=(-54.3,-57.3,8.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F8BE5 peerKey=004F8BE5 -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=004F8BE5 -> puppet shown
+[Net] PUP act=3595255830 (rx=3595255830) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F8BE5 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=3595255830 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.107
+[Net] scene change: localKey=004F8BE5 peerKey=004F8BE5 -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=004F8BE5 -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE5 peerKey=004F8BE5 -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] cap SWITCH 3595255830 -> 3595255831 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=004F8BE6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=FFFFFFFF -> puppet shown
+[Net] cap SWITCH 3595255831 -> 3595255830 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] action -> 3595255831 ch=0 ly=0 ratio=0.03 blendIn=0.20 (puppet, cur was 3595255830)
+[Net] blendIn fix alias=3595255831 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Relay] objId=4026539297 vanished dead=0 life=50
+[Net] scene change: localKey=004F8BE6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BE6 peerKey=004F8BE6 -> puppet shown
+[Net] scene change: localKey=004F87E6 peerKey=004F8BE6 -> puppet shown
+[Net] action -> 3595255830 ch=0 ly=0 ratio=0.03 blendIn=0.20 (puppet, cur was 3595255831)
+[Net] blendIn fix alias=3595255830 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=004F87E6 peerKey=004F87E6 -> puppet shown
+[Net] apply seq=170 pos=(-50.9,-59.3,8.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=401F5790 -> playback dummy objId=4026541983 pos=(-66.0,-57.8,8.5) dead=0
+[Net] cap action=3595255830 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.106
+[Net] PUP act=3595255830 (rx=3595255830) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87E7 peerKey=004F87E7 -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=004F87E7 -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=004F87E7 -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=FFFFFFFF -> puppet shown
+[Net] cap SWITCH 3595255830 -> 3595255831 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=004F87E7 peerKey=004F87E7 -> puppet shown
+[Net] scene change: localKey=004F87E7 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026539166 vanished dead=0 life=24
+[Relay] objId=4026539186 vanished dead=1 life=0
+[Relay] host DEATH objId=4026539186 -> peer
+[Relay] host DEATH objId=4026539297 -> peer
+[Net] scene change: localKey=004F87E7 peerKey=004F87E7 -> puppet shown
+[Net] action -> 3595255831 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 3595255830)
+[Net] blendIn fix alias=3595255831 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=004F87E8 peerKey=004F87E8 -> puppet shown
+[Net] scene change: localKey=004F87E8 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026538934 vanished dead=0 life=30296
+[Relay] objId=4026539032 vanished dead=0 life=24
+[Net] cap action=3595255831 ch=0 ly=0 blend(n=3)={2:0.99} ts=1.00 VEL=0.096
+[Net] scene change: localKey=004F87E8 peerKey=004F87E8 -> puppet shown
+[Net] cap SWITCH 3595255831 -> 194060297 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.13
+[Net] scene change: localKey=004F87E8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83E8 peerKey=004F87E8 -> puppet shown
+[Net] scene change: localKey=004F83E8 peerKey=004F83E8 -> puppet shown
+[Net] apply seq=205 pos=(-48.2,-61.6,8.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=3595255831 (rx=3595255831) rxBlend(n=3)={2:0.99} pupBlend(n=3)={2:0.99} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83E8 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026539122 vanished dead=0 life=24
+[Net] scene change: localKey=004F83E8 peerKey=004F83E8 -> puppet shown
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.13 blendIn=0.20 (puppet, cur was 3595255831)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=004F83E8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83E8 peerKey=004F83E8 -> puppet shown
+[Net] scene change: localKey=004F83E9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83E9 peerKey=004F83E9 -> puppet shown
+[Net] scene change: localKey=004F83E9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83E9 peerKey=004F83E9 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.47 26:0.52} ts=1.00 VEL=0.101
+[Relay] objId=4026538573 vanished dead=0 life=30
+[Relay] objId=4026538626 vanished dead=0 life=0
+[Mirror] ent=2D0055C0 -> playback dummy objId=4026542468 pos=(-26.2,-98.0,6.7) dead=0
+[Net] apply seq=239 pos=(-45.1,-62.8,8.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83E9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83E9 peerKey=004F83E9 -> puppet shown
+[Relay] objId=4026538639 vanished dead=0 life=30
+[Relay] objId=4026538647 vanished dead=0 life=30
+[Mirror] ent=407A3440 -> playback dummy objId=4026542628 pos=(-75.2,-46.7,8.1) dead=0
+[Mirror] ent=410331A0 -> playback dummy objId=4026538863 pos=(-65.1,-85.4,8.4) dead=0
+[Net] scene change: localKey=004F83EA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=004F83EA -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.55 26:0.44} pupBlend(n=46)={22:0.55 26:0.44} rxTS=1.00 pupTS=1.00
+[Relay] host DEATH objId=4026538647 -> peer
+[Relay] objId=4026538876 vanished dead=0 life=26560
+[Relay] objId=4026538879 vanished dead=0 life=24
+[Net] scene change: localKey=004F83EA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=004F83EA -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=004F83EA -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83EA peerKey=004F83EA -> puppet shown
+[Net] scene change: localKey=004F7FEA peerKey=FFFFFFFF -> puppet shown
+[Mirror] ent=40E9AF30 -> playback dummy objId=4026542749 pos=(-3.9,-43.5,3.7) dead=0
+[Mirror] ent=4360D560 -> playback dummy objId=4026542735 pos=(-4.0,-44.9,3.6) dead=0
+[Mirror] ent=3D88DAA0 -> playback dummy objId=4026542691 pos=(-84.1,-65.1,11.6) dead=0
+[Mirror] ent=40EEFA70 -> playback dummy objId=4026540264 pos=(-67.0,-83.9,8.5) dead=0
+[Mirror] ent=43AD04C0 -> playback dummy objId=4026540243 pos=(-67.5,-82.5,8.5) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.79 23:0.10 26:0.02 35:0.07} ts=1.00 VEL=0.097
+[Net] scene change: localKey=004F7FEA peerKey=004F7FEA -> puppet shown
+[Net] scene change: localKey=004F7FEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEB peerKey=004F7FEB -> puppet shown
+[Mirror] ent=4153A1D0 -> playback dummy objId=4026542263 pos=(-22.7,-40.4,3.6) dead=0
+[Mirror] ent=415C5E50 -> playback dummy objId=4026541527 pos=(-57.7,-90.5,8.6) dead=0
+[Mirror] ent=435C4FD0 -> playback dummy objId=4026539261 pos=(-18.1,-65.0,5.8) dead=0
+[Mirror] ent=431527D0 -> playback dummy objId=4026539245 pos=(-18.8,-65.8,6.0) dead=0
+[Mirror] ent=41DA5540 -> playback dummy objId=4026539219 pos=(-16.7,-65.3,5.8) dead=0
+[Mirror] ent=40E77140 -> playback dummy objId=4026542417 pos=(-21.4,-41.4,3.6) dead=0
+[Mirror] ent=410AB000 -> playback dummy objId=4026542429 pos=(-20.8,-40.2,3.6) dead=0
+[Mirror] ent=40E78850 -> playback dummy objId=4026539105 pos=(-79.6,-60.9,11.1) dead=0
+[Mirror] ent=4102C7C0 -> playback dummy objId=4026539080 pos=(-33.4,-54.6,7.3) dead=0
+[Mirror] ent=40E71A30 -> playback dummy objId=4026539049 pos=(-35.1,-53.9,7.4) dead=0
+[Mirror] ent=414C71C0 -> playback dummy objId=4026539046 pos=(-34.1,-55.4,7.2) dead=0
+[Mirror] ent=414B5580 -> playback dummy objId=4026539043 pos=(-37.9,-51.1,7.6) dead=0
+[Mirror] ent=414A65E0 -> playback dummy objId=4026539040 pos=(-37.9,-49.3,7.7) dead=0
+[Mirror] ent=414826F0 -> playback dummy objId=4026539035 pos=(-38.0,-51.0,7.6) dead=0
+[Mirror] ent=41088C30 -> playback dummy objId=4026539029 pos=(-30.4,-61.7,6.2) dead=0
+[Mirror] ent=401423C0 -> playback dummy objId=4026539024 pos=(-30.9,-60.0,6.4) dead=0
+[Mirror] ent=40E71C70 -> playback dummy objId=4026539019 pos=(-31.9,-62.3,6.5) dead=0
+[Mirror] ent=411766C0 -> playback dummy objId=4026538972 pos=(-61.6,-35.7,7.8) dead=0
+[Mirror] ent=4115D100 -> playback dummy objId=4026538967 pos=(-72.3,-55.0,9.6) dead=0
+[Mirror] ent=4114B9A0 -> playback dummy objId=4026538962 pos=(-73.4,-55.4,9.6) dead=0
+[Mirror] ent=41132220 -> playback dummy objId=4026538959 pos=(-73.9,-54.2,9.3) dead=0
+[Mirror] ent=2487CEC0 -> playback dummy objId=4026542001 pos=(-66.4,-58.3,8.4) dead=0
+[Mirror] ent=410D4DC0 -> playback dummy objId=4026538949 pos=(-70.6,-48.5,8.0) dead=0
+[Smooth] frames=164 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=56 avgD=0.1322 maxD=0.6207
+[Net] stats tx=278 pkt, 155680 B, 0 ent  rx=278 pkt, 155680 B  |  30.4 kB/s up, 30.4 kB/s down  |  mirror ok=2898 nobod=0 steal=0
+[Net] scene change: localKey=004F7FEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEB peerKey=004F7FEB -> puppet shown
+[Net] scene change: localKey=004F7FEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEB peerKey=004F7FEB -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=004F7FEC -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=004F7FEC -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.07 23:0.91} ts=1.00 VEL=0.105
+[Net] scene change: localKey=004F7FEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=004F7FEC -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=004F7FEC -> puppet shown
+[Net] apply seq=297 pos=(-39.7,-65.0,8.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FEC peerKey=004F7FEC -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.07 23:0.92} pupBlend(n=46)={22:0.07 23:0.92} rxTS=1.00 pupTS=1.00
+[Relay] objId=4026538565 vanished dead=0 life=24
+[Relay] objId=4026538570 vanished dead=1 life=56246
+[Relay] host DEATH objId=4026538570 -> peer
+[Mirror] ent=41087D20 -> playback dummy objId=4026538937 pos=(-69.4,-48.6,8.0) dead=0
+[Mirror] ent=3225E190 -> playback dummy objId=4026542443 pos=(-13.0,-81.3,5.4) dead=0
+[Net] scene change: localKey=004F7FED peerKey=004F7FED -> puppet shown
+[Relay] host DEATH objId=4026538565 -> peer
+[Relay] objId=4026539351 vanished dead=0 life=24
+[Net] scene change: localKey=004F7BED peerKey=004F7BED -> puppet shown
+[Net] scene change: localKey=004F7BED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BED peerKey=004F7BED -> puppet shown
+[Relay] objId=4026538937 vanished dead=0 life=24
+[Relay] objId=4026539105 vanished dead=0 life=24
+[Mirror] ent=40591450 -> playback dummy objId=4026543194 pos=(-57.1,-26.6,7.8) dead=0
+[Mirror] ent=41098A80 -> playback dummy objId=4026538882 pos=(-45.2,-90.3,8.6) dead=0
+[Net] scene change: localKey=004F7BED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BED peerKey=004F7BED -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.68 25:0.11 26:0.17 28:0.02} ts=1.00 VEL=0.100
+[Net] scene change: localKey=004F7BED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BED peerKey=004F7BED -> puppet shown
+[Relay] objId=4026538559 vanished dead=0 life=24
+[Relay] objId=4026543194 vanished dead=0 life=24
+[Mirror] ent=346D8FB0 -> playback dummy objId=4026542678 pos=(-73.1,-60.3,10.1) dead=0
+[Mirror] ent=40DC82E0 -> playback dummy objId=4026542658 pos=(-23.8,-89.5,6.5) dead=0
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] apply seq=330 pos=(-36.7,-66.3,8.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7BEE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.42 25:0.12 26:0.31 28:0.09 36:0.03} pupBlend(n=46)={23:0.42 25:0.12 26:0.31 28:0.09 36:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BEE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEE peerKey=004F7BEE -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.64 26:0.12 27:0.08 36:0.14} ts=1.00 VEL=0.102
+[Net] scene change: localKey=004F7BEF peerKey=004F7BEE -> puppet shown
+[Net] scene change: localKey=004F7BEF peerKey=004F7BEF -> puppet shown
+[Net] scene change: localKey=004F7BEF peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026540142 vanished dead=0 life=24
+[Relay] objId=4026542628 vanished dead=0 life=24
+[Mirror] ent=4053AE80 -> playback dummy objId=4026543448 pos=(-28.6,-112.2,6.6) dead=0
+[Mirror] ent=4375F300 -> playback dummy objId=4026543421 pos=(-27.4,-111.8,6.6) dead=0
+[Net] scene change: localKey=004F7BEF peerKey=004F7BEF -> puppet shown
+[Net] scene change: localKey=004F7BEF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BEF peerKey=004F7BEF -> puppet shown
+[Relay] host DEATH objId=4026540142 -> peer
+[Relay] objId=4026539035 vanished dead=0 life=24
+[Relay] host DEATH objId=4026542628 -> peer
+[Relay] objId=4026542678 vanished dead=1 life=37819
+[Relay] host DEATH objId=4026542678 -> peer
+[Mirror] ent=40F5B980 -> playback dummy objId=4026543467 pos=(-27.6,-113.1,6.6) dead=0
+[Mirror] ent=40597D20 -> playback dummy objId=4026538869 pos=(-54.3,-86.6,8.4) dead=0
+[Net] scene change: localKey=003F7BF0 peerKey=004F7BEF -> puppet shown
+[Net] scene change: localKey=003F7BF0 peerKey=003F7BF0 -> puppet shown
+[Relay] host DEATH objId=4026539035 -> peer
+[Net] scene change: localKey=003F77F0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=003F77F0 -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=003F77F0 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.59 24:0.01 36:0.39} ts=1.00 VEL=0.218
+[Net] scene change: localKey=003F77F0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=003F77F0 -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=003F77F0 -> puppet shown
+[Net] scene change: localKey=003F77F0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] apply seq=404 pos=(-29.5,-68.2,6.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] objId=4026539049 vanished dead=0 life=24
+[Mirror] ent=410248B0 -> playback dummy objId=4026538866 pos=(-39.0,-80.1,8.5) dead=0
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={15:0.17 17:0.34 19:0.07 21:0.08 23:0.03 25:0.00 28:0.00 33:0.00 36:0.02 40:0.22} pupBlend(n=46)={15:0.17 17:0.34 19:0.07 21:0.08 23:0.03 25:0.00 28:0.00 33:0.00 36:0.02 40:0.22} rxTS=1.00 pupTS=1.00
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.14 14:0.03 15:0.47 17:0.25 21:0.06 40:0.02} ts=1.00 VEL=0.069
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F1 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026538346 vanished dead=0 life=0
+[Relay] objId=4026538387 vanished dead=1 life=37819
+[Relay] host DEATH objId=4026538387 -> peer
+[Relay] objId=4026538727 vanished dead=0 life=24
+[Mirror] ent=414FE700 -> playback dummy objId=4026543876 pos=(-36.9,-111.9,9.1) dead=0
+[Net] scene change: localKey=003F77F2 peerKey=003F77F1 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Relay] objId=4026538972 vanished dead=0 life=6208
+[Mirror] ent=3D4866D0 -> playback dummy objId=4026543907 pos=(15.7,-61.2,3.6) dead=0
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Relay] objId=4026539040 vanished dead=0 life=0
+[Relay] objId=4026539080 vanished dead=0 life=24
+[Mirror] ent=415D8C80 -> playback dummy objId=4026543968 pos=(17.0,-61.1,3.6) dead=0
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Relay] objId=4026538959 vanished dead=0 life=24
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={9:0.03 12:0.14 13:0.01 15:0.80} ts=1.00 VEL=0.060
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F2 peerKey=003F77F2 -> puppet shown
+[Net] apply seq=445 pos=(-26.7,-68.8,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] objId=4026538730 vanished dead=1 life=65534
+[Relay] host DEATH objId=4026538730 -> peer
+[Relay] objId=4026538735 vanished dead=0 life=24
+[Net] scene change: localKey=003F77F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F2 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={9:0.03 12:0.14 13:0.01 15:0.80} pupBlend(n=46)={9:0.03 12:0.14 13:0.01 15:0.80} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Relay] objId=4026538266 vanished dead=0 life=43144
+[Mirror] ent=40EEECF0 -> playback dummy objId=4026544064 pos=(9.1,-54.7,3.3) dead=0
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={8:0.12 9:0.35 12:0.21 15:0.31} ts=1.00 VEL=0.048
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Net] cap SWITCH 194060297 -> 86 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F3 peerKey=FFFFFFFF -> puppet shown
+[Relay] host DEATH objId=4026538266 -> peer
+[Relay] objId=4026542001 vanished dead=0 life=255
+[Relay] objId=4026543876 vanished dead=0 life=24
+[Net] scene change: localKey=003F77F3 peerKey=003F77F3 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] apply seq=486 pos=(-24.4,-69.1,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] objId=4026538553 vanished dead=0 life=24
+[Relay] objId=4026538653 vanished dead=0 life=24
+[Relay] objId=4026543895 vanished dead=0 life=24
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] action -> 86 ch=0 ly=0 ratio=0.14 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=86 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] PUP act=86 (rx=86) rxBlend(n=3)={1:1.00} pupBlend(n=3)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 86 -> 90 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Relay] host DEATH objId=4026538553 -> peer
+[Relay] objId=4026538656 vanished dead=0 life=24
+[Relay] objId=4026541983 vanished dead=0 life=0
+[Relay] host DEATH objId=4026543876 -> peer
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap action=90 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] action -> 90 ch=0 ly=0 ratio=0.00 blendIn=0.00 (puppet, cur was 86)
+[Net] blendIn fix alias=90 len 0.20 -> 0.00 type 1 -> 0 (t=0.16) [kept]
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Mirror] ent=43E6FCC0 -> playback dummy objId=4026544552 pos=(-14.0,-101.4,4.1) dead=0
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Mirror] ent=40E94EC0 -> playback dummy objId=4026544571 pos=(-13.9,-101.5,4.1) dead=0
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap SWITCH 90 -> 53 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=526 pos=(-23.4,-69.2,6.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Mirror] ent=41C9D050 -> playback dummy objId=4026544448 pos=(13.1,-49.8,3.2) dead=0
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] action -> 53 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 90)
+[Net] blendIn fix alias=53 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] PUP act=53 (rx=53) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[RelayTest] armed on ent=401D1820 life=36 — press F2 again to kill + report
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Mirror] ent=414E5F70 -> playback dummy objId=4026543949 pos=(19.2,-63.0,12.3) dead=0
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] apply seq=561 pos=(-23.2,-69.2,6.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] PUP act=53 (rx=53) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Smooth] frames=204 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=65 avgD=0.1168 maxD=4.1958
+[Net] stats tx=303 pkt, 169680 B, 0 ent  rx=303 pkt, 169680 B  |  33.1 kB/s up, 33.1 kB/s down  |  mirror ok=3150 nobod=0 steal=0
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap SWITCH 53 -> 110759372 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] action -> 110759372 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 53)
+[Net] blendIn fix alias=110759372 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] apply seq=600 pos=(-22.9,-69.3,6.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[KF] target ent=401D1820 ai=40A09920 health=409F7960 pos=(-20.2,-68.6,6.0)
+[KF] before: alive=1  health life=36/36 flags=00000004
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FC5C39F0 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538708 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026538708 -> ent=401D1820 health=409F7960
+[KF] target ent=401D1820 ai=40A09920 health=409F7960 pos=(-20.2,-68.6,6.0)
+[KF] before: alive=0  health life=65535/36 flags=01000004
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FC5C39F0 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538708 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Arch] vt=026E34D8 id=0400 skel=1 ent=401D1820 evt=01E4CE90 human=1 life=65535/36 stage=1 alias=6C6401FA comps=20 d2=7 accepted=1
+[Cap] ent=401D1820 dead=1 ai=40A09920 (captured into the snapshot)
+[Relay] host DEATH objId=4026538708 -> peer
+[Net] PUP act=110759372 (rx=110759372) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Relay] host DEATH objId=4026538626 -> peer
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] apply seq=636 pos=(-22.7,-69.3,6.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[RelayTest] armed on ent=407D4EE0 life=36 — press F2 again to kill + report
+[Net] PUP act=110759372 (rx=110759372) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[KF] target ent=407D4EE0 ai=40A882C0 health=40784DF0 pos=(-20.1,-69.5,6.0)
+[KF] before: alive=1  health life=36/36 flags=00000004
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FC5C3A48 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538711 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026538711 -> ent=407D4EE0 health=40784DF0
+[KF] target ent=407D4EE0 ai=40A882C0 health=40784DF0 pos=(-20.1,-69.5,6.0)
+[KF] before: alive=0  health life=65535/36 flags=01000004
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FC5C3A48 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538711 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Cap] ent=407D4EE0 dead=1 ai=40A882C0 (captured into the snapshot)
+[Relay] host DEATH objId=4026538711 -> peer
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] apply seq=676 pos=(-22.4,-69.3,6.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 110759372 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] PUP act=110759372 (rx=110759372) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Relay] objId=4026538556 vanished dead=0 life=24
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 110759372)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.016
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] apply seq=715 pos=(-22.1,-69.2,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Mirror] ent=4078AC80 -> playback dummy objId=4026545503 pos=(21.9,-74.2,3.6) dead=0
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:0.76 2:0.23} ts=1.00 VEL=0.023
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F77F4 peerKey=003F77F4 -> puppet shown
+[Net] cap SWITCH 110764537 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=754 pos=(-22.2,-68.4,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F77F4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={1:0.04 2:0.95} pupBlend(n=8)={1:0.04 2:0.95} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110764537)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Relay] objId=4026545503 vanished dead=0 life=30
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.08 13:0.01 16:0.69 18:0.14 20:0.01 26:0.04} ts=1.00 VEL=0.075
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] cap SWITCH 194060297 -> 86 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7BF4 peerKey=003F7BF4 -> puppet shown
+[Net] action -> 86 ch=0 ly=0 ratio=0.05 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=86 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=003F7FF4 peerKey=003F7BF4 -> puppet shown
+[Net] cap SWITCH 86 -> 90 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=003F7FF4 peerKey=003F7FF4 -> puppet shown
+[Net] cap SWITCH 90 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=793 pos=(-23.7,-66.3,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] PUP act=86 (rx=86) rxBlend(n=3)={1:0.96 2:0.03} pupBlend(n=3)={1:0.96 2:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:0.68 5:0.31} ts=1.00 VEL=0.005
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] action -> 90 ch=0 ly=0 ratio=0.00 blendIn=0.00 (puppet, cur was 86)
+[Net] blendIn fix alias=90 len 0.20 -> 0.00 type 1 -> 0 (t=0.18) [kept]
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 90)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[RelayTest] armed on ent=3FEC9140 life=36 — press F2 again to kill + report
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:0.68 5:0.31} ts=1.00 VEL=0.019
+[Net] apply seq=833 pos=(-24.2,-65.6,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[KF] target ent=3FEC9140 ai=3FF42510 health=3C740300 pos=(-42.8,-36.9,17.8)
+[KF] before: alive=1  health life=36/36 flags=00000006
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FCB8D860 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000006
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538273 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026538273 -> ent=3FEC9140 health=3C740300
+[KF] target ent=3FEC9140 ai=3FF42510 health=3C740300 pos=(-42.8,-36.9,17.8)
+[KF] before: alive=0  health life=65535/36 flags=01000006
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FCB8D860 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000006
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026538273 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Cap] ent=3FEC9140 dead=1 ai=3FF42510 (captured into the snapshot)
+[Relay] host DEATH objId=4026538273 -> peer
+[Mirror] ent=3FEC9140 host reports DEAD (es.dead=1, from ai+0x8C)
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={1:0.68 5:0.31} pupBlend(n=8)={1:0.68 5:0.31} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Relay] objId=4026542658 vanished dead=0 life=24
+[Relay] objId=4026544064 vanished dead=1 life=33
+[Relay] host DEATH objId=4026544064 -> peer
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:0.68 5:0.31} ts=1.00 VEL=0.026
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] cap SWITCH 110764537 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] apply seq=873 pos=(-24.7,-64.9,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Smooth] frames=234 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=70 avgD=0.0353 maxD=0.2476
+[Net] stats tx=310 pkt, 170450 B, 3 ent  rx=310 pkt, 170450 B  |  33.2 kB/s up, 33.2 kB/s down  |  mirror ok=3212 nobod=0 steal=0
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110764537)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026539046 vanished dead=0 life=24
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.70 12:0.24 26:0.04} pupBlend(n=46)={8:0.70 12:0.24 26:0.04} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F7FF3 peerKey=003F7FF3 -> puppet shown
+[Net] scene change: localKey=003F83F3 peerKey=003F83F3 -> puppet shown
+[Net] scene change: localKey=002F83F3 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.43 16:0.46 26:0.04 38:0.00 40:0.03} ts=1.00 VEL=0.074
+[Net] scene change: localKey=002F83F3 peerKey=002F83F3 -> puppet shown
+[Net] scene change: localKey=002F83F3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=002F83F3 peerKey=002F83F3 -> puppet shown
+[Net] scene change: localKey=002F83F2 peerKey=002F83F2 -> puppet shown
+[Net] scene change: localKey=002F83F2 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026545379 vanished dead=0 life=24
+[Net] scene change: localKey=002F83F2 peerKey=002F83F2 -> puppet shown
+[Relay] objId=4026538949 vanished dead=1 life=28157
+[Relay] host DEATH objId=4026538949 -> peer
+[Net] scene change: localKey=002F83F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=002F83F2 peerKey=002F83F2 -> puppet shown
+[Net] scene change: localKey=002F83F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=002F83F2 peerKey=002F83F2 -> puppet shown
+[Net] scene change: localKey=002F87F2 peerKey=002F87F2 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={26:0.96 36:0.02 40:0.00} ts=1.00 VEL=0.102
+[Net] scene change: localKey=002F87F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=002F87F2 peerKey=002F87F2 -> puppet shown
+[Net] scene change: localKey=002F87F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=002F87F2 -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=003F87F2 -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=003F87F2 -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=003F87F2 -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F2 peerKey=003F87F2 -> puppet shown
+[Relay] host DEATH objId=4026538556 -> peer
+[Relay] objId=4026543448 vanished dead=0 life=24
+[Relay] objId=4026545356 vanished dead=0 life=24
+[Net] scene change: localKey=003F87F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F1 peerKey=003F87F1 -> puppet shown
+[Net] apply seq=934 pos=(-27.4,-61.4,6.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F87F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F1 peerKey=003F87F1 -> puppet shown
+[Relay] objId=4026543389 vanished dead=0 life=24
+[Relay] objId=4026544025 vanished dead=0 life=36
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.03 23:0.03 26:0.85 35:0.07} pupBlend(n=46)={22:0.03 23:0.03 26:0.85 35:0.07} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F87F1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F87F1 peerKey=003F87F1 -> puppet shown
+[Relay] objId=4026543408 vanished dead=0 life=24
+[Relay] objId=4026543421 vanished dead=0 life=24
+[Net] scene change: localKey=003F8BF1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=003F8BF1 -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=003F8BF1 -> puppet shown
+[Relay] objId=4026543467 vanished dead=0 life=24
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.02 23:0.33 26:0.51 35:0.12} ts=1.00 VEL=0.091
+[Net] scene change: localKey=003F8BF1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=003F8BF1 -> puppet shown
+[Relay] host DEATH objId=4026539080 -> peer
+[Net] scene change: localKey=003F8BF1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=003F8BF1 -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF1 peerKey=003F8BF1 -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=003F8BF0 -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=003F8BF0 -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=003F8BF0 -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8BF0 peerKey=003F8BF0 -> puppet shown
+[Relay] host DEATH objId=4026538959 -> peer
+[Relay] objId=4026543745 vanished dead=0 life=36
+[Net] scene change: localKey=003F8BF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FF0 peerKey=003F8FF0 -> puppet shown
+[Net] apply seq=975 pos=(-30.0,-58.6,6.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F8FF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FF0 peerKey=003F8FF0 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.76 26:0.08 35:0.15} ts=1.00 VEL=0.101
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.64 26:0.20 35:0.14} pupBlend(n=46)={23:0.64 26:0.20 35:0.14} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F8FF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FF0 peerKey=003F8FF0 -> puppet shown
+[Net] scene change: localKey=003F8FF0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FF0 peerKey=003F8FF0 -> puppet shown
+[Relay] objId=4026543139 vanished dead=0 life=36
+[Relay] objId=4026543163 vanished dead=0 life=36
+[Relay] objId=4026543210 vanished dead=0 life=36
+[Relay] objId=4026543225 vanished dead=0 life=36
+[Net] scene change: localKey=003F8FEF peerKey=003F8FEF -> puppet shown
+[Net] scene change: localKey=003F8FEF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FEF peerKey=003F8FEF -> puppet shown
+[Relay] host DEATH objId=4026539351 -> peer
+[Net] scene change: localKey=003F8FEF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FEF peerKey=003F8FEF -> puppet shown
+[Net] scene change: localKey=003F8FEF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F8FEF peerKey=003F8FEF -> puppet shown
+[Relay] host DEATH objId=4026542658 -> peer
+[Relay] objId=4026543949 vanished dead=0 life=36
+[Relay] host DEATH objId=4026545379 -> peer
+[Net] scene change: localKey=003F93EF peerKey=003F93EF -> puppet shown
+[Net] scene change: localKey=003F93EF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EF peerKey=003F93EF -> puppet shown
+[Relay] host DEATH objId=4026543225 -> peer
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.91 35:0.07} ts=1.00 VEL=0.103
+[Net] scene change: localKey=003F93EF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EF peerKey=003F93EF -> puppet shown
+[Relay] host DEATH objId=4026539122 -> peer
+[Relay] objId=4026547465 vanished dead=0 life=24
+[Net] scene change: localKey=003F93EF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EF peerKey=003F93EF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Relay] objId=4026547544 vanished dead=0 life=24
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] apply seq=1030 pos=(-33.9,-55.0,7.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.92 35:0.07} pupBlend(n=46)={23:0.92 35:0.07} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F93EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F93EE peerKey=003F93EE -> puppet shown
+[Net] scene change: localKey=003F97EE peerKey=003F93EE -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.05 23:0.45 25:0.11 26:0.26 28:0.06 35:0.04} ts=1.00 VEL=0.099
+[Net] scene change: localKey=003F97EE peerKey=003F97EE -> puppet shown
+[Net] scene change: localKey=003F97EE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F97EE peerKey=003F97EE -> puppet shown
+[Arch] vt=026E34D8 id=0000 skel=1 ent=43D6F370 evt=01E4CE90 human=1 life=30/30 stage=1 alias=00000030 comps=24 d2=1787 accepted=1
+[Net] scene change: localKey=003F97ED peerKey=003F97ED -> puppet shown
+[Net] scene change: localKey=003F97ED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F97ED peerKey=003F97ED -> puppet shown
+[Relay] objId=4026544468 vanished dead=0 life=24
+[Relay] objId=4026544448 vanished dead=0 life=24
+[Relay] objId=4026539261 vanished dead=0 life=24
+[Relay] host DEATH objId=4026541983 -> peer
+[Relay] objId=4026544486 vanished dead=0 life=24
+[Mirror] ent=33423650 -> playback dummy objId=4026547903 pos=(-74.4,-67.2,11.7) dead=0
+[Net] scene change: localKey=003F97ED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F97ED peerKey=003F97ED -> puppet shown
+[Relay] host DEATH objId=4026539261 -> peer
+[Net] scene change: localKey=003F97ED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F97ED peerKey=003F97ED -> puppet shown
+[Net] scene change: localKey=003F9BED peerKey=003F97ED -> puppet shown
+[Net] scene change: localKey=003F9BED peerKey=003F9BED -> puppet shown
+[Net] apply seq=1067 pos=(-36.6,-52.6,7.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] host DEATH objId=4026538727 -> peer
+[Relay] objId=4026543907 vanished dead=0 life=24
+[Mirror] ent=3D3397B0 -> playback dummy objId=4026547083 pos=(-57.0,-25.1,7.7) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.01 15:0.32 16:0.02 17:0.47 20:0.11 26:0.02 32:0.00 39:0.00} ts=1.00 VEL=0.078
+[Net] scene change: localKey=003F9BED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BED peerKey=003F9BED -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={15:0.17 16:0.03 17:0.29 21:0.12 22:0.01 23:0.15 26:0.11 28:0.07} pupBlend(n=46)={15:0.17 16:0.03 17:0.29 21:0.12 22:0.01 23:0.15 26:0.11 28:0.07} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9BED peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026543968 vanished dead=0 life=24
+[Relay] objId=4026544087 vanished dead=0 life=24
+[Relay] host DEATH objId=4026545503 -> peer
+[Mirror] ent=414FDAC0 -> playback dummy objId=4026547862 pos=(-68.5,-23.8,7.7) dead=0
+[Net] scene change: localKey=003F9BED peerKey=003F9BED -> puppet shown
+[Net] scene change: localKey=003F9BED peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BED peerKey=003F9BED -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Relay] objId=4026543929 vanished dead=1 life=58080
+[Relay] host DEATH objId=4026543929 -> peer
+[Relay] host DEATH objId=4026543968 -> peer
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.02 13:0.12 15:0.82 37:0.00 39:0.01} ts=1.00 VEL=0.062
+[RelayTest] armed on ent=406DBB90 life=36 — press F2 again to kill + report
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] apply seq=1108 pos=(-39.0,-51.1,7.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEC peerKey=003F9BEC -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={12:0.03 13:0.10 15:0.83 37:0.00 39:0.01} pupBlend(n=46)={12:0.03 13:0.10 15:0.83 37:0.00 39:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9BEC peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEC -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[KF] target ent=406DBB90 ai=43D27A90 health=410E6210 pos=(-67.8,-60.8,8.3)
+[KF] before: alive=1  health life=36/36 flags=00000004
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FC5C5FC8 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026547374 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026547374 -> ent=406DBB90 health=410E6210
+[KF] target ent=406DBB90 ai=43D27A90 health=410E6210 pos=(-67.8,-60.8,8.3)
+[KF] before: alive=0  health life=65535/36 flags=01000004
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FC5C5FC8 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026547374 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Cap] ent=406DBB90 dead=1 ai=43D27A90 (captured into the snapshot)
+[Relay] host DEATH objId=4026547374 -> peer
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={8:0.31 12:0.24 15:0.43} ts=1.00 VEL=0.058
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Relay] objId=4026542468 vanished dead=0 life=0
+[Relay] objId=4026547161 vanished dead=0 life=24
+[Net] apply seq=1146 pos=(-41.1,-50.4,7.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] host DEATH objId=4026543448 -> peer
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEB peerKey=003F9BEB -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.52 12:0.19 15:0.27} pupBlend(n=46)={8:0.52 12:0.19 15:0.27} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9BEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=003F9BEA -> puppet shown
+[RelayTest] armed on ent=401D8B30 life=36 — press F2 again to kill + report
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={8:0.85 12:0.06 15:0.07} ts=1.00 VEL=0.042
+[Net] scene change: localKey=003F9BEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=003F9BEA -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=003F9BEA -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9BEA peerKey=003F9BEA -> puppet shown
+[Relay] host DEATH objId=4026539040 -> peer
+[Net] scene change: localKey=003F9BEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9BEA -> puppet shown
+[KF] target ent=401D8B30 ai=3FCFEBD0 health=320EC200 pos=(-67.0,-61.6,8.3)
+[KF] before: alive=1  health life=36/36 flags=00000004
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FC5CAF30 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026547408 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026547408 -> ent=401D8B30 health=320EC200
+[KF] target ent=401D8B30 ai=3FCFEBD0 health=320EC200 pos=(-67.0,-61.6,8.3)
+[KF] before: alive=0  health life=65535/36 flags=01000004
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FC5CAF30 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000004
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026547408 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Cap] ent=401D8B30 dead=1 ai=3FCFEBD0 (captured into the snapshot)
+[Relay] host DEATH objId=4026547408 -> peer
+[Smooth] frames=203 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=69 avgD=0.1630 maxD=2.6131
+[Net] stats tx=307 pkt, 169820 B, 2 ent  rx=307 pkt, 169820 B  |  33.1 kB/s up, 33.1 kB/s down  |  mirror ok=3213 nobod=0 steal=0
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] apply seq=1185 pos=(-42.8,-49.9,7.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.08 8:0.90 38:0.00} pupBlend(n=46)={4:0.08 8:0.90 38:0.00} rxTS=1.00 pupTS=1.00
+[Relay] objId=4026538863 vanished dead=0 life=24
+[Relay] objId=4026541527 vanished dead=0 life=33
+[Relay] host DEATH objId=4026542001 -> peer
+[Mirror] ent=435D6790 -> playback dummy objId=4026548467 pos=(-80.6,-22.7,7.7) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.17 8:0.79 9:0.01 38:0.00} ts=1.00 VEL=0.039
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026538860 vanished dead=0 life=53635
+[Relay] host DEATH objId=4026541527 -> peer
+[Mirror] ent=40D53220 -> playback dummy objId=4026548376 pos=(-70.0,-54.8,9.4) dead=0
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FEA peerKey=003F9FEA -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[RelayTest] armed on ent=40DC2040 life=36 — press F2 again to kill + report
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.31 5:0.17 8:0.31 9:0.17 37:0.02 39:0.00} ts=1.00 VEL=0.036
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] apply seq=1225 pos=(-44.3,-49.5,7.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[KF] target ent=40DC2040 ai=4019EF70 health=4136E840 pos=(-71.0,-42.5,16.5)
+[KF] before: alive=1  health life=36/36 flags=00000006
+[KF] SetLife(-1) rc=0  life 36 -> 65535
+[KF] is-alive service=FC5C9D00 +4 00000000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000006
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026546666 life=65535 -> peer
+[Kill] SELF-TEST loopback: delivering the event to the apply path
+[Kill] peer DEATH objId=4026546666 -> ent=40DC2040 health=4136E840
+[KF] target ent=40DC2040 ai=4019EF70 health=4136E840 pos=(-71.0,-42.5,16.5)
+[KF] before: alive=0  health life=65535/36 flags=01000006
+[KF] SetLife(-1) rc=-1  life 65535 -> 65535
+[KF] is-alive service=FC5C9D00 +4 00001000 -> 00001000
+[KF] after : alive=0 health life=65535 flags=01000006
+[KF] requested death clip alias=1818493434
+[KF] collision layer -> Disabled(0x29) (controller left untouched)
+[Kill] push health event objId=4026546666 life=65535 -> peer
+[RelayTest] guard killed; now exercising guest death detection (expect a [Relay] line)
+[RelayTest] done (if no [Relay] line above, detection failed)
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.30 5:0.16 8:0.32 9:0.17 37:0.02 39:0.00} pupBlend(n=46)={4:0.30 5:0.16 8:0.32 9:0.17 37:0.02 39:0.00} rxTS=1.00 pupTS=1.00
+[Cap] ent=40DC2040 dead=1 ai=4019EF70 (captured into the snapshot)
+[Relay] host DEATH objId=4026546666 -> peer
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.25 5:0.68 29:0.03 37:0.02} ts=1.00 VEL=0.027
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE9 peerKey=003F9FE9 -> puppet shown
+[Net] apply seq=1260 pos=(-45.4,-49.2,7.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.16 5:0.54 8:0.03 9:0.10 26:0.09 29:0.03 37:0.01} pupBlend(n=46)={4:0.16 5:0.54 8:0.03 9:0.10 26:0.09 29:0.03 37:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE9 -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={26:0.95 29:0.01 32:0.03} ts=1.00 VEL=0.095
+[Net] scene change: localKey=003F9FE8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Relay] objId=4026542443 vanished dead=0 life=24
+[Relay] objId=4026542735 vanished dead=0 life=24
+[Mirror] ent=407D4EE0 host reports DEAD (es.dead=1, from ai+0x8C)
+[Net] scene change: localKey=003F9FE8 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE8 peerKey=003F9FE8 -> puppet shown
+[Net] scene change: localKey=003F9FE7 peerKey=003F9FE7 -> puppet shown
+[Relay] objId=4026542749 vanished dead=0 life=24
+[Net] scene change: localKey=003F9FE7 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE7 peerKey=003F9FE7 -> puppet shown
+[Net] apply seq=1296 pos=(-47.8,-48.6,7.8) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Relay] host DEATH objId=4026539032 -> peer
+[Relay] host DEATH objId=4026542749 -> peer
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={26:0.95 29:0.00 32:0.03} pupBlend(n=46)={26:0.95 29:0.00 32:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9FE7 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE7 peerKey=003F9FE7 -> puppet shown
+[Relay] host DEATH objId=4026542735 -> peer
+[Mirror] ent=414912D0 -> playback dummy objId=4026548874 pos=(-80.4,-65.6,11.3) dead=0
+[Relay] objId=4026538714 vanished dead=0 life=0
+[Relay] objId=4026538724 vanished dead=0 life=24
+[Mirror] ent=435FD490 -> playback dummy objId=4026548954 pos=(-64.7,-84.2,8.4) dead=0
+[Mirror] ent=40191800 -> playback dummy objId=4026548929 pos=(-57.7,-90.5,8.6) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={26:0.98 34:0.00 36:0.00} ts=1.00 VEL=0.098
+[Net] scene change: localKey=003F9FE6 peerKey=003F9FE7 -> puppet shown
+[Net] scene change: localKey=003FA3E6 peerKey=003F9FE6 -> puppet shown
+[Net] scene change: localKey=003FA3E6 peerKey=003FA3E6 -> puppet shown
+[Mirror] ent=40183950 -> playback dummy objId=4026548995 pos=(-65.0,-85.4,8.4) dead=0
+[Net] scene change: localKey=003FA3E6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E6 peerKey=003FA3E6 -> puppet shown
+[Net] scene change: localKey=003FA3E6 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E6 peerKey=003FA3E6 -> puppet shown
+[Net] apply seq=1331 pos=(-50.9,-47.7,7.9) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.00 26:0.94 36:0.04} pupBlend(n=46)={23:0.00 26:0.94 36:0.04} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.24 26:0.68 36:0.06} ts=1.00 VEL=0.097
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=003FA3E5 -> puppet shown
+[Net] scene change: localKey=003FA3E5 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=003FA3E4 -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=003FA3E4 -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=003FA3E4 -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=003FA3E4 -> puppet shown
+[Relay] host DEATH objId=4026538573 -> peer
+[Net] apply seq=1368 pos=(-54.6,-46.8,7.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.25 24:0.01 26:0.58 27:0.14} ts=1.00 VEL=0.107
+[Net] scene change: localKey=003FA3E4 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E4 peerKey=003FA3E4 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E4 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.14 24:0.07 26:0.68 27:0.09} pupBlend(n=46)={23:0.14 24:0.07 26:0.68 27:0.09} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003FA3E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E3 peerKey=003FA3E3 -> puppet shown
+[Net] scene change: localKey=003FA3E2 peerKey=003FA3E2 -> puppet shown
+[Net] scene change: localKey=003FA3E2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E2 peerKey=003FA3E2 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={20:0.03 26:0.30 27:0.61 35:0.03} ts=1.00 VEL=0.099
+[Net] scene change: localKey=003FA3E2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E2 peerKey=003FA3E2 -> puppet shown
+[Net] apply seq=1407 pos=(-58.3,-47.1,7.7) spd=0.00 dst=0.82 ctx=4 bundle=1
+[Net] scene change: localKey=003FA3E2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003FA3E2 peerKey=003FA3E2 -> puppet shown
+[Net] scene change: localKey=003F9FE2 peerKey=003FA3E2 -> puppet shown
+[Net] scene change: localKey=003F9FE2 peerKey=003F9FE2 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={20:0.00 26:0.31 27:0.64 35:0.03} pupBlend(n=46)={20:0.00 26:0.31 27:0.64 35:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=003F9FE2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE2 peerKey=003F9FE2 -> puppet shown
+[Net] scene change: localKey=003F9FE2 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=003F9FE2 peerKey=003F9FE2 -> puppet shown
+[Net] scene change: localKey=004F9FE2 peerKey=003F9FE2 -> puppet shown
+[Net] scene change: localKey=004F9FE2 peerKey=004F9FE2 -> puppet shown
+[Relay] objId=4026542263 vanished dead=0 life=24
+[Relay] objId=4026542429 vanished dead=0 life=24
+[Net] scene change: localKey=004F9FE1 peerKey=004F9FE2 -> puppet shown
+[Net] scene change: localKey=004F9FE1 peerKey=004F9FE1 -> puppet shown
+[Net] scene change: localKey=004F9FE1 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026542417 vanished dead=0 life=24
+[Mirror] ent=401D1820 host reports DEAD (es.dead=1, from ai+0x8C)
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.25 26:0.64 27:0.00 35:0.09} ts=1.00 VEL=0.093
+[Net] scene change: localKey=004F9FE1 peerKey=004F9FE1 -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Relay] host DEATH objId=4026542429 -> peer
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Net] apply seq=1444 pos=(-60.6,-49.9,8.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Mirror] ent=4326C7D0 -> playback dummy objId=4026549496 pos=(-71.1,-44.9,7.8) dead=0
+[Mirror] ent=40D94E50 -> playback dummy objId=4026548894 pos=(-79.2,-63.3,11.1) dead=0
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE1 peerKey=004F9BE1 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.42 26:0.52 28:0.04} pupBlend(n=46)={23:0.42 26:0.52 28:0.04} rxTS=1.00 pupTS=1.00
+[Relay] host DEATH objId=4026547161 -> peer
+[Mirror] ent=4158FE10 -> playback dummy objId=4026548864 pos=(-77.4,-62.0,10.8) dead=0
+[Net] scene change: localKey=004F9BE1 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE0 peerKey=004F9BE1 -> puppet shown
+[Net] scene change: localKey=004F9BE0 peerKey=004F9BE0 -> puppet shown
+[Net] scene change: localKey=004F9BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F9BE0 peerKey=004F9BE0 -> puppet shown
+[Net] scene change: localKey=004F9BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.74 25:0.00 26:0.21 28:0.00 35:0.02} ts=1.00 VEL=0.100
+[Net] scene change: localKey=004F9BE0 peerKey=004F9BE0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F97E0 peerKey=004F97E0 -> puppet shown
+[Smooth] frames=243 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=62 avgD=0.1250 maxD=0.6045
+[Net] stats tx=307 pkt, 170870 B, 1 ent  rx=307 pkt, 170870 B  |  33.3 kB/s up, 33.3 kB/s down  |  mirror ok=3150 nobod=0 steal=0
+[Net] scene change: localKey=004F97DF peerKey=004F97E0 -> puppet shown
+[Net] scene change: localKey=004F97DF peerKey=004F97DF -> puppet shown
+[Relay] host DEATH objId=4026543139 -> peer
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.07 23:0.76 26:0.12 36:0.03} ts=1.00 VEL=0.099
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Relay] objId=4026549586 vanished dead=0 life=24
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F93DF peerKey=004F93DF -> puppet shown
+[Net] scene change: localKey=004F8FDF peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026549682 vanished dead=0 life=24
+[Net] scene change: localKey=004F8FDF peerKey=004F8FDF -> puppet shown
+[Net] apply seq=1515 pos=(-65.3,-55.3,8.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F8FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FDF peerKey=004F8FDF -> puppet shown
+[Net] scene change: localKey=004F8FDE peerKey=004F8FDF -> puppet shown
+[Net] scene change: localKey=004F8FDE peerKey=004F8FDE -> puppet shown
+[Relay] host DEATH objId=4026538724 -> peer
+[Relay] host DEATH objId=4026549586 -> peer
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={15:0.08 16:0.11 17:0.01 18:0.00 20:0.09 22:0.20 23:0.03 24:0.01 26:0.24 27:0.16 35:0.01 39:0.00} ts=1.00 VEL=0.091
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.73 23:0.23 24:0.01 27:0.01} pupBlend(n=46)={22:0.73 23:0.23 24:0.01 27:0.01} rxTS=1.00 pupTS=1.00
+[Relay] objId=4026542691 vanished dead=1 life=7
+[Relay] host DEATH objId=4026542691 -> peer
+[Relay] objId=4026546504 vanished dead=0 life=24
+[Net] scene change: localKey=004F8FDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FDE peerKey=004F8FDE -> puppet shown
+[Relay] objId=4026538576 vanished dead=0 life=24
+[Relay] objId=4026538632 vanished dead=0 life=24
+[Relay] host DEATH objId=4026538934 -> peer
+[Relay] host DEATH objId=4026542263 -> peer
+[Relay] host DEATH objId=4026546504 -> peer
+[Mirror] ent=40FE6950 -> playback dummy objId=4026550243 pos=(-110.7,-50.0,13.7) dead=0
+[Mirror] ent=40E5F2A0 -> playback dummy objId=4026550221 pos=(-107.2,-39.9,13.2) dead=0
+[Net] scene change: localKey=004F8FDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8FDE peerKey=004F8FDE -> puppet shown
+[Net] scene change: localKey=004F8FDE peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026538642 vanished dead=1 life=0
+[Relay] host DEATH objId=4026538642 -> peer
+[Relay] objId=4026538659 vanished dead=0 life=24
+[Net] scene change: localKey=004F8BDE peerKey=004F8FDE -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Relay] objId=4026546487 vanished dead=0 life=0
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.15 13:0.07 15:0.58 16:0.00 17:0.07 18:0.01 20:0.03 38:0.01 40:0.04} ts=1.00 VEL=0.062
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] apply seq=1552 pos=(-66.7,-58.2,8.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={12:0.17 15:0.60 16:0.02 17:0.13 26:0.00 38:0.00 40:0.03} pupBlend(n=46)={12:0.17 15:0.60 16:0.02 17:0.13 26:0.00 38:0.00 40:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=004F8BDE -> puppet shown
+[Net] scene change: localKey=004F8BDE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F8BDE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] cap SWITCH 194060297 -> 86 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=86 ch=0 ly=0 blend(n=3)={1:1.00} ts=1.00 VEL=0.059
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] action -> 86 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=86 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] apply seq=1589 pos=(-66.6,-60.3,8.3) spd=0.00 dst=0.05 ctx=4 bundle=1
+[Relay] host DEATH objId=4026538632 -> peer
+[Relay] host DEATH objId=4026539010 -> peer
+[Relay] objId=4026550197 vanished dead=0 life=24
+[Net] cap SWITCH 86 -> 90 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=86 (rx=86) rxBlend(n=3)={1:1.00} pupBlend(n=3)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Relay] objId=4026550243 vanished dead=0 life=24
+[Relay] objId=4026550221 vanished dead=0 life=24
+[Mirror] ent=40FD7BE0 -> playback dummy objId=4026550832 pos=(-25.5,-65.8,6.0) dead=0
+[Mirror] ent=40D547F0 -> playback dummy objId=4026550850 pos=(-25.4,-67.9,6.0) dead=0
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] action -> 90 ch=0 ly=0 ratio=0.00 blendIn=0.00 (puppet, cur was 86)
+[Net] blendIn fix alias=90 len 0.20 -> 0.00 type 1 -> 0 (t=0.19) [kept]
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=90 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] cap SWITCH 90 -> 53 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] apply seq=1626 pos=(-66.3,-61.1,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] action -> 53 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 90)
+[Net] blendIn fix alias=53 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] PUP act=53 (rx=53) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] apply seq=1667 pos=(-66.1,-61.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] PUP act=53 (rx=53) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Mirror] ent=48A12A10 -> playback dummy objId=4026550334 pos=(-86.1,-45.7,10.9) dead=0
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] cap SWITCH 53 -> 110759372 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] action -> 110759372 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 53)
+[Net] blendIn fix alias=110759372 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] apply seq=1710 pos=(-66.0,-61.6,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759372 (rx=110759372) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DE peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DE -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] apply seq=1747 pos=(-65.9,-61.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] PUP act=110759372 (rx=110759372) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F87DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F87DF peerKey=004F87DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap SWITCH 110759372 -> 50 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1787 pos=(-65.8,-62.1,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Smooth] frames=212 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=69 avgD=0.0474 maxD=0.3909
+[Net] stats tx=304 pkt, 170240 B, 0 ent  rx=304 pkt, 170240 B  |  33.2 kB/s up, 33.2 kB/s down  |  mirror ok=3213 nobod=0 steal=0
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] action -> 50 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110759372)
+[Net] blendIn fix alias=50 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1825 pos=(-65.7,-62.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1864 pos=(-65.6,-62.6,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1901 pos=(-65.5,-62.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1939 pos=(-65.4,-63.1,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=1975 pos=(-65.3,-63.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=2009 pos=(-65.2,-63.5,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] apply seq=2044 pos=(-65.1,-63.7,8.4) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=004F83DF -> puppet shown
+[Net] scene change: localKey=004F83DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.003
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Smooth] frames=230 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=59 avgD=0.0112 maxD=0.0348
+[Net] stats tx=304 pkt, 170240 B, 0 ent  rx=304 pkt, 170240 B  |  33.2 kB/s up, 33.2 kB/s down  |  mirror ok=3213 nobod=0 steal=0
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2113 pos=(-64.9,-64.1,8.4) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] apply seq=2153 pos=(-64.8,-64.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2191 pos=(-64.7,-64.6,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Relay] objId=4026548446 vanished dead=0 life=24
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Relay] objId=4026547791 vanished dead=0 life=30
+[Relay] objId=4026548467 vanished dead=0 life=24
+[Mirror] ent=4618E940 -> playback dummy objId=4026553329 pos=(-66.5,-105.4,12.0) dead=0
+[Net] apply seq=2230 pos=(-64.6,-64.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Relay] host DEATH objId=4026538346 -> peer
+[Relay] host DEATH objId=4026547791 -> peer
+[Relay] objId=4026547835 vanished dead=0 life=30
+[Relay] objId=4026547862 vanished dead=0 life=30
+[Mirror] ent=3BE3D6E0 -> playback dummy objId=4026553374 pos=(-68.2,-107.0,11.8) dead=0
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Relay] objId=4026547814 vanished dead=0 life=30
+[Mirror] ent=40591930 -> playback dummy objId=4026553395 pos=(-66.8,-107.1,11.9) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Relay] host DEATH objId=4026548467 -> peer
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2272 pos=(-64.5,-65.1,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026547326 vanished dead=0 life=24
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2316 pos=(-64.4,-65.4,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Relay] objId=4026547362 vanished dead=0 life=24
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2354 pos=(-64.2,-65.6,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Net] apply seq=2393 pos=(-64.1,-65.9,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7FDF peerKey=004F7FDF -> puppet shown
+[Smooth] frames=222 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=75 avgD=0.0119 maxD=0.0329
+[Net] stats tx=303 pkt, 169680 B, 0 ent  rx=303 pkt, 169680 B  |  33.1 kB/s up, 33.1 kB/s down  |  mirror ok=3150 nobod=0 steal=0
+[Net] scene change: localKey=004F7FDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7FDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] apply seq=2430 pos=(-64.0,-66.1,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] apply seq=2496 pos=(-63.9,-66.5,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] apply seq=2536 pos=(-63.9,-66.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Relay] objId=4026547083 vanished dead=0 life=24
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] apply seq=2573 pos=(-63.9,-67.0,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Relay] objId=4026547057 vanished dead=0 life=24
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Relay] host DEATH objId=4026547057 -> peer
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] apply seq=2608 pos=(-63.9,-67.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] apply seq=2650 pos=(-63.9,-67.6,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BE0 peerKey=004F7BE0 -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Relay] host DEATH objId=4026538639 -> peer
+[Relay] host DEATH objId=4026548446 -> peer
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.003
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Smooth] frames=190 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=65 avgD=0.0106 maxD=0.2347
+[Net] stats tx=303 pkt, 169680 B, 0 ent  rx=303 pkt, 169680 B  |  33.1 kB/s up, 33.1 kB/s down  |  mirror ok=3213 nobod=0 steal=0
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F7BDF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F7BDF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] apply seq=2723 pos=(-64.0,-68.0,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2760 pos=(-64.0,-68.2,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2799 pos=(-64.0,-68.5,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2838 pos=(-64.0,-68.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Relay] objId=4026555003 vanished dead=0 life=24
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.007
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Relay] objId=4026555014 vanished dead=0 life=24
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2879 pos=(-64.0,-68.8,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2919 pos=(-64.0,-68.5,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] apply seq=2959 pos=(-64.2,-68.3,8.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.006
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=FFFFFFFF -> puppet shown
+[Net] scene change: localKey=004F77DF peerKey=004F77DF -> puppet shown

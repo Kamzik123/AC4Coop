@@ -1,0 +1,200 @@
+name	ps3_low_pc	size	cu	decl_line	linkage
+AddComponent	?	?	..\..\..\..\tmp\blob\engine\engine_001.blob.cpp	94	_ZN8scimitar13ComponentList12AddComponentEPNS_9ComponentEb
+AddComponentContainer	?	?	..\..\..\..\tmp\blob\engine\engine_002.blob.cpp	920	_ZN8scimitar26GameplayCoordinatorManager21AddComponentContainerEPNS_19ICoordinatorSpawnerE
+AddComponents	?	?	..\..\..\..\tmp\blob\graphic\graphic_002.blob.cpp	528	_ZN8scimitar12GraphicWorld13AddComponentsEPNS_6EntityE
+AnyMemberCallbackCast<void (scimitar::CharacterFactionChangedEvent::*)()>	?	?	..\..\..\..\tmp\blob\assassin\assassin_030.blob.cpp	745	
+BuildEntityWithSelector	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	232	_ZN8scimitar18EntityGroupBuilder23BuildEntityWithSelectorERPNS_6EntityERNS_11RowSelectorE
+CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+CharacterFactionChangedEvent	?	?	..\..\..\..\tmp\blob\assassin\assassin_030.blob.cpp		
+Create<scimitar::CharacterFactionChangedEvent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	32	_ZN8scimitar14FrameAllocator6CreateINS_28CharacterFactionChangedEventEEEPT_v
+DeleteEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	246	_ZN8scimitar10CLConflict100DeleteEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEne
+DeleteEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_011.blob.cpp	302	_ZN8scimitar9CRLDetect78DeleteEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerce
+DuplicateObject<scimitar::CharacterFactionChangedEvent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_030.blob.cpp	288	
+Execute_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+Execute_PlayerPerceptionMonitor_Initial	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+Execute_PlayerPerceptionMonitor_PlayerNotPerceived	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+Execute_PlayerPerceptionMonitor_PlayerPerceived	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp		
+GetClassDescriptor	?	?	..\..\..\..\source\scimitar\main\durango\gameappview.cpp	248	_ZN8scimitar18PropertyDescriptor18GetClassDescriptorEPvb
+GetComponentByType	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	4744	_ZN8scimitar6Entity18GetComponentByTypeEPKNS_15ClassDescriptorERPKPNS_9ComponentE
+GetComponentByType<scimitar::AIComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::AbstractDominoComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_022.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23AbstractDominoComponentEEEPT_v
+GetComponentByType<scimitar::AbstractShipPhysicDriver>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_24AbstractShipPhysicDriverEEEPT_v
+GetComponentByType<scimitar::AbstractWatercraftPhysicComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_33AbstractWatercraftPhysicComponentEEEPT_v
+GetComponentByType<scimitar::ActionComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_002.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15ActionComponentEEEPT_v
+GetComponentByType<scimitar::AmbientAIComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18AmbientAIComponentEEEPT_v
+GetComponentByType<scimitar::AnimComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_021.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_13AnimComponentEEEPT_v
+GetComponentByType<scimitar::AutoFakeEntityComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::BallisticTrajectoryComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::BendingObjectComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_019.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22BendingObjectComponentEEEPT_v
+GetComponentByType<scimitar::BhvAssassin>	?	?	..\..\..\..\tmp\blob\assassin\assassin_045.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_11BhvAssassinEEEPT_v
+GetComponentByType<scimitar::BipedComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14BipedComponentEEEPT_v
+GetComponentByType<scimitar::BoatAttributeComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_015.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22BoatAttributeComponentEEEPT_v
+GetComponentByType<scimitar::BoatController>	?	?	..\..\..\..\tmp\blob\assassin\assassin_004.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14BoatControllerEEEPT_v
+GetComponentByType<scimitar::BreakableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18BreakableComponentEEEPT_v
+GetComponentByType<scimitar::BulkComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_13BulkComponentEEEPT_v
+GetComponentByType<scimitar::BulkDepthMapComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_21BulkDepthMapComponentEEEPT_v
+GetComponentByType<scimitar::BulkFishAvoidanceComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_26BulkFishAvoidanceComponentEEEPT_v
+GetComponentByType<scimitar::CameraTipComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_020.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18CameraTipComponentEEEPT_v
+GetComponentByType<scimitar::CameraZone>	?	?	..\..\..\..\tmp\blob\engine\engine_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_10CameraZoneEEEPT_v
+GetComponentByType<scimitar::CharacterBehavior>	?	?	..\..\..\..\tmp\blob\engine\engine_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17CharacterBehaviorEEEPT_v
+GetComponentByType<scimitar::CharacterController>	?	?	..\..\..\..\tmp\blob\engine\engine_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19CharacterControllerEEEPT_v
+GetComponentByType<scimitar::ClothComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::ConstraintComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::CustomNavigationComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_25CustomNavigationComponentEEEPT_v
+GetComponentByType<scimitar::DataBindableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_21DataBindableComponentEEEPT_v
+GetComponentByType<scimitar::DataBinderComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19DataBinderComponentEEEPT_v
+GetComponentByType<scimitar::DestructionComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_017.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20DestructionComponentEEEPT_v
+GetComponentByType<scimitar::DominoComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15DominoComponentEEEPT_v
+GetComponentByType<scimitar::EagleVisionComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20EagleVisionComponentEEEPT_v
+GetComponentByType<scimitar::EntityLabelComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_006.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20EntityLabelComponentEEEPT_v
+GetComponentByType<scimitar::EntityPositionComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23EntityPositionComponentEEEPT_v
+GetComponentByType<scimitar::EquippableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_045.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19EquippableComponentEEEPT_v
+GetComponentByType<scimitar::EventListenerComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_002.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22EventListenerComponentEEEPT_v
+GetComponentByType<scimitar::FXComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_11FXComponentEEEPT_v
+GetComponentByType<scimitar::FleetManager>	?	?	..\..\..\..\tmp\blob\assassin\assassin_050.blob.cpp	98	_ZN8scimitar8Universe18GetComponentByTypeINS_12FleetManagerEEEPT_v
+GetComponentByType<scimitar::FloatingComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17FloatingComponentEEEPT_v
+GetComponentByType<scimitar::FocusableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18FocusableComponentEEEPT_v
+GetComponentByType<scimitar::FortTowerManager>	?	?	..\..\..\..\tmp\blob\assassin\assassin_017.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_16FortTowerManagerEEEPT_v
+GetComponentByType<scimitar::GameplayCoordinatorComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_001.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_28GameplayCoordinatorComponentEEEPT_v
+GetComponentByType<scimitar::GameplayTagComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20GameplayTagComponentEEEPT_v
+GetComponentByType<scimitar::GcLHarpooning>	?	?	..\..\..\..\tmp\blob\assassin\assassin_032.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_13GcLHarpooningEEEPT_v
+GetComponentByType<scimitar::GcLShip>	?	?	..\..\..\..\tmp\blob\assassin\assassin_031.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_7GcLShipEEEPT_v
+GetComponentByType<scimitar::GroupPhysicZone>	?	?	..\..\..\..\tmp\blob\engine\engine_018.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15GroupPhysicZoneEEEPT_v
+GetComponentByType<scimitar::GuidanceSystemComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_019.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23GuidanceSystemComponentEEEPT_v
+GetComponentByType<scimitar::GuidanceSystemCustom>	?	?	..\..\..\..\tmp\blob\engine\engine_018.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20GuidanceSystemCustomEEEPT_v
+GetComponentByType<scimitar::HayStackComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17HayStackComponentEEEPT_v
+GetComponentByType<scimitar::InertComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14InertComponentEEEPT_v
+GetComponentByType<scimitar::LargeMeshChunkComponent>	?	?	..\..\..\..\tmp\blob\graphic\graphic_000.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23LargeMeshChunkComponentEEEPT_v
+GetComponentByType<scimitar::LargeMeshComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::LocateZoneComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19LocateZoneComponentEEEPT_v
+GetComponentByType<scimitar::MapIconComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_022.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_16MapIconComponentEEEPT_v
+GetComponentByType<scimitar::MapIconManager>	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	98	_ZN8scimitar8Universe18GetComponentByTypeINS_14MapIconManagerEEEPT_v
+GetComponentByType<scimitar::MenuCameraComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_049.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19MenuCameraComponentEEEPT_v
+GetComponentByType<scimitar::MenuPageComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_049.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17MenuPageComponentEEEPT_v
+GetComponentByType<scimitar::MovingNavMeshComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_004.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22MovingNavMeshComponentEEEPT_v
+GetComponentByType<scimitar::NavFlow>	?	?	..\..\..\..\tmp\blob\engine\engine_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_7NavFlowEEEPT_v
+GetComponentByType<scimitar::NavMeshLinkingComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_004.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23NavMeshLinkingComponentEEEPT_v
+GetComponentByType<scimitar::NavalAnimalComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20NavalAnimalComponentEEEPT_v
+GetComponentByType<scimitar::NavalCollectableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_25NavalCollectableComponentEEEPT_v
+GetComponentByType<scimitar::NavalMineComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18NavalMineComponentEEEPT_v
+GetComponentByType<scimitar::NavalPatrolPathComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_045.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_24NavalPatrolPathComponentEEEPT_v
+GetComponentByType<scimitar::NavalTargetingComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_046.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23NavalTargetingComponentEEEPT_v
+GetComponentByType<scimitar::NavigationZone>	?	?	..\..\..\..\tmp\blob\engine\engine_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14NavigationZoneEEEPT_v
+GetComponentByType<scimitar::OceanWaveEmitter>	?	?	..\..\..\..\tmp\blob\graphic\graphic_002.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_16OceanWaveEmitterEEEPT_v
+GetComponentByType<scimitar::OnlineGameplayManager>	?	?	..\..\..\..\tmp\blob\assassin\assassin_049.blob.cpp	98	_ZN8scimitar8Universe18GetComponentByTypeINS_21OnlineGameplayManagerEEEPT_v
+GetComponentByType<scimitar::POIComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_013.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_12POIComponentEEEPT_v
+GetComponentByType<scimitar::PageComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_13PageComponentEEEPT_v
+GetComponentByType<scimitar::PatrolPathComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19PatrolPathComponentEEEPT_v
+GetComponentByType<scimitar::PhysicComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_019.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15PhysicComponentEEEPT_v
+GetComponentByType<scimitar::PickableComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_000.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17PickableComponentEEEPT_v
+GetComponentByType<scimitar::PinocchioComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_019.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18PinocchioComponentEEEPT_v
+GetComponentByType<scimitar::PlayerSpawnActivatorComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_015.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_29PlayerSpawnActivatorComponentEEEPT_v
+GetComponentByType<scimitar::ProceduralFreeRoamingTrajectory>	?	?	..\..\..\..\tmp\blob\engine\engine_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_31ProceduralFreeRoamingTrajectoryEEEPT_v
+GetComponentByType<scimitar::QuadrupedComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_007.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18QuadrupedComponentEEEPT_v
+GetComponentByType<scimitar::RagdollComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_007.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_16RagdollComponentEEEPT_v
+GetComponentByType<scimitar::Reflector>	?	?	..\..\..\..\tmp\blob\graphic\graphic_001.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_9ReflectorEEEPT_v
+GetComponentByType<scimitar::RestObjectAttributeComponent>	?	?	..\..\..\..\source\scimitar\assassin2\ai\character\common\actor\actorcontext\humanground.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_28RestObjectAttributeComponentEEEPT_v
+GetComponentByType<scimitar::RigidBodyComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::RogueWaveFXTracker>	?	?	..\..\..\..\tmp\blob\assassin\assassin_023.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18RogueWaveFXTrackerEEEPT_v
+GetComponentByType<scimitar::RopeComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_13RopeComponentEEEPT_v
+GetComponentByType<scimitar::RopeFXComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15RopeFXComponentEEEPT_v
+GetComponentByType<scimitar::SailManager>	?	?	..\..\..\..\tmp\blob\assassin\assassin_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_11SailManagerEEEPT_v
+GetComponentByType<scimitar::Scene>	?	?	..\..\..\..\tmp\blob\engine\engine_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_5SceneEEEPT_v
+GetComponentByType<scimitar::ScrollingListComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22ScrollingListComponentEEEPT_v
+GetComponentByType<scimitar::SharkComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14SharkComponentEEEPT_v
+GetComponentByType<scimitar::ShipCannonBankComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_034.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23ShipCannonBankComponentEEEPT_v
+GetComponentByType<scimitar::ShipPhysicComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19ShipPhysicComponentEEEPT_v
+GetComponentByType<scimitar::SkeletonComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17SkeletonComponentEEEPT_v
+GetComponentByType<scimitar::SoftBodyComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	1424	
+GetComponentByType<scimitar::SoundBankEntityComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_000.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_24SoundBankEntityComponentEEEPT_v
+GetComponentByType<scimitar::SoundComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_046.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14SoundComponentEEEPT_v
+GetComponentByType<scimitar::SplinePath>	?	?	..\..\..\..\tmp\blob\assassin\assassin_021.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_10SplinePathEEEPT_v
+GetComponentByType<scimitar::StalkingZoneComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_016.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_21StalkingZoneComponentEEEPT_v
+GetComponentByType<scimitar::SwingRopeComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_004.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_18SwingRopeComponentEEEPT_v
+GetComponentByType<scimitar::TargettingComponent>	?	?	..\..\..\..\source\scimitar\assassin2\ai\character\common\actor\actorcontext\humanupperbody.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19TargettingComponentEEEPT_v
+GetComponentByType<scimitar::TemplateBinderComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23TemplateBinderComponentEEEPT_v
+GetComponentByType<scimitar::TerrainLargeMeshChunkComponent>	?	?	..\..\..\..\tmp\blob\graphic\graphic_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_30TerrainLargeMeshChunkComponentEEEPT_v
+GetComponentByType<scimitar::Trajectory>	?	?	..\..\..\..\tmp\blob\engine\engine_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_10TrajectoryEEEPT_v
+GetComponentByType<scimitar::TrajectoryFollowComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_036.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_25TrajectoryFollowComponentEEEPT_v
+GetComponentByType<scimitar::TriggerComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_001.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_16TriggerComponentEEEPT_v
+GetComponentByType<scimitar::UnderwaterBurstBeamComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_28UnderwaterBurstBeamComponentEEEPT_v
+GetComponentByType<scimitar::UnderwaterCurrentTrajectory>	?	?	..\..\..\..\tmp\blob\assassin\assassin_008.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_27UnderwaterCurrentTrajectoryEEEPT_v
+GetComponentByType<scimitar::UnderwaterDivingBellComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_29UnderwaterDivingBellComponentEEEPT_v
+GetComponentByType<scimitar::UnderwaterRandomMovementComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_005.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_33UnderwaterRandomMovementComponentEEEPT_v
+GetComponentByType<scimitar::UnderwaterRopeComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_23UnderwaterRopeComponentEEEPT_v
+GetComponentByType<scimitar::UniverseTagRules>	?	?	..\..\..\..\tmp\blob\engine\engine_012.blob.cpp	98	_ZN8scimitar8Universe18GetComponentByTypeINS_16UniverseTagRulesEEEPT_v
+GetComponentByType<scimitar::Visual>	?	?	..\..\..\..\tmp\blob\graphic\graphic_001.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_6VisualEEEPT_v
+GetComponentByType<scimitar::VisualBowSplashComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_010.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_24VisualBowSplashComponentEEEPT_v
+GetComponentByType<scimitar::VisualGrapplingHook>	?	?	..\..\..\..\source\scimitar\assassin2\ai\character\common\actor\actorcontext\humanground.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19VisualGrapplingHookEEEPT_v
+GetComponentByType<scimitar::VisualOceanComponent>	?	?	..\..\..\..\tmp\blob\graphic\graphic_003.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20VisualOceanComponentEEEPT_v
+GetComponentByType<scimitar::VisualQuadComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19VisualQuadComponentEEEPT_v
+GetComponentByType<scimitar::VisualRopeComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_027.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19VisualRopeComponentEEEPT_v
+GetComponentByType<scimitar::VisualRopeComponent_DEPRECATED>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_30VisualRopeComponent_DEPRECATEDEEEPT_v
+GetComponentByType<scimitar::VisualTargetingComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_022.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_24VisualTargetingComponentEEEPT_v
+GetComponentByType<scimitar::VisualTextComponent>	?	?	..\..\..\..\tmp\blob\engine\engine_021.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19VisualTextComponentEEEPT_v
+GetComponentByType<scimitar::VisualTrajectoryComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_028.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_25VisualTrajectoryComponentEEEPT_v
+GetComponentByType<scimitar::WaterCurrentTrajectory>	?	?	..\..\..\..\tmp\blob\assassin\assassin_036.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22WaterCurrentTrajectoryEEEPT_v
+GetComponentByType<scimitar::WaterSpoutComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_009.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19WaterSpoutComponentEEEPT_v
+GetComponentByType<scimitar::WatercraftAttributes>	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_20WatercraftAttributesEEEPT_v
+GetComponentByType<scimitar::WatercraftControlPoint>	?	?	..\..\..\..\source\scimitar\assassin2\ai\character\common\actor\actorcontext\humanground.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_22WatercraftControlPointEEEPT_v
+GetComponentByType<scimitar::WatercraftElement>	?	?	..\..\..\..\tmp\blob\assassin\assassin_042.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_17WatercraftElementEEEPT_v
+GetComponentByType<scimitar::WatercraftMast>	?	?	..\..\..\..\tmp\blob\assassin\assassin_035.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14WatercraftMastEEEPT_v
+GetComponentByType<scimitar::WatercraftReference>	?	?	..\..\..\..\tmp\blob\assassin\assassin_026.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_19WatercraftReferenceEEEPT_v
+GetComponentByType<scimitar::WatercraftSail>	?	?	..\..\..\..\tmp\blob\assassin\assassin_035.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14WatercraftSailEEEPT_v
+GetComponentByType<scimitar::WatercraftYard>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_14WatercraftYardEEEPT_v
+GetComponentByType<scimitar::WeaponComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_042.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_15WeaponComponentEEEPT_v
+GetComponentByType<scimitar::Wind>	?	?	..\..\..\..\tmp\blob\assassin\assassin_043.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_4WindEEEPT_v
+GetComponentByType<scimitar::WorldUpgradeComponent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	1424	_ZN8scimitar6Entity18GetComponentByTypeINS_21WorldUpgradeComponentEEEPT_v
+GetEmbeddedPlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	154	_ZN8scimitar10CLConflict34GetEmbeddedPlayerPerceptionMonitorEv
+GetEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	245	_ZN8scimitar10CLConflict97GetEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOf
+GetEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_011.blob.cpp	301	_ZN8scimitar9CRLDetect75GetEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPercepti
+GetFaction	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	54	_ZN8scimitar18GameAIEntityHelper10GetFactionEPNS_6EntityE
+GetFactionBasedDamageMultiplier	?	?	..\..\..\..\tmp\blob\assassin\assassin_023.blob.cpp	15366	_ZN8scimitar7GcLShip31GetFactionBasedDamageMultiplierEPNS_6EntityE
+GetFactionBuildingIconID	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	171	_ZN8scimitar24WorldUpgradeSystemHelper24GetFactionBuildingIconIDEPNS_24WorldUpgradeRuleSet
+GetFactionBuildingOwner	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	98	_ZN8scimitar24WorldUpgradeSystemHelper23GetFactionBuildingOwnerEPNS_24WorldUpgradeRuleSett
+GetFactionBuildingUIDescription	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	191	_ZN8scimitar24WorldUpgradeSystemHelper31GetFactionBuildingUIDescriptionEPNS_24WorldUpgrade
+GetFactionBuildingUIName	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	187	_ZN8scimitar24WorldUpgradeSystemHelper24GetFactionBuildingUINameEPNS_24WorldUpgradeRuleSet
+GetFactionCondition	?	?	..\..\..\..\tmp\blob\assassin\assassin_007.blob.cpp	204	_ZNK8scimitar20ReactionKitParamData19GetFactionConditionEv
+GetFactionCreed	?	?	..\..\..\..\tmp\blob\assassin\assassin_045.blob.cpp	26	_ZNK8scimitar24OpenFactionCreedMenuClip15GetFactionCreedEv
+GetFactionDeathCondition	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	44	_ZN8scimitar25FactionDeathConditionClip24GetFactionDeathConditionEv
+GetFactionFilter	?	?	..\..\..\..\tmp\blob\assassin\assassin_009.blob.cpp	112	_ZN8scimitar12NukeOperator16GetFactionFilterEv
+GetFactionHQTypeByFaction	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	180	_ZN8scimitar24WorldUpgradeSystemHelper25GetFactionHQTypeByFactionENS_21GroupManipulationTy
+GetFactionHandle	?	?	..\..\..\..\tmp\blob\assassin\assassin_023.blob.cpp	98	_ZN8scimitar15GcLShipAbstract16GetFactionHandleEv
+GetFactionIcon	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	32	_ZN8scimitar13UIFactionInfo14GetFactionIconEv
+GetFactionInfo	?	?	..\..\..\..\tmp\blob\assassin\assassin_052.blob.cpp	23	_ZN8scimitar16UIFactionContext14GetFactionInfoEv
+GetFactionList	?	?	..\..\..\..\tmp\blob\assassin\assassin_042.blob.cpp	64	_ZN8scimitar15FactionSelector14GetFactionListERNS_8PtrArrayINS_7FactionENS_21DefaultAlloca
+GetFactionName	?	?	..\..\..\..\tmp\blob\assassin\assassin_048.blob.cpp	96	_ZNK8scimitar7Faction14GetFactionNameEv
+GetFactionSelector	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	48	_ZN8scimitar21FactionDeathCondition18GetFactionSelectorEv
+GetFactionSettings	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	168	_ZN8scimitar16GamePlaySettings18GetFactionSettingsEv
+GetFactionState	?	?	..\..\..\..\tmp\blob\assassin\assassin_049.blob.cpp	271	_ZNK8scimitar29MapMarkerSetFactionStateEvent15GetFactionStateEv
+GetFactionStatus	?	?	..\..\..\..\tmp\blob\assassin\assassin_008.blob.cpp	24	_ZNK8scimitar24FactionCouplingCondition16GetFactionStatusEv
+GetFactionStatusWithPlayer	?	?	..\..\..\..\tmp\blob\assassin\assassin_023.blob.cpp	851	_ZN8scimitar7GcLShip26GetFactionStatusWithPlayerEv
+GetFactionType	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	29	_ZNK8scimitar31FactionBuildingUpgradeRuleState14GetFactionTypeEv
+GetFactionUIStateForBuilding	?	?	..\..\..\..\tmp\blob\assassin\assassin_038.blob.cpp	158	_ZN8scimitar24WorldUpgradeSystemHelper28GetFactionUIStateForBuildingENS_21GroupManipulatio
+GetFactions	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	184	_ZN8scimitar15FactionSettings11GetFactionsEv
+GetFactionsThatAllowWarningIndicator	?	?	..\..\..\..\tmp\blob\assassin\assassin_017.blob.cpp	275	_ZN8scimitar36FortTowerEnableWarningIndicatorRules36GetFactionsThatAllowWarningIndicatorEv
+GetFactionsToTarget	?	?	..\..\..\..\tmp\blob\assassin\assassin_017.blob.cpp	153	_ZN8scimitar21FortTowerTargetParams19GetFactionsToTargetEv
+HandleCharacterFactionChangedEvent	?	?	..\..\..\..\tmp\blob\assassin\assassin_041.blob.cpp	278	_ZN8scimitar20EagleVisionComponent34HandleCharacterFactionChangedEventERNS_28CharacterFact
+InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_011.blob.cpp		
+Instanciate<scimitar::CharacterFactionChangedEvent>	?	?	..\..\..\..\tmp\blob\assassin\assassin_014.blob.cpp	218	_ZN8scimitar12EventFactory11InstanciateINS_28CharacterFactionChangedEventEEEPT_v
+IsEnemyOfThePlayer	?	?	..\..\..\..\tmp\blob\assassin\assassin_018.blob.cpp	4952	_ZN8scimitar12FightManager18IsEnemyOfThePlayerEPNS_6EntityE
+MethodICSrvHealthSetLifePoints	?	?	..\..\..\..\tmp\blob\assassin\assassin_013.blob.cpp	64	_ZN8scimitar13CSrvNPCHealth30MethodICSrvHealthSetLifePointsEi
+MethodSetLifePoints	?	?	..\..\..\..\tmp\blob\assassin\assassin_045.blob.cpp	52	_ZN8scimitar11ICSrvHealth19MethodSetLifePointsEi
+Method_SetLifePoints	?	?	..\..\..\..\tmp\blob\assassin\assassin_013.blob.cpp	574	_ZN8scimitar13CSrvNPCHealth9StateRoot20Method_SetLifePointsEi
+RemoveEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	247	_ZN8scimitar10CLConflict100RemoveEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEne
+RemoveEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_011.blob.cpp	303	_ZN8scimitar9CRLDetect78RemoveEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerce
+SetEmbeddedPlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	153	_ZN8scimitar10CLConflict34SetEmbeddedPlayerPerceptionMonitorEPNS_10StatechartE
+SetEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_044.blob.cpp	244	_ZN8scimitar10CLConflict97SetEmbeddedStatechart_CanDoConflict_PlayerEnemyHandler_IsEnemyOf
+SetEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_007.blob.cpp	300	_ZN8scimitar9CRLDetect75SetEmbeddedStatechart_InDetect_DetectionProcessRoot_PlayerPercepti
+SetGlobalMatrixInternal	?	?	..\..\..\..\tmp\blob\engine\engine_014.blob.cpp	4969	_ZN8scimitar6Entity23SetGlobalMatrixInternalERKN4Gear8Matrix44IfEEb
+SetLifeInternal	?	?	..\..\..\..\tmp\blob\assassin\assassin_013.blob.cpp	135	_ZN8scimitar10CSrvHealth15SetLifeInternalEi
+SetLifePoints	?	?	..\..\..\..\tmp\blob\assassin\assassin_030.blob.cpp	640	_ZN8scimitar36AnimalJumpAttackHumanInteractionData13SetLifePointsEh
+~CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	1697	
+~CanDoConflict_PlayerEnemyHandler_IsEnemyOfThePlayer_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	1748	
+~CharacterFactionChangedEvent	?	?	..\..\..\..\tmp\blob\assassin\assassin_030.blob.cpp	1021	
+~Execute_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	2070	
+~Execute_PlayerPerceptionMonitor_Initial	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	2117	
+~Execute_PlayerPerceptionMonitor_PlayerNotPerceived	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	2211	
+~Execute_PlayerPerceptionMonitor_PlayerPerceived	?	?	..\..\..\..\tmp\blob\assassin\assassin_012.blob.cpp	2164	
+~InDetect_DetectionProcessRoot_PlayerPerceptionMonitor	?	?	..\..\..\..\tmp\blob\assassin\assassin_011.blob.cpp	5143	

@@ -1,0 +1,8 @@
+{
+  "id": "20261031T104619Z_RE_8732",
+  "seat": "RE",
+  "status": "DONE",
+  "ts": "2026-10-31T10:46:19.485988+00:00",
+  "text": "SEAT orchestrator | status: DONE\ndid: Second copy is installing - I built and packaged the run kit and wrote the run sheet. This is the first time the loop can close since D3.\nevidence: build REL-fbd38635fc81 from commit 3c80c85, tree clean, MSBuild Release|x86 v143, exit 0, AC4Coop.asi 303,616 B, sha256 FBD38635FC81DCC1FDC653F4E2B9881D58DF23F317C0102B5A50CF25BBE3B768.\nkit dist\\\\2pc-kit-2026-10-31 = AC4Coop.asi + dinput8.dll + HOST.ini + GUEST.ini + collect.ps1 + README-RUN.md + SHA256SUMS.txt.\nHOST.ini/GUEST.ini generated from the maintained ref\\\\AC4Coop\\\\AC4Coop.ini (so nothing documented is lost) with only these overrides: EntityHost=1/0, EntitySync=1, SyncEnemiesOnly=1, KrLog=1, StageLog=1, KillTrace=1, DisableSpawns=0 (was 1 - an empty world cannot test an enemy lane), PeerPort=47801, PeerIP placeholder.\nrun sheet ops/RUN-2026-10-31-two-machine.md, ordered by information value: A link+puppet (empty world, 10 min) -> B G6 does the host classify soldiers live (15 min) -> C G10 do guards see the guest (15 min) -> D G9 kills (15) -> E G7/G8 binding (10). Each has a PASS line and an explicit stop rule.\nTASKBOARD T16 updated from blocked to UNBLOCKED with the kit hash.\nnote for the two runs: DisableSpawns stays 0 for B/C/D/E; set it to 1 only for run A, on BOTH machines, and restart both games.\nbuild: REL-fbd38635fc81 / 303,616 B\nnext: user sets the two IPs and starts a session; C (G10) is the run that decides whether co-op stealth is a real target or gets cut.\nblocked-by: nothing",
+  "session": "ses_e741f0b23ffemD1twBuCaV2rgl"
+}

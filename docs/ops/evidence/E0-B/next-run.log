@@ -1,0 +1,7 @@
+18:40:16 waiting up to 14400s for [Net] init= in a NEW game log
+18:41:47 game: phase1_log_29900.txt (pid 29900)
+18:41:53 phase 1 failed: the game sent no decodable PlayerState — is it in-world?
+[peer9] bound 0.0.0.0:47802 -> 127.0.0.1:47801  proto=9  walk=False loss=0.00 jitter=0ms
+[peer9] running (Ctrl+C to stop) ...
+[peer9] summary: sent=119 received=0 decode_failures=0 max_seq_gap=0
+

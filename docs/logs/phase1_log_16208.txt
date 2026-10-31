@@ -1,0 +1,1697 @@
+[Build] asi=483775060ef545169ddd3025f226690d71b38dedab91f69efd0ef665b29e5aae commit=46e8d7a tree=dirty
+[Paths] module=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\games\Assassin's Creed IV Black Flag ini=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\games\Assassin's Creed IV Black Flag\AC4Coop.ini inifrom=module logdir=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\games\Assassin's Creed IV Black Flag logfrom=module writable=1 err=0
+[Phase1] DriveContext=0 ctxMask=0x440
+[Phase1] RelevanceRadiusM=250 (characters), ShipRelevanceRadiusM=1000 (ships); peer-relative, 0 = off
+[IdRes] entity identity: scan only
+[Hook] GetUnusedPadID detour: installed
+[SGM] CHARACTER (vt 0x01E4CE90) reached SetGlobalMatrixInternal -> guard render override GO
+[Id] world=23CCAA70 worldId=0000000032E21E58 count=18
+[Id] idx=0 objId=4026532612 ent=3019B820 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=1 objId=420982877 ent=31D5F450 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=2 objId=853679922 ent=3010C090 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=3 objId=20143895943 ent=31D66540 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.27,-0.83)
+[Id] idx=4 objId=35677645477 ent=316378C0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(5.78,-2.51,0.27)
+[Id] idx=5 objId=12438318502 ent=3059FC60 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-0.05,-1.01,0.00)
+[Id] idx=6 objId=16852032057 ent=3022C980 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-0.51,-1.01,0.00)
+[Id] idx=7 objId=8200524827 ent=30C7FC30 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,2.81,0.00)
+[Id] idx=8 objId=35724969930 ent=3022F050 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=9 objId=35914154362 ent=30569180 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=10 objId=955820763 ent=30C7FB10 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.51,-0.22,1.00)
+[Id] idx=11 objId=4026532883 ent=31D637E0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=12 objId=4026532884 ent=31D638F0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-15.31,-15.31,12.50)
+[Id] idx=13 objId=4026532886 ent=31D644E0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=14 objId=4026532887 ent=31D645F0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=15 objId=4026532888 ent=31D647D0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=16 objId=4026532889 ent=31D649B0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-32.27,-5.64,17.20)
+[Id] idx=17 objId=4026532891 ent=3043ED30 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,-0.03)
+[Enum] world=23CCAA70 player=3043ED30
+[Enum] NavalManager=00000000 (via descriptor *(void**)0x028b168c)
+[Enum] ship list unreachable (mgr=00000000)
+[Enum] m_CharacterList size=1
+[Enum]   char[0]=3043ED30 vt=01E4CE90 pos=(0,0,-0)
+[Enum] m_ObjectList size=0
+[Enum] m_EntityManager.m_Entities size=18
+[Enum]   ent[0]=3019B820 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[1]=31D5F450 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[2]=3010C090 vt=01E4CE90 pos=(0,0,0)
+[Enum]   ent[3]=31D66540 vt=01E4CE90 pos=(0,0,-0)
+[Enum]   ent[4]=316378C0 vt=01E4CE90 pos=(5,-2,0)
+[Enum]   ent[5]=3059FC60 vt=01E4CE90 pos=(-0,-1,0)
+[Enum]   ent[6]=3022C980 vt=01E4CE90 pos=(-0,-1,0)
+[Enum]   ent[7]=30C7FC30 vt=01E4CE90 pos=(0,2,0)
+[Enum]   ent[8]=3022F050 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[9]=30569180 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[10]=30C7FB10 vt=01E4CE90 pos=(0,-0,1)
+[Enum]   ent[11]=31D637E0 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[12]=31D638F0 vt=01E4CE90 pos=(-15,-15,12)
+[Enum]   ent[13]=31D644E0 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[14]=31D645F0 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[15]=31D647D0 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[16]=31D649B0 vt=01E4CE90 pos=(-32,-5,17)
+[Enum]   ent[17]=3043ED30 vt=01E4CE90 pos=(0,0,-0)
+[Guard] [17]=3043ED30 bhv=026FA898 cloth=1 arch=00000001 pos=(0,0,-0) d=0
+[Guard] nearbyChars=1 guards=0
+[Fight] fighters=0
+[Tpl] spawnMgr=*(world+0x924)=FD2F3E40
+[Tpl] arr84=FD2E1060 cnt=18432 | arr94=00000000 cnt=0
+[Net] init=1  (bound/peer line goes to OutputDebugString)
+[Net] cfg enabled=1 peer=26.113.208.88 local=47801 peerPort=47801 strictPeer=1
+[Smooth] frames=0 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=0 avgD=0.0000 maxD=0.0000
+[Net] stats tx=0 pkt, 0 B, 0 ent  rx=3570 pkt, 2392236 B  |  0.0 kB/s up, 35.2 kB/s down  |  mirror ok=0 nobod=0 steal=0
+[Net] scene change: localKey=FFFFFFFF peerKey=001F7033 -> puppet shown
+[Id] world=30AD9440 worldId=000000029816CCA1 count=1955
+[Id] idx=0 objId=4026547722 ent=324BAAB0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(0.00,0.00,0.00)
+[Id] idx=1 objId=32421166846 ent=30EA9960 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-448.00,0.00)
+[Id] idx=2 objId=32421166973 ent=30EA9A70 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-448.00,0.00)
+[Id] idx=3 objId=32421166972 ent=34DF2510 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-320.00,0.00)
+[Id] idx=4 objId=32421166971 ent=34DF2620 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-320.00,0.00)
+[Id] idx=5 objId=32421166970 ent=34DF2730 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-448.00,0.00)
+[Id] idx=6 objId=32421166969 ent=34DC27C0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-448.00,0.00)
+[Id] idx=7 objId=32421166968 ent=34DC28D0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-320.00,0.00)
+[Id] idx=8 objId=32421166967 ent=34DC29E0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-320.00,0.00)
+[Id] idx=9 objId=32421166966 ent=34A958A0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-192.00,0.00)
+[Id] idx=10 objId=32421166965 ent=34A959B0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-192.00,0.00)
+[Id] idx=11 objId=32421166964 ent=34A95AC0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-448.00,-64.00,0.00)
+[Id] idx=12 objId=32421166963 ent=34CBC1E0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-320.00,-64.00,0.00)
+[Id] idx=13 objId=32421166962 ent=34CBC2F0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-192.00,0.00)
+[Id] idx=14 objId=32421166961 ent=300FA580 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-192.00,0.00)
+[Id] idx=15 objId=32421166960 ent=300FA7C0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-192.00,-64.00,0.00)
+[Id] idx=16 objId=32421166959 ent=34DAE650 evt=01E4CE90 bhv=00000000 arch=0000 pos=(-64.00,-64.00,0.00)
+[Id] idx=17 objId=32421166958 ent=34DAE890 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-448.00,0.00)
+[Id] idx=18 objId=32421166957 ent=34DAE9A0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-448.00,0.00)
+[Id] idx=19 objId=32421166956 ent=34DAEAB0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-320.00,0.00)
+[Id] idx=20 objId=32421166955 ent=34DAEBC0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-320.00,0.00)
+[Id] idx=21 objId=32421166954 ent=34DAECD0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-448.00,0.00)
+[Id] idx=22 objId=32421166953 ent=37D4AC50 evt=01E4CE90 bhv=00000000 arch=0000 pos=(448.00,-448.00,0.00)
+[Id] idx=23 objId=32421166952 ent=37D4AD60 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-320.00,0.00)
+[Id] idx=24 objId=32421166951 ent=37D4AE70 evt=01E4CE90 bhv=00000000 arch=0000 pos=(448.00,-320.00,0.00)
+[Id] idx=25 objId=32421166950 ent=37D4B0B0 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-192.00,0.00)
+[Id] idx=26 objId=32421166949 ent=37D4B350 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-192.00,0.00)
+[Id] idx=27 objId=32421166948 ent=37D4B460 evt=01E4CE90 bhv=00000000 arch=0000 pos=(64.00,-64.00,0.00)
+[Id] idx=28 objId=32421166947 ent=34A94A00 evt=01E4CE90 bhv=00000000 arch=0000 pos=(192.00,-64.00,0.00)
+[Id] idx=29 objId=32421166946 ent=34A94B10 evt=01E4CE90 bhv=00000000 arch=0000 pos=(320.00,-192.00,0.00)
+[Ident] --- world=30AD9440 worldId=11141565601 entities=1955 ---
+[Ident] objId=4026548935 arch=31EC pos=(104.99,-77.19,2.34) ent=326CA4A0
+[Ident] objId=4026548938 arch=31EC pos=(103.90,-77.89,2.27) ent=3BE66FE0
+[Ident] objId=4026548941 arch=31EC pos=(105.12,-78.59,2.33) ent=3808AC50
+[Ident] objId=4026548944 arch=35F7 pos=(55.98,-75.22,3.14) ent=3BE66E20
+[Ident] objId=4026548947 arch=318C pos=(53.88,-70.05,3.10) ent=37DBD9A0
+[Ident] objId=4026548952 arch=318C pos=(53.03,-71.53,3.01) ent=33AE1760
+[Ident] objId=4026548957 arch=318C pos=(52.13,-69.59,3.04) ent=34AC1020
+[Ident] objId=4026548962 arch=318C pos=(51.99,-70.89,3.00) ent=3BE67DC0
+[Ident] objId=4026548967 arch=31EC pos=(48.41,-80.60,3.05) ent=380F8170
+[Ident] objId=4026549123 arch=31EC pos=(46.97,-80.60,3.06) ent=3D785100
+[Ident] objId=4026549126 arch=31EC pos=(93.57,-71.90,2.31) ent=3D7703F0
+[Ident] objId=4026549129 arch=31EC pos=(85.55,-75.16,1.68) ent=3D7BCB60
+[Ident] objId=4026549132 arch=31EC pos=(82.86,-71.99,1.71) ent=3D79C300
+[Ident] objId=4026549137 arch=31EC pos=(81.91,-70.95,1.72) ent=3D7F1260
+[Ident] objId=4026549140 arch=31EC pos=(90.52,-52.27,1.24) ent=3D7BC330
+[Ident] objId=4026549143 arch=31EC pos=(89.86,-51.56,1.27) ent=3D81D920
+[Ident] objId=4026549146 arch=31EC pos=(74.89,-77.02,2.54) ent=3D8394B0
+[Ident] objId=4026549149 arch=31EC pos=(66.00,-77.00,1.85) ent=3D83DEE0
+[Ident] objId=4026549188 arch=31EC pos=(62.51,-69.65,1.79) ent=3F240990
+[Ident] objId=4026549192 arch=31EC pos=(68.36,-103.00,1.71) ent=3FD41DF0
+[Ident] objId=4026549195 arch=31EC pos=(68.13,-104.01,1.65) ent=3FE359E0
+[Ident] objId=4026549201 arch=31EC pos=(55.09,-57.44,-0.73) ent=3FE606C0
+[Ident] objId=4026549204 arch=31EC pos=(54.78,-56.02,-0.69) ent=3FE65700
+[Ident] objId=4026549207 arch=31EC pos=(41.52,-70.68,3.60) ent=3FE79540
+[Ident] objId=4026549864 arch=31EC pos=(55.99,-76.43,3.18) ent=27BB9D70
+[Ident] objId=4026549899 arch=31EC pos=(54.78,-77.64,3.18) ent=4267DA80
+[Ident] --- 26 humans logged ---
+[Net] cap SWITCH 0 -> 48 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F6C33 peerKey=001F7033 -> puppet shown
+[Mirror] ent=326CA4A0 -> playback dummy objId=4026537594 pos=(104.8,-77.0,2.3) dead=0
+[Mirror] ent=3BE66FE0 -> playback dummy objId=4026537597 pos=(103.9,-77.8,2.2) dead=0
+[Mirror] ent=3808AC50 -> playback dummy objId=4026537600 pos=(105.1,-78.5,2.3) dead=0
+[Mirror] ent=37DBD9A0 -> playback dummy objId=4026537606 pos=(53.8,-69.8,3.1) dead=0
+[Mirror] ent=33AE1760 -> playback dummy objId=4026537611 pos=(53.0,-71.6,3.0) dead=0
+[Mirror] ent=34AC1020 -> playback dummy objId=4026537616 pos=(52.1,-69.5,3.0) dead=0
+[Mirror] ent=3BE67DC0 -> playback dummy objId=4026537621 pos=(51.9,-70.8,3.0) dead=0
+[Mirror] ent=380F8170 -> playback dummy objId=4026537626 pos=(48.4,-80.5,3.0) dead=0
+[Mirror] ent=3D785100 -> playback dummy objId=4026537690 pos=(46.9,-80.6,3.0) dead=0
+[Mirror] ent=3D7703F0 -> playback dummy objId=4026537693 pos=(93.5,-71.9,2.3) dead=0
+[Mirror] ent=3D7BCB60 -> playback dummy objId=4026537696 pos=(86.4,-74.5,1.6) dead=0
+[Mirror] ent=3D79C300 -> playback dummy objId=4026537701 pos=(82.8,-71.9,1.7) dead=0
+[Mirror] ent=3D7F1260 -> playback dummy objId=4026537704 pos=(81.9,-70.9,1.7) dead=0
+[Mirror] ent=3D7BC330 -> playback dummy objId=4026537707 pos=(90.5,-52.2,1.2) dead=0
+[Mirror] ent=3D81D920 -> playback dummy objId=4026537710 pos=(89.8,-51.5,1.2) dead=0
+[Mirror] ent=3D8394B0 -> playback dummy objId=4026537713 pos=(74.8,-77.0,2.5) dead=0
+[Mirror] ent=3D83DEE0 -> playback dummy objId=4026537716 pos=(66.0,-77.0,1.8) dead=0
+[Mirror] ent=3F240990 -> playback dummy objId=4026537840 pos=(61.8,-69.4,1.7) dead=0
+[Mirror] ent=3FD41DF0 -> playback dummy objId=4026537844 pos=(68.3,-103.0,1.7) dead=0
+[Mirror] ent=3FE359E0 -> playback dummy objId=4026537847 pos=(68.1,-104.0,1.6) dead=0
+[Mirror] ent=3FE606C0 -> playback dummy objId=4026537853 pos=(55.0,-57.4,-0.7) dead=0
+[Mirror] ent=3FE65700 -> playback dummy objId=4026537856 pos=(55.0,-55.7,-0.7) dead=0
+[Mirror] ent=27BB9D70 -> playback dummy objId=4026538605 pos=(55.9,-76.4,3.1) dead=0
+[Mirror] ent=4267DA80 -> playback dummy objId=4026538641 pos=(54.7,-77.6,3.1) dead=0
+[Mirror] ent=26019040 -> playback dummy objId=4026539702 pos=(114.5,-86.8,4.8) dead=0
+[Mirror] ent=3FE79540 -> playback dummy objId=4026549552 pos=(41.5,-70.6,3.6) dead=0
+[Smooth] frames=0 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=26 avgD=0.0000 maxD=0.0000
+[Net] stats tx=15 pkt, 8400 B, 0 ent  rx=353 pkt, 254059 B  |  1.6 kB/s up, 49.6 kB/s down  |  mirror ok=50 nobod=72 steal=0
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Mirror] ent=34DD0200 -> playback dummy objId=4026539776 pos=(110.7,-89.1,4.5) dead=0
+[Mirror] ent=3BE6CFB0 -> playback dummy objId=4026539799 pos=(118.0,-89.4,4.6) dead=0
+[Mirror] ent=305693B0 -> playback dummy objId=4026539730 pos=(118.6,-76.8,2.1) dead=0
+[Mirror] ent=30361F50 -> playback dummy objId=4026539824 pos=(111.7,-67.4,2.3) dead=0
+[Mirror] ent=30364880 -> playback dummy objId=4026539848 pos=(117.6,-68.5,2.2) dead=0
+[Mirror] refused to steal ent=3808AC50 (already objId=4026537600, wanted 4026543270)
+[Mirror] ent=31EBB8F0 -> playback dummy objId=4026539876 pos=(111.0,-75.6,2.1) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=421FFA90 -> playback dummy objId=4026539926 pos=(111.4,-62.2,2.5) dead=0
+[Mirror] ent=31D6FE30 -> playback dummy objId=4026539948 pos=(111.2,-65.7,2.3) dead=0
+[Mirror] ent=33965D00 -> playback dummy objId=4026540020 pos=(116.0,-79.1,2.2) dead=0
+[Mirror] ent=31E176C0 -> playback dummy objId=4026539973 pos=(115.6,-63.7,2.4) dead=0
+[Mirror] refused to steal ent=31E176C0 (already objId=4026539973, wanted 4026540159)
+[Net] scene change: localKey=001F6C33 peerKey=001F6C34 -> puppet shown
+[Mirror] ent=317C2430 -> playback dummy objId=4026540043 pos=(118.8,-66.6,2.3) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] peer in world (id=000000029816CCA1) -> spawning puppet (try 1)
+[Phase1] HC: [0]=37E49F60 [1]=00000019 [2]=80000001  builderID=00000009`9A958CDD
+[Phase1] selector=3022D0A0 builderHC=0A43A40C builder(masked)=37E49F60
+[Phase1] builder.vtbl=01E57790 selector.vtbl=00000000
+[Phase1] dupSelector=31E13410
+[Phase1] BuildEntityWithSelector rc=0 entity=411B6E40
+[Phase1] entity.vtbl=01E4CE90
+[Phase1] GetPlayer AFTER build = 380BEBF0 (orig=380BEBF0 new=411B6E40)
+[Phase1] AddEntity issued; GetPlayer now = 380BEBF0 (orig=380BEBF0 new=411B6E40)
+[Net] spawn succeeded, g_puppet=411B6E40
+[Net] puppet behavior disabled (ctx=4)
+[Net] CAS set from local player (pac=411C1740 lac=326CC6E0)
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.40 blendIn=0.20 (puppet, cur was 48)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Mirror] ent=411C39B0 -> playback dummy objId=4026540159 pos=(116.7,-63.1,2.5) dead=0
+[Mirror] ent=411A1A10 -> playback dummy objId=4026539900 pos=(112.7,-69.6,2.2) dead=0
+[Mirror] ent=30529960 -> playback dummy objId=4026540090 pos=(112.0,-94.1,5.3) dead=0
+[Mirror] ent=30AC7DA0 -> playback dummy objId=4026539752 pos=(109.5,-77.0,2.1) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3439 pos=(105.2,-72.9,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.42 5:0.57 37:0.01} pupBlend(n=46)={4:0.42 5:0.57 37:0.01} rxTS=1.00 pupTS=1.00
+[Mirror] ent=42496DE0 -> playback dummy objId=4026540068 pos=(114.4,-94.3,5.3) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3474 pos=(105.8,-72.4,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.97 5:0.01 38:0.02} pupBlend(n=46)={4:0.97 5:0.01 38:0.02} rxTS=1.00 pupTS=1.00
+[Mirror] ent=423FB3B0 -> playback dummy objId=4026539996 pos=(109.4,-73.4,2.1) dead=0
+[Mirror] refused to steal ent=3FE79540 (already objId=4026549552, wanted 4026555619)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 228161315 ch=0 ly=0 ratio=0.00 blendIn=0.33 (puppet, cur was 194060297)
+[Net] blendIn fix alias=228161315 len 0.00 -> 0.33 type 0 -> 1 (t=0.00)
+[Net] apply seq=3508 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3543 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3578 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 50 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 228161315)
+[Net] blendIn fix alias=50 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=3611 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3645 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=219 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=47 avgD=0.0163 maxD=0.3156
+[Net] stats tx=295 pkt, 165200 B, 0 ent  rx=354 pkt, 254374 B  |  32.3 kB/s up, 49.7 kB/s down  |  mirror ok=1926 nobod=1111 steal=31
+[Mirror] ent=3BE66E20 -> playback dummy objId=4026554547 pos=(47.6,-74.6,3.0) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3679 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3713 pos=(105.3,-72.2,2.3) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 50)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={3:1.00} pupBlend(n=8)={3:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 294495259 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 110764537)
+[Net] blendIn fix alias=294495259 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=001F7033 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3750 pos=(103.2,-71.9,2.8) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] scene change: localKey=001F6C33 peerKey=001F7032 -> puppet shown
+[Net] action -> 294495261 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 294495259)
+[Net] blendIn fix alias=294495261 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] PUP act=294495261 (rx=294495261) rxBlend(n=16)={6:1.00} pupBlend(n=16)={6:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 1830814048 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 294495261)
+[Net] blendIn fix alias=1830814048 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F7031 -> puppet shown
+[Net] apply seq=3782 pos=(100.0,-71.5,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] action -> 1830814050 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 1830814048)
+[Net] blendIn fix alias=1830814050 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 2607276944 ch=0 ly=0 ratio=0.04 blendIn=0.25 (puppet, cur was 1830814050)
+[Net] blendIn fix alias=2607276944 len 0.00 -> 0.25 type 0 -> 1 (t=0.00)
+[Net] PUP act=2607276944 (rx=2607276944) rxBlend(n=46)={0:0.37 18:0.55 19:0.05 42:0.01} pupBlend(n=46)={0:0.37 18:0.55 19:0.05 42:0.01} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 2607276946 ch=0 ly=0 ratio=0.21 blendIn=0.20 (puppet, cur was 2607276944)
+[Net] blendIn fix alias=2607276946 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 1612324422 ch=0 ly=0 ratio=0.24 blendIn=0.20 (puppet, cur was 2607276946)
+[Net] blendIn fix alias=1612324422 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 75597291 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 1612324422)
+[Net] blendIn fix alias=75597291 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 879111348 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 75597291)
+[Net] blendIn fix alias=879111348 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=3820 pos=(99.2,-71.3,3.2) spd=0.00 dst=1.00 ctx=9 bundle=1
+[Net] PUP act=879111348 (rx=879111348) rxBlend(n=3)={0:0.83 1:0.17} pupBlend(n=3)={0:0.83 1:0.17} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3852 pos=(98.7,-71.1,3.5) spd=0.00 dst=1.00 ctx=9 bundle=1
+[Net] PUP act=879111348 (rx=879111348) rxBlend(n=3)={0:1.00} pupBlend(n=3)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.16 blendIn=0.50 (puppet, cur was 879111348)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.50 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F7030 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3888 pos=(97.7,-70.7,3.5) spd=0.00 dst=0.72 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.98 37:0.02} pupBlend(n=46)={4:0.98 37:0.02} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=3922 pos=(97.0,-71.0,3.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:1.00} pupBlend(n=46)={4:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 18003372 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 194060297)
+[Net] blendIn fix alias=18003372 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F702F -> puppet shown
+[Mirror] ent=429A7E50 -> playback dummy objId=4026540114 pos=(115.8,-70.4,2.2) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2F -> puppet shown
+[Net] apply seq=3955 pos=(95.3,-71.9,3.4) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] action -> 17690840 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 18003372)
+[Net] blendIn fix alias=17690840 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] PUP act=17690840 (rx=17690840) rxBlend(n=16)={4:0.60 5:0.40} pupBlend(n=16)={4:0.60 5:0.40} rxTS=1.00 pupTS=1.00
+[Smooth] frames=265 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=36 avgD=0.0565 maxD=0.3214
+[Net] stats tx=302 pkt, 169120 B, 0 ent  rx=353 pkt, 251476 B  |  33.0 kB/s up, 49.1 kB/s down  |  mirror ok=2039 nobod=1110 steal=50
+[Net] action -> 1830814048 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 17690840)
+[Net] blendIn fix alias=1830814048 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2E -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 1830814050 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 1830814048)
+[Net] blendIn fix alias=1830814050 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] apply seq=3990 pos=(93.3,-73.0,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=1830814050 (rx=1830814050) rxBlend(n=6)={0:0.58 3:0.42} pupBlend(n=6)={0:0.58 3:0.42} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.14 blendIn=0.20 (puppet, cur was 1830814050)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2D -> puppet shown
+[Net] action -> 18003337 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 194060297)
+[Net] blendIn fix alias=18003337 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] apply seq=4028 pos=(91.9,-73.4,2.5) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] PUP act=18003337 (rx=18003337) rxBlend(n=40)={2:0.38 7:0.52 10:0.04 15:0.06} pupBlend(n=40)={2:0.38 7:0.52 10:0.04 15:0.06} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F682D -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F682C -> puppet shown
+[Net] action -> 18981193 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 18003337)
+[Net] blendIn fix alias=18981193 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=001F6C33 peerKey=000F682C -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=001F682C -> puppet shown
+[Net] apply seq=4063 pos=(88.5,-75.5,2.2) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] action -> 2387887342 ch=0 ly=0 ratio=0.00 blendIn=0.17 (puppet, cur was 18981193)
+[Net] blendIn fix alias=2387887342 len 0.00 -> 0.17 type 0 -> 4 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=2387887342 (rx=2387887342) rxBlend(n=6)={0:0.99 1:0.01} pupBlend(n=6)={0:0.99 1:0.01} rxTS=1.00 pupTS=1.00
+[Net] action -> 2531761262 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2387887342)
+[Net] blendIn fix alias=2531761262 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F642C -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4100 pos=(88.2,-76.0,3.4) spd=0.00 dst=0.00 ctx=30 bundle=1
+[Net] PUP act=2531761262 (rx=2531761262) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=002F642C -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=002F642B -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 2531761263 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2531761262)
+[Net] blendIn fix alias=2531761263 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=4135 pos=(88.0,-76.3,4.3) spd=0.00 dst=0.00 ctx=30 bundle=1
+[Net] PUP act=2531761263 (rx=2531761263) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4169 pos=(88.0,-76.3,5.2) spd=0.00 dst=0.00 ctx=30 bundle=1
+[Net] action -> 2531761270 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 2531761263)
+[Net] blendIn fix alias=2531761270 len 0.00 -> 0.10 type 0 -> 1 (t=0.00)
+[Net] PUP act=2531761270 (rx=2531761270) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4204 pos=(88.0,-76.3,5.3) spd=0.00 dst=0.00 ctx=30 bundle=1
+[Net] action -> 17224389 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 2531761270)
+[Net] blendIn fix alias=17224389 len 0.00 -> 0.10 type 0 -> 2 (t=0.00)
+[Net] PUP act=17224389 (rx=17224389) rxBlend(n=3)={0:0.98 2:0.02} pupBlend(n=3)={0:0.98 2:0.02} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=003F642B -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=003F682B -> puppet shown
+[Net] apply seq=4242 pos=(87.8,-75.7,6.4) spd=0.00 dst=0.00 ctx=30 bundle=1
+[Net] action -> 613324592 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 17224389)
+[Net] blendIn fix alias=613324592 len 0.00 -> 0.10 type 0 -> 2 (t=0.00)
+[Net] PUP act=613324592 (rx=613324592) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 3873499576 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 613324592)
+[Net] blendIn fix alias=3873499576 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Smooth] frames=255 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=47 avgD=0.0687 maxD=0.8294
+[Net] stats tx=299 pkt, 167440 B, 0 ent  rx=352 pkt, 270495 B  |  32.7 kB/s up, 52.8 kB/s down  |  mirror ok=1985 nobod=1614 steal=47
+[Net] apply seq=4275 pos=(87.8,-75.6,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] PUP act=3873499576 (rx=3873499576) rxBlend(n=6)={0:0.01 1:0.99} pupBlend(n=6)={0:0.01 1:0.99} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4311 pos=(87.1,-75.8,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=3873499576 (rx=3873499576) rxBlend(n=6)={0:0.00 1:0.71 3:0.27} pupBlend(n=6)={0:0.00 1:0.71 3:0.27} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=003F642B -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=003F642A -> puppet shown
+[Net] action -> 681814244 ch=0 ly=0 ratio=0.50 blendIn=0.20 (puppet, cur was 3873499576)
+[Net] blendIn fix alias=681814244 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4344 pos=(85.6,-76.2,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] action -> 1612324379 ch=0 ly=0 ratio=0.05 blendIn=0.25 (puppet, cur was 681814244)
+[Net] blendIn fix alias=1612324379 len 0.00 -> 0.25 type 0 -> 1 (t=0.00)
+[Net] PUP act=1612324379 (rx=1612324379) rxBlend(n=46)={0:0.49 1:0.45 5:0.03 42:0.02 43:0.01} pupBlend(n=46)={0:0.49 1:0.45 5:0.03 42:0.02 43:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=003F6429 -> puppet shown
+[Net] action -> 1612324381 ch=0 ly=0 ratio=0.16 blendIn=0.20 (puppet, cur was 1612324379)
+[Net] blendIn fix alias=1612324381 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 1612324427 ch=0 ly=0 ratio=0.03 blendIn=0.20 (puppet, cur was 1612324381)
+[Net] blendIn fix alias=1612324427 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=003F6829 -> puppet shown
+[Net] apply seq=4380 pos=(83.1,-76.2,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] scene change: localKey=001F6C33 peerKey=003F6828 -> puppet shown
+[Net] PUP act=1612324427 (rx=1612324427) rxBlend(n=3)={2:1.00} pupBlend(n=3)={2:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 681814244 ch=0 ly=0 ratio=0.02 blendIn=0.20 (puppet, cur was 1612324427)
+[Net] blendIn fix alias=681814244 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=003F6827 -> puppet shown
+[Net] apply seq=4416 pos=(80.2,-75.2,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] action -> 681814242 ch=0 ly=0 ratio=0.00 blendIn=0.50 (puppet, cur was 681814244)
+[Net] blendIn fix alias=681814242 len 0.20 -> 0.50 type 1 -> 1 (t=0.00)
+[Net] PUP act=681814242 (rx=681814242) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4454 pos=(79.9,-75.1,6.4) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] PUP act=681814242 (rx=681814242) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 2607276939 ch=0 ly=0 ratio=0.00 blendIn=0.25 (puppet, cur was 681814242)
+[Net] blendIn fix alias=2607276939 len 0.00 -> 0.25 type 0 -> 1 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=003F6C27 -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=002F6C27 -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=002F6C26 -> puppet shown
+[Net] apply seq=4492 pos=(78.2,-73.9,6.0) spd=0.00 dst=0.00 ctx=6 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=2607276939 (rx=2607276939) rxBlend(n=46)={11:0.12 15:0.75} pupBlend(n=46)={11:0.12 15:0.75} rxTS=0.94 pupTS=0.94
+[Net] scene change: localKey=001F6C33 peerKey=001F6C26 -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=000F6C26 -> puppet shown
+[Net] action -> 2607276941 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2607276939)
+[Net] blendIn fix alias=2607276941 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4528 pos=(77.0,-73.0,1.8) spd=0.00 dst=0.00 ctx=9 bundle=1
+[Net] PUP act=2607276941 (rx=2607276941) rxBlend(n=21)={11:0.13 15:0.87} pupBlend(n=21)={11:0.13 15:0.87} rxTS=0.94 pupTS=0.94
+[Net] action -> 1612324401 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2607276941)
+[Net] blendIn fix alias=1612324401 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4564 pos=(76.5,-72.7,1.8) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] refused to steal ent=3D7703F0 (already objId=4026537693, wanted 4026556989)
+[Net] action -> 110762643 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 1612324401)
+[Net] blendIn fix alias=110762643 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Smooth] frames=252 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=51 avgD=0.0781 maxD=0.6724
+[Net] stats tx=295 pkt, 165200 B, 0 ent  rx=355 pkt, 291298 B  |  32.2 kB/s up, 56.8 kB/s down  |  mirror ok=2049 nobod=1993 steal=48
+[Net] PUP act=110762643 (rx=110762643) rxBlend(n=2)={0:0.54 1:0.46} pupBlend(n=2)={0:0.54 1:0.46} rxTS=1.00 pupTS=1.00
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.07 blendIn=0.30 (puppet, cur was 110762643)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4598 pos=(76.7,-72.7,1.8) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 2607276944 ch=0 ly=0 ratio=0.00 blendIn=0.25 (puppet, cur was 110764537)
+[Net] blendIn fix alias=2607276944 len 0.00 -> 0.25 type 0 -> 1 (t=0.00)
+[Net] apply seq=4629 pos=(77.0,-72.7,1.8) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] PUP act=2607276944 (rx=2607276944) rxBlend(n=46)={0:0.68 18:0.06 42:0.25} pupBlend(n=46)={0:0.68 18:0.06 42:0.25} rxTS=1.11 pupTS=1.11
+[Net] action -> 2607276946 ch=0 ly=0 ratio=0.18 blendIn=0.25 (puppet, cur was 2607276944)
+[Net] blendIn fix alias=2607276946 len 0.25 -> 0.25 type 1 -> 1 (t=0.24)
+[Net] action -> 1612324426 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2607276946)
+[Net] blendIn fix alias=1612324426 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=001F6C33 peerKey=000F6C27 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4666 pos=(79.0,-73.5,1.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=1612324426 (rx=1612324426) rxBlend(n=3)={2:1.00} pupBlend(n=3)={2:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=000F6C28 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 1612324426)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=001F6C33 peerKey=000F6C29 -> puppet shown
+[Net] apply seq=4701 pos=(82.0,-73.6,1.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={15:0.28 16:0.21 22:0.04 26:0.44 39:0.02} pupBlend(n=46)={15:0.28 16:0.21 22:0.04 26:0.44 39:0.02} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=000F6C2A -> puppet shown
+[Net] apply seq=4740 pos=(84.8,-73.6,1.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.01 12:0.08 15:0.88 38:0.01 40:0.02} pupBlend(n=46)={8:0.01 12:0.08 15:0.88 38:0.01 40:0.02} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=000F6C2B -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4776 pos=(86.9,-73.6,1.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.39 9:0.13 12:0.20 15:0.27} pupBlend(n=46)={8:0.39 9:0.13 12:0.20 15:0.27} rxTS=1.00 pupTS=1.00
+[Net] action -> 87 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=87 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] action -> 91 ch=0 ly=0 ratio=0.00 blendIn=0.00 (puppet, cur was 87)
+[Net] blendIn fix alias=91 len 0.20 -> 0.00 type 1 -> 0 (t=0.17) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4811 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=91 (rx=91) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 51 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 91)
+[Net] blendIn fix alias=51 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4850 pos=(87.9,-73.5,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=51 (rx=51) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=257 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=45 avgD=0.0491 maxD=0.3424
+[Net] stats tx=294 pkt, 164640 B, 0 ent  rx=355 pkt, 305942 B  |  32.1 kB/s up, 59.6 kB/s down  |  mirror ok=1981 nobod=2229 steal=47
+[Net] action -> 110759371 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 51)
+[Net] blendIn fix alias=110759371 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=4883 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4920 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=4955 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 48 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110759371)
+[Net] blendIn fix alias=48 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] apply seq=4988 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] refused to steal ent=411A1A10 (already objId=4026539900, wanted 4026540135)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5024 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5060 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5095 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5131 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=427B4BF0 -> playback dummy objId=4026540135 pos=(113.5,-79.2,2.3) dead=0
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5162 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=260 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=39 avgD=0.0000 maxD=0.0000
+[Net] stats tx=293 pkt, 164080 B, 0 ent  rx=352 pkt, 299768 B  |  32.0 kB/s up, 58.5 kB/s down  |  mirror ok=2019 nobod=2178 steal=59
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5204 pos=(88.0,-73.6,1.6) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 48)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=000F6C2C -> puppet shown
+[Net] apply seq=5249 pos=(88.0,-73.6,1.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 3517504040 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 110764536)
+[Net] blendIn fix alias=3517504040 len 0.30 -> 0.30 type 1 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2C -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2D -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5286 pos=(90.6,-73.6,2.2) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] action -> 3517504042 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 3517504040)
+[Net] blendIn fix alias=3517504042 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 1830814049 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 3517504042)
+[Net] blendIn fix alias=1830814049 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] PUP act=1830814049 (rx=1830814049) rxBlend(n=6)={0:1.00} pupBlend(n=6)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2E -> puppet shown
+[Net] action -> 1830814051 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 1830814049)
+[Net] blendIn fix alias=1830814051 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5325 pos=(92.8,-73.5,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=1830814051 (rx=1830814051) rxBlend(n=6)={0:0.84 1:0.16} pupBlend(n=6)={0:0.84 1:0.16} rxTS=1.00 pupTS=1.00
+[Net] action -> 3517504041 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 1830814051)
+[Net] blendIn fix alias=3517504041 len 0.30 -> 0.30 type 1 -> 1 (t=0.00)
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C2F -> puppet shown
+[Net] scene change: localKey=001F6C33 peerKey=001F6C30 -> puppet shown
+[Net] action -> 3517504043 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 3517504041)
+[Net] blendIn fix alias=3517504043 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] apply seq=5362 pos=(96.2,-73.4,2.8) spd=0.00 dst=1.00 ctx=6 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=3517504043 (rx=3517504043) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F6C31 -> puppet shown
+[Net] action -> 1830814048 ch=0 ly=0 ratio=0.00 blendIn=0.10 (puppet, cur was 3517504043)
+[Net] blendIn fix alias=1830814048 len 0.10 -> 0.10 type 1 -> 1 (t=0.00)
+[Net] action -> 1830814050 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 1830814048)
+[Net] blendIn fix alias=1830814050 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5399 pos=(98.9,-73.3,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=1830814050 (rx=1830814050) rxBlend(n=6)={0:1.00} pupBlend(n=6)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.14 blendIn=0.20 (puppet, cur was 1830814050)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=001F6C33 peerKey=001F6C32 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5432 pos=(100.1,-73.3,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.93 38:0.07} pupBlend(n=46)={4:0.93 38:0.07} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5467 pos=(101.1,-73.4,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.92 38:0.08} pupBlend(n=46)={4:0.92 38:0.08} rxTS=1.00 pupTS=1.00
+[Smooth] frames=241 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=52 avgD=0.0602 maxD=0.3308
+[Net] stats tx=296 pkt, 165760 B, 0 ent  rx=357 pkt, 292503 B  |  32.4 kB/s up, 57.1 kB/s down  |  mirror ok=2077 nobod=2017 steal=52
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Net] apply seq=5503 pos=(102.2,-73.6,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={4:0.95 31:0.02 38:0.03} pupBlend(n=46)={4:0.95 31:0.02 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5540 pos=(103.0,-73.8,2.2) spd=0.00 dst=0.64 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={0:0.30 2:0.02 4:0.65 6:0.03 37:0.01} pupBlend(n=46)={0:0.30 2:0.02 4:0.65 6:0.03 37:0.01} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6833 -> puppet shown
+[Net] apply seq=5573 pos=(103.2,-74.2,2.2) spd=0.00 dst=0.85 ctx=4 bundle=1
+[Mirror] ent=42591060 -> playback dummy objId=4026563935 pos=(39.3,-74.4,3.5) dead=0
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={0:0.01 1:0.01 2:0.01 4:0.24 5:0.32 6:0.41} pupBlend(n=46)={0:0.01 1:0.01 2:0.01 4:0.24 5:0.32 6:0.41} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5606 pos=(103.6,-74.5,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.60 6:0.39 37:0.01} pupBlend(n=46)={5:0.60 6:0.39 37:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F6834 -> puppet shown
+[Net] apply seq=5639 pos=(104.3,-74.3,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.65 6:0.31 37:0.04} pupBlend(n=46)={5:0.65 6:0.31 37:0.04} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F6C34 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5671 pos=(104.4,-73.8,2.2) spd=0.00 dst=0.95 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.69 6:0.31} pupBlend(n=46)={5:0.69 6:0.31} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5707 pos=(104.4,-73.7,2.3) spd=0.00 dst=0.59 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={0:0.01 1:0.16 2:0.14 5:0.35 6:0.31 38:0.03} pupBlend(n=46)={0:0.01 1:0.16 2:0.14 5:0.35 6:0.31 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Net] apply seq=5742 pos=(104.1,-73.2,2.3) spd=0.00 dst=0.98 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.59 6:0.40 37:0.01} pupBlend(n=46)={5:0.59 6:0.40 37:0.01} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5773 pos=(103.7,-73.1,2.3) spd=0.00 dst=0.93 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.58 6:0.40 38:0.02} pupBlend(n=46)={5:0.58 6:0.40 38:0.02} rxTS=1.00 pupTS=1.00
+[Smooth] frames=267 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=37 avgD=0.0243 maxD=0.1024
+[Net] stats tx=299 pkt, 167440 B, 0 ent  rx=355 pkt, 273641 B  |  32.7 kB/s up, 53.4 kB/s down  |  mirror ok=2120 nobod=1543 steal=50
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5806 pos=(103.1,-73.6,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.51 6:0.49} pupBlend(n=46)={5:0.51 6:0.49} rxTS=1.00 pupTS=1.00
+[Mirror] refused to steal ent=3BE66FE0 (already objId=4026537597, wanted 4026548547)
+[Net] scene change: localKey=001F6C33 peerKey=001F6833 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5842 pos=(103.3,-74.4,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.73 6:0.24 38:0.03} pupBlend(n=46)={5:0.73 6:0.24 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6834 -> puppet shown
+[Net] apply seq=5880 pos=(104.0,-74.5,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.68 6:0.32 37:0.01} pupBlend(n=46)={5:0.68 6:0.32 37:0.01} rxTS=1.00 pupTS=1.00
+[Net] apply seq=5912 pos=(104.3,-74.3,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C34 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.47 6:0.46 38:0.07} pupBlend(n=46)={5:0.47 6:0.46 38:0.07} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5950 pos=(104.8,-73.6,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.59 6:0.33 37:0.09} pupBlend(n=46)={5:0.59 6:0.33 37:0.09} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=5984 pos=(104.3,-73.3,2.3) spd=0.00 dst=0.75 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={0:0.01 1:0.16 2:0.05 5:0.56 6:0.18 38:0.03} pupBlend(n=46)={0:0.01 1:0.16 2:0.05 5:0.56 6:0.18 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6015 pos=(103.8,-73.1,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.52 6:0.44 37:0.04} pupBlend(n=46)={5:0.52 6:0.44 37:0.04} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6050 pos=(103.3,-73.3,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={1:0.06 2:0.04 5:0.51 6:0.35 38:0.03} pupBlend(n=46)={1:0.06 2:0.04 5:0.51 6:0.35 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6833 -> puppet shown
+[Net] apply seq=6084 pos=(103.1,-73.8,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Smooth] frames=265 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=37 avgD=0.0286 maxD=0.0938
+[Net] stats tx=301 pkt, 168560 B, 0 ent  rx=353 pkt, 274280 B  |  32.9 kB/s up, 53.6 kB/s down  |  mirror ok=2086 nobod=1549 steal=52
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.52 6:0.48} pupBlend(n=46)={5:0.52 6:0.48} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6117 pos=(103.5,-74.5,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F6C33 peerKey=001F6834 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.82 6:0.18} pupBlend(n=46)={5:0.82 6:0.18} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6166 pos=(104.4,-74.2,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F6C33 peerKey=001F6C34 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.50 6:0.47 37:0.04} pupBlend(n=46)={5:0.50 6:0.47 37:0.04} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6206 pos=(104.3,-73.4,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.55 6:0.42 38:0.03} pupBlend(n=46)={5:0.55 6:0.42 38:0.03} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] scene change: localKey=001F6C33 peerKey=001F6C33 -> puppet shown
+[Net] apply seq=6244 pos=(104.1,-73.2,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.56 6:0.36 38:0.07} pupBlend(n=46)={5:0.56 6:0.36 38:0.07} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6278 pos=(103.3,-73.3,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.58 6:0.42} pupBlend(n=46)={5:0.58 6:0.42} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=6314 pos=(103.1,-73.8,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={5:0.60 6:0.40} pupBlend(n=46)={5:0.60 6:0.40} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 48 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={0:0.38 1:0.62} ts=1.00 VEL=0.000
+[Net] cap SWITCH 110764536 -> 228161314 blendIn=0.43 type=1 flags=0631 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=6351 pos=(103.2,-73.4,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={1:0.07 2:0.06 5:0.44 6:0.40 37:0.02} pupBlend(n=46)={1:0.07 2:0.06 5:0.44 6:0.40 37:0.02} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161314 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 228161315 ch=0 ly=0 ratio=0.00 blendIn=0.33 (puppet, cur was 194060297)
+[Net] blendIn fix alias=228161315 len 0.00 -> 0.33 type 0 -> 1 (t=0.00)
+[Net] cap SWITCH 228161314 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Smooth] frames=235 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=56 avgD=0.0262 maxD=0.3275
+[Net] stats tx=301 pkt, 168560 B, 0 ent  rx=353 pkt, 275081 B  |  32.9 kB/s up, 53.7 kB/s down  |  mirror ok=2067 nobod=1544 steal=50
+[Net] apply seq=6391 pos=(103.2,-73.4,2.2) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.009
+[Net] action -> 110761829 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 228161315)
+[Net] blendIn fix alias=110761829 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={0:0.21 1:0.79} ts=1.00 VEL=0.004
+[Net] apply seq=6428 pos=(103.2,-73.3,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.06 blendIn=0.30 (puppet, cur was 110761829)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={3:1.00} pupBlend(n=8)={3:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=33ADC930 -> playback dummy objId=4026564660 pos=(55.8,-74.6,3.1) dead=0
+[Net] scene change: localKey=001F6C33 peerKey=001F6C32 -> puppet shown
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.010
+[Net] cap SWITCH 110764536 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.13
+[Net] scene change: localKey=001F6833 peerKey=001F6C32 -> puppet shown
+[Net] apply seq=6465 pos=(101.8,-73.3,2.3) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={3:1.00} pupBlend(n=8)={3:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 110764537)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6833 peerKey=001F6832 -> puppet shown
+[Net] scene change: localKey=001F6833 peerKey=001F6831 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.55 5:0.06 7:0.39} ts=1.00 VEL=0.011
+[Net] scene change: localKey=001F6833 peerKey=001F6830 -> puppet shown
+[Net] apply seq=6501 pos=(98.6,-74.4,2.4) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.01 23:0.06 25:0.13 26:0.72 36:0.07} pupBlend(n=46)={22:0.01 23:0.06 25:0.13 26:0.72 36:0.07} rxTS=1.00 pupTS=1.00
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.21 14:0.48 16:0.07 19:0.17 37:0.02 39:0.06} ts=1.00 VEL=0.044
+[Net] scene change: localKey=001F6833 peerKey=001F682F -> puppet shown
+[Net] scene change: localKey=001F6833 peerKey=001F6C2F -> puppet shown
+[Net] scene change: localKey=001F6833 peerKey=001F6C2E -> puppet shown
+[Net] scene change: localKey=001F6832 peerKey=001F6C2E -> puppet shown
+[Net] apply seq=6543 pos=(94.4,-73.9,2.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={19:0.18 25:0.17 26:0.49 35:0.08 39:0.08} ts=1.00 VEL=0.089
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.75 25:0.01 26:0.24 35:0.01} pupBlend(n=46)={23:0.75 25:0.01 26:0.24 35:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6832 peerKey=001F6C2D -> puppet shown
+[Net] scene change: localKey=001F6831 peerKey=001F6C2D -> puppet shown
+[Net] scene change: localKey=001F6831 peerKey=000F6C2D -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.01 23:0.27 25:0.02 26:0.66 28:0.04} ts=1.00 VEL=0.104
+[Net] scene change: localKey=001F6831 peerKey=000F6C2C -> puppet shown
+[Net] apply seq=6578 pos=(90.7,-73.4,1.8) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.43 23:0.44 36:0.11} pupBlend(n=46)={22:0.43 23:0.44 36:0.11} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6830 peerKey=000F6C2C -> puppet shown
+[Net] scene change: localKey=001F6830 peerKey=000F6C2B -> puppet shown
+[Net] scene change: localKey=001F682F peerKey=000F6C2B -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.76 24:0.02 26:0.18 27:0.02 36:0.02} ts=1.00 VEL=0.108
+[Mirror] ent=444EAEE0 -> playback dummy objId=4026543270 pos=(104.8,-80.0,2.3) dead=0
+[Mirror] ent=4467F920 -> playback dummy objId=4026557028 pos=(104.3,-69.1,2.3) dead=0
+[Net] scene change: localKey=001F682F peerKey=000F6C2A -> puppet shown
+[Mirror] ent=44BDA800 -> playback dummy objId=4026567328 pos=(44.0,-112.8,1.7) dead=0
+[Net] scene change: localKey=001F682E peerKey=000F6C2A -> puppet shown
+[Mirror] ent=449469B0 -> playback dummy objId=4026567016 pos=(47.0,-106.9,1.8) dead=0
+[Mirror] ent=44593380 -> playback dummy objId=4026566980 pos=(44.5,-45.1,3.6) dead=0
+[Net] scene change: localKey=001F6C2E peerKey=000F6C2A -> puppet shown
+[Net] scene change: localKey=001F6C2E peerKey=000F6C29 -> puppet shown
+[Net] apply seq=6637 pos=(84.7,-73.4,1.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.90 35:0.10} ts=1.00 VEL=0.099
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:1.00} pupBlend(n=46)={22:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C2D peerKey=000F6C29 -> puppet shown
+[Mirror] ent=4465F210 -> playback dummy objId=4026567464 pos=(42.8,-113.3,1.6) dead=0
+[Mirror] ent=4115B020 -> playback dummy objId=4026567133 pos=(34.8,-74.6,3.5) dead=0
+[Mirror] ent=44CF4160 -> playback dummy objId=4026557378 pos=(101.0,-68.5,2.5) dead=0
+[Mirror] ent=30E93970 -> playback dummy objId=4026556989 pos=(102.6,-69.3,2.3) dead=0
+[Net] scene change: localKey=001F6C2D peerKey=000F6C28 -> puppet shown
+[Net] scene change: localKey=000F6C2D peerKey=000F6C28 -> puppet shown
+[Mirror] ent=3D79F190 -> playback dummy objId=4026567153 pos=(44.9,-39.6,3.5) dead=0
+[Mirror] ent=44490DD0 -> playback dummy objId=4026567186 pos=(43.4,-41.4,3.5) dead=0
+[Net] scene change: localKey=000F6C2C peerKey=000F6C28 -> puppet shown
+[Net] scene change: localKey=000F6C2C peerKey=000F6C27 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.91 24:0.01 27:0.03 36:0.05} ts=1.00 VEL=0.101
+[Mirror] ent=443619F0 -> playback dummy objId=4026567536 pos=(37.7,-106.7,4.2) dead=0
+[Net] apply seq=6684 pos=(79.9,-73.4,1.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=000F6C2B peerKey=000F6C27 -> puppet shown
+[Smooth] frames=217 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=67 avgD=0.1236 maxD=2.0769
+[Net] stats tx=293 pkt, 164080 B, 0 ent  rx=355 pkt, 285320 B  |  32.0 kB/s up, 55.7 kB/s down  |  mirror ok=2188 nobod=1583 steal=49
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.04 23:0.95 35:0.01} pupBlend(n=46)={22:0.04 23:0.95 35:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=000F6C2B peerKey=000F6C26 -> puppet shown
+[Mirror] ent=44594D70 -> playback dummy objId=4026543993 pos=(97.1,-75.4,2.3) dead=0
+[Mirror] ent=442B05C0 -> playback dummy objId=4026543974 pos=(98.3,-75.4,2.5) dead=0
+[Net] scene change: localKey=000F6C2A peerKey=000F6C26 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.10 23:0.89 35:0.01} ts=1.00 VEL=0.107
+[Net] scene change: localKey=000F6C2A peerKey=000F6C25 -> puppet shown
+[Mirror] ent=3FECC070 -> playback dummy objId=4026543854 pos=(95.3,-70.3,2.4) dead=0
+[Net] scene change: localKey=000F6C29 peerKey=000F6C25 -> puppet shown
+[Net] apply seq=6730 pos=(75.3,-73.2,1.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=429294E0 -> playback dummy objId=4026557487 pos=(31.6,-118.1,3.5) dead=0
+[Net] scene change: localKey=000F6C29 peerKey=000F6C24 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.49 25:0.05 26:0.24 28:0.17 36:0.05} pupBlend(n=46)={23:0.49 25:0.05 26:0.24 28:0.17 36:0.05} rxTS=1.00 pupTS=1.00
+[GKT] push SKIPPED objId=4026543897 ent=44860990 reason=mirror-watch-table-full
+[Mirror] ent=44860990 -> playback dummy objId=4026543897 pos=(93.0,-75.4,2.3) dead=0
+[GKT] push SKIPPED objId=4026543897 ent=44860990 reason=mirror-watch-table-full
+[GKT] push SKIPPED objId=4026543881 ent=46048150 reason=mirror-watch-table-full
+[Mirror] ent=46048150 -> playback dummy objId=4026543881 pos=(94.8,-75.3,2.3) dead=0
+[GKT] push SKIPPED objId=4026557525 ent=3FECC450 reason=mirror-watch-table-full
+[Mirror] ent=3FECC450 -> playback dummy objId=4026557525 pos=(31.7,-117.3,3.5) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.93 23:0.07} ts=1.00 VEL=0.101
+[Net] scene change: localKey=000F6C28 peerKey=000F6C24 -> puppet shown
+[GKT] push SKIPPED objId=4026543897 ent=44860990 reason=mirror-watch-table-full
+[GKT] push SKIPPED objId=4026543881 ent=46048150 reason=mirror-watch-table-full
+[GKT] push SKIPPED objId=4026557525 ent=3FECC450 reason=mirror-watch-table-full
+[Net] scene change: localKey=000F6C28 peerKey=000F6C23 -> puppet shown
+[GKT] push SKIPPED objId=4026543897 ent=44860990 reason=mirror-watch-table-full
+[GKT] push SKIPPED objId=4026543881 ent=46048150 reason=mirror-watch-table-full
+[GKT] push SKIPPED objId=4026557525 ent=3FECC450 reason=mirror-watch-table-full
+[Net] scene change: localKey=000F6C27 peerKey=000F6C23 -> puppet shown
+[Net] scene change: localKey=000F6C27 peerKey=000F6823 -> puppet shown
+[Net] apply seq=6774 pos=(71.0,-74.0,1.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.99 35:0.01} ts=1.00 VEL=0.100
+[Net] scene change: localKey=000F6C27 peerKey=000F6822 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.18 26:0.67 27:0.14 35:0.01} pupBlend(n=46)={23:0.18 26:0.67 27:0.14 35:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=000F6C26 peerKey=000F6822 -> puppet shown
+[Net] scene change: localKey=000F6C26 peerKey=000F6821 -> puppet shown
+[Mirror] refused to steal ent=3FECC450 (already objId=4026557525, wanted 4026557487)
+[Net] scene change: localKey=000F6C25 peerKey=000F6821 -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.96 36:0.04} ts=1.00 VEL=0.101
+[Net] apply seq=6816 pos=(67.0,-74.5,1.8) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=000F6C25 peerKey=000F6820 -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.27 26:0.72 28:0.01} pupBlend(n=46)={23:0.27 26:0.72 28:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=000F6C24 peerKey=000F6820 (last) -> puppet shown
+[Net] scene change: localKey=000F6C24 peerKey=000F681F -> puppet shown
+[Net] scene change: localKey=000F6C23 peerKey=000F681F -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.93 23:0.06 35:0.01} ts=1.00 VEL=0.100
+[Net] scene change: localKey=000F6C23 peerKey=000F681E -> puppet shown
+[Net] apply seq=6857 pos=(62.8,-74.9,1.8) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=000F6C22 peerKey=000F681E -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.86 26:0.01 35:0.12} pupBlend(n=46)={23:0.86 26:0.01 35:0.12} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=000F6C22 peerKey=001F681E -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.09 23:0.89 35:0.02} ts=1.00 VEL=0.099
+[Net] scene change: localKey=000F6C22 peerKey=001F681D -> puppet shown
+[Net] scene change: localKey=000F6C21 peerKey=001F681D -> puppet shown
+[Net] apply seq=6900 pos=(59.0,-74.9,3.2) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] scene change: localKey=000F6C20 peerKey=001F681D -> puppet shown
+[Net] scene change: localKey=000F6C20 peerKey=001F681C -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={23:0.56 35:0.44} pupBlend(n=46)={23:0.56 35:0.44} rxTS=1.00 pupTS=1.00
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:1.00} ts=1.00 VEL=0.103
+[Net] action -> 2607276594 ch=0 ly=0 ratio=0.00 blendIn=0.25 (puppet, cur was 194060297)
+[Net] blendIn fix alias=2607276594 len 0.00 -> 0.25 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=000F6C1F peerKey=001F681C -> puppet shown
+[Net] scene change: localKey=000F6C1F peerKey=001F681B -> puppet shown
+[Net] scene change: localKey=000F681F peerKey=001F681B (last) -> puppet shown
+[Net] action -> 2607276591 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 2607276594)
+[Net] blendIn fix alias=2607276591 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] scene change: localKey=000F681E peerKey=001F681B (last) -> puppet shown
+[Mirror] ent=3054D220 -> playback dummy objId=4026569447 pos=(40.4,-12.4,1.7) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={23:0.76 35:0.24} ts=1.00 VEL=0.121
+[Mirror] ent=4C1FA1E0 -> playback dummy objId=4026569461 pos=(42.2,-12.5,1.7) dead=0
+[Net] scene change: localKey=001F681E peerKey=001F681B -> puppet shown
+[Net] apply seq=6957 pos=(55.0,-74.7,3.1) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=2607276591 (rx=2607276591) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F681D peerKey=001F681B -> puppet shown
+[Net] cap SWITCH 194060297 -> 86 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=86 ch=0 ly=0 blend(n=3)={1:0.27 2:0.73} ts=1.00 VEL=0.160
+[Net] scene change: localKey=001F681D peerKey=001F681A -> puppet shown
+[Net] cap SWITCH 86 -> 90 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Smooth] frames=205 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=73 avgD=0.1407 maxD=1.1152
+[Net] stats tx=273 pkt, 152880 B, 0 ent  rx=355 pkt, 288468 B  |  29.9 kB/s up, 56.3 kB/s down  |  mirror ok=2273 nobod=1216 steal=73
+[Mirror] ent=43EA87A0 -> playback dummy objId=4026569821 pos=(102.8,-79.5,2.2) dead=0
+[Net] apply seq=6997 pos=(53.8,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] action -> 2607276269 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2607276591)
+[Net] blendIn fix alias=2607276269 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] PUP act=2607276269 (rx=2607276269) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=90 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 90 -> 53 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7060 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=2607276269 (rx=2607276269) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 53 -> 110759372 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7108 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=2607276269 (rx=2607276269) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 2607276271 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 2607276269)
+[Net] blendIn fix alias=2607276271 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] action -> 2607276272 ch=0 ly=0 ratio=0.07 blendIn=0.20 (puppet, cur was 2607276271)
+[Net] blendIn fix alias=2607276272 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=7153 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=2607276272 (rx=2607276272) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 110759372 -> 50 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Mirror] ent=4626DD10 -> playback dummy objId=4026568854 pos=(28.3,-62.8,12.4) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7209 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=2607276272 (rx=2607276272) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7251 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=2607276272 (rx=2607276272) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 110759371 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 2607276272)
+[Net] blendIn fix alias=110759371 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7292 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=185 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=62 avgD=0.0051 maxD=0.3398
+[Net] stats tx=237 pkt, 132720 B, 0 ent  rx=355 pkt, 285110 B  |  25.9 kB/s up, 55.7 kB/s down  |  mirror ok=1648 nobod=1204 steal=38
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7333 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 48 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110759371)
+[Net] blendIn fix alias=48 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] apply seq=7378 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7416 pos=(53.1,-74.6,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 48)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Mirror] ent=30F387A0 -> playback dummy objId=4026569232 pos=(15.7,-81.9,12.1) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7457 pos=(53.1,-74.7,3.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 228161314 ch=0 ly=0 ratio=0.02 blendIn=0.33 (puppet, cur was 110764536)
+[Net] blendIn fix alias=228161314 len 0.00 -> 0.33 type 0 -> 1 (t=0.00)
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7497 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161314 (rx=228161314) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7542 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161314 (rx=228161314) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 48 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 228161314)
+[Net] blendIn fix alias=48 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=7582 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=223 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=60 avgD=0.0019 maxD=0.0457
+[Net] stats tx=263 pkt, 147280 B, 0 ent  rx=353 pkt, 279721 B  |  28.8 kB/s up, 54.6 kB/s down  |  mirror ok=1824 nobod=1197 steal=39
+[Net] apply seq=7621 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7660 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7712 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7754 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7794 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7838 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7891 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=201 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=62 avgD=0.0000 maxD=0.0000
+[Net] stats tx=265 pkt, 148400 B, 0 ent  rx=352 pkt, 270500 B  |  29.0 kB/s up, 52.8 kB/s down  |  mirror ok=1871 nobod=1068 steal=44
+[Mirror] ent=37F90A60 -> playback dummy objId=4026547909 pos=(34.1,-72.3,3.4) dead=0
+[Mirror] refused to steal ent=37F90A60 (already objId=4026547909, wanted 4026547952)
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7941 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=7980 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8021 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8060 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] refused to steal ent=380F8170 (already objId=4026537626, wanted 4026547859)
+[Net] apply seq=8101 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] apply seq=8140 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8181 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=222 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=68 avgD=0.0000 maxD=0.0000
+[Net] stats tx=267 pkt, 149520 B, 0 ent  rx=357 pkt, 272949 B  |  29.1 kB/s up, 53.1 kB/s down  |  mirror ok=1780 nobod=936 steal=151
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8225 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8266 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8310 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8359 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=31EAF9A0 -> playback dummy objId=4026558612 pos=(31.7,-115.3,3.5) dead=0
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 50 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=8409 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] refused to steal ent=3D785100 (already objId=4026537690, wanted 4026557562)
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.019
+[Net] scene change: localKey=001F6C1D peerKey=001F681A -> puppet shown
+[Net] scene change: localKey=001F6C1C peerKey=001F681A -> puppet shown
+[Net] apply seq=8453 pos=(53.1,-74.9,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.028
+[Net] cap SWITCH 110764537 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 48)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] apply seq=8492 pos=(53.1,-74.9,3.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.94 38:0.06} ts=1.00 VEL=0.032
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=204 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=76 avgD=0.0010 maxD=0.0488
+[Net] stats tx=257 pkt, 143920 B, 0 ent  rx=353 pkt, 270759 B  |  28.1 kB/s up, 52.9 kB/s down  |  mirror ok=1816 nobod=922 steal=161
+[Mirror] ent=4BCAA2A0 -> playback dummy objId=4026578700 pos=(35.5,-121.4,3.8) dead=0
+[Mirror] ent=447A8320 -> playback dummy objId=4026578722 pos=(23.8,-94.9,3.5) dead=0
+[Mirror] ent=41136D70 -> playback dummy objId=4026578740 pos=(35.6,-122.9,3.8) dead=0
+[Mirror] ent=31E139F0 -> playback dummy objId=4026578767 pos=(27.5,-121.0,3.7) dead=0
+[Net] scene change: localKey=001F6C1B peerKey=001F681A -> puppet shown
+[Mirror] ent=31E11DE0 -> playback dummy objId=4026578794 pos=(28.3,-121.5,3.7) dead=0
+[Mirror] ent=418A4070 -> playback dummy objId=4026578816 pos=(28.2,-123.0,3.6) dead=0
+[Mirror] ent=461A5210 -> playback dummy objId=4026578841 pos=(27.4,-122.9,3.6) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.94 38:0.06} ts=1.00 VEL=0.034
+[Net] apply seq=8536 pos=(52.8,-75.3,3.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 228161315 ch=0 ly=0 ratio=0.02 blendIn=0.33 (puppet, cur was 110764536)
+[Net] blendIn fix alias=228161315 len 0.00 -> 0.33 type 0 -> 1 (t=0.00)
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.97 38:0.03} ts=1.00 VEL=0.028
+[Net] apply seq=8575 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C1A peerKey=001F681A -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:1.00} ts=1.00 VEL=0.029
+[Net] scene change: localKey=001F681A peerKey=001F681A -> puppet shown
+[Net] apply seq=8619 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161315 (rx=228161315) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.14 5:0.78 6:0.04 38:0.05} ts=1.00 VEL=0.026
+[Net] scene change: localKey=001F6C1A peerKey=001F681A (last) -> puppet shown
+[Net] action -> 50 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 228161315)
+[Net] blendIn fix alias=50 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={5:0.87 6:0.07 38:0.06} ts=1.00 VEL=0.029
+[Net] cap SWITCH 194060297 -> 228161315 blendIn=0.33 type=1 flags=0631 tgt=0.00 trans=1 ratio=0.00
+[Mirror] ent=4BBAEB00 -> playback dummy objId=4026578865 pos=(14.6,-113.4,3.6) dead=1
+[Mirror] ent=4BBAEB00 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=4BBAEB00 host says dead -> visual death locally
+[Mirror] dead ent=4BBAEB00 left in place (no flags, no teleport)
+[Mirror] ent=421FEAA0 -> playback dummy objId=4026579010 pos=(18.3,-111.4,3.7) dead=0
+[Net] apply seq=8686 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8726 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8768 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 228161315 -> 50 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8812 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=199 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=67 avgD=0.0048 maxD=0.0673
+[Net] stats tx=261 pkt, 146160 B, 0 ent  rx=354 pkt, 299848 B  |  28.5 kB/s up, 58.4 kB/s down  |  mirror ok=2174 nobod=1493 steal=108
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8856 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8898 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=8945 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=3F1818C0 -> playback dummy objId=4026579100 pos=(10.7,-100.5,3.6) dead=0
+[Mirror] ent=447D8FB0 -> playback dummy objId=4026581525 pos=(62.5,-69.7,1.8) dead=0
+[Net] apply seq=8985 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9030 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9074 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=44CD5860 -> playback dummy objId=4026581493 pos=(21.4,-101.4,3.5) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9119 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=208 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=60 avgD=0.0000 maxD=0.0000
+[Net] stats tx=251 pkt, 140560 B, 0 ent  rx=355 pkt, 310639 B  |  27.5 kB/s up, 60.7 kB/s down  |  mirror ok=2073 nobod=1527 steal=66
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9163 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9208 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9251 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9299 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9348 pos=(52.4,-75.3,3.0) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=46098590 -> playback dummy objId=4026558593 pos=(32.1,-113.8,3.5) dead=0
+[Net] action -> 110764537 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 50)
+[Net] blendIn fix alias=110764537 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9390 pos=(52.3,-75.2,3.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=30F0AAE0 -> playback dummy objId=4026579119 pos=(18.2,-100.5,3.6) dead=0
+[Net] scene change: localKey=001F6C1A peerKey=001F6819 -> puppet shown
+[Mirror] refused to steal ent=30F0AAE0 (already objId=4026579119, wanted 4026579162)
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=206 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=66 avgD=0.0048 maxD=0.0980
+[Net] stats tx=259 pkt, 145040 B, 0 ent  rx=356 pkt, 308086 B  |  28.2 kB/s up, 60.0 kB/s down  |  mirror ok=2274 nobod=1591 steal=54
+[Net] apply seq=9430 pos=(51.5,-74.9,2.9) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=44DCA160 -> playback dummy objId=4026584325 pos=(22.7,-94.2,3.6) dead=0
+[Net] PUP act=110764537 (rx=110764537) rxBlend(n=8)={2:0.64 3:0.36} pupBlend(n=8)={2:0.64 3:0.36} rxTS=1.00 pupTS=1.00
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.01 blendIn=0.20 (puppet, cur was 110764537)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6C1A peerKey=001F6818 -> puppet shown
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=44CCC370 -> playback dummy objId=4026584507 pos=(25.1,-78.5,3.6) dead=0
+[Net] scene change: localKey=001F6C1A peerKey=001F6817 -> puppet shown
+[Mirror] ent=4447A620 -> playback dummy objId=4026584526 pos=(25.1,-80.5,3.6) dead=0
+[Mirror] ent=449A0160 -> playback dummy objId=4026584603 pos=(36.0,-83.1,4.1) dead=1
+[Mirror] ent=449A0160 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=449A0160 host says dead -> visual death locally
+[Mirror] dead ent=449A0160 left in place (no flags, no teleport)
+[Net] apply seq=9473 pos=(47.6,-74.8,3.0) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=44C69A60 -> playback dummy objId=4026584660 pos=(16.6,-62.5,3.6) dead=0
+[Mirror] ent=462395A0 -> playback dummy objId=4026584686 pos=(17.1,-61.1,3.6) dead=0
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.21 26:0.78} pupBlend(n=46)={22:0.21 26:0.78} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4116AB00 -> playback dummy objId=4026584707 pos=(23.8,-93.6,3.6) dead=0
+[Mirror] refused to steal ent=447A8320 (already objId=4026578722, wanted 4026584735)
+[Net] scene change: localKey=001F6C1A peerKey=001F6816 -> puppet shown
+[Net] cap SWITCH 50 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Mirror] refused to steal ent=44DCA160 (already objId=4026584325, wanted 4026584783)
+[Mirror] ent=319EC840 -> playback dummy objId=4026584802 pos=(15.8,-61.2,3.6) dead=0
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=46A60030 -> playback dummy objId=4026584893 pos=(13.8,-38.5,3.6) dead=0
+[Mirror] ent=31E0B760 -> playback dummy objId=4026584859 pos=(15.3,-37.7,3.6) dead=0
+[Mirror] refused to steal ent=4BCAA2A0 (already objId=4026578700, wanted 4026584830)
+[Mirror] ent=462026A0 -> playback dummy objId=4026584939 pos=(13.2,-37.4,3.6) dead=0
+[Net] scene change: localKey=001F6C19 peerKey=001F6816 -> puppet shown
+[Net] scene change: localKey=001F6C19 peerKey=001F6815 -> puppet shown
+[Mirror] ent=462349A0 -> playback dummy objId=4026584958 pos=(14.0,-36.4,3.7) dead=0
+[Mirror] refused to steal ent=4BBAEB00 (already objId=4026578865, wanted 4026584980)
+[Net] scene change: localKey=001F6C19 peerKey=001F6C15 -> puppet shown
+[Mirror] refused to steal ent=41136D70 (already objId=4026578740, wanted 4026584994)
+[Net] apply seq=9515 pos=(43.5,-74.0,3.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=45FE76C0 -> playback dummy objId=4026585111 pos=(27.7,-61.7,3.6) dead=0
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={22:0.05 23:0.19 25:0.02 26:0.51 28:0.16 35:0.07} pupBlend(n=46)={22:0.05 23:0.19 25:0.02 26:0.51 28:0.16 35:0.07} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C19 peerKey=001F6C14 -> puppet shown
+[Mirror] ent=461C1320 -> playback dummy objId=4026585139 pos=(17.0,-46.7,3.6) dead=0
+[Mirror] ent=44C695F0 -> playback dummy objId=4026585157 pos=(33.7,-89.4,3.6) dead=0
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.022
+[Mirror] ent=42843CD0 -> playback dummy objId=4026585180 pos=(15.1,-52.1,3.5) dead=0
+[Mirror] ent=44E55E10 -> playback dummy objId=4026579162 pos=(19.9,-98.5,3.7) dead=0
+[Net] scene change: localKey=001F6C19 peerKey=001F6C13 -> puppet shown
+[Net] scene change: localKey=001F6819 peerKey=001F6C13 (last) -> puppet shown
+[Net] cap SWITCH 110764537 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=9561 pos=(40.0,-72.5,3.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.64 8:0.31 26:0.05} ts=1.00 VEL=0.031
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={12:0.15 15:0.79 17:0.04 40:0.01} pupBlend(n=46)={12:0.15 15:0.79 17:0.04 40:0.01} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6818 peerKey=001F6C13 -> puppet shown
+[Net] scene change: localKey=001F6818 peerKey=001F7012 -> puppet shown
+[Net] action -> 87 ch=0 ly=0 ratio=0.04 blendIn=0.20 (puppet, cur was 194060297)
+[Net] blendIn fix alias=87 len 0.20 -> 0.20 type 1 -> 1 (t=0.00)
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.35 16:0.59 26:0.05 39:0.01} ts=1.00 VEL=0.069
+[Net] action -> 91 ch=0 ly=0 ratio=0.00 blendIn=0.00 (puppet, cur was 87)
+[Net] blendIn fix alias=91 len 0.20 -> 0.00 type 1 -> 0 (t=0.17) [kept]
+[Net] apply seq=9606 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F6817 peerKey=001F7012 -> puppet shown
+[Net] PUP act=91 (rx=91) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C17 peerKey=001F7012 (last) -> puppet shown
+[Net] scene change: localKey=001F6C16 peerKey=001F7012 -> puppet shown
+[Net] action -> 51 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 91)
+[Net] blendIn fix alias=51 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.06 26:0.86 28:0.03 35:0.05} ts=1.00 VEL=0.098
+[Mirror] ent=421FED70 -> playback dummy objId=4026584980 pos=(14.6,-113.4,3.6) dead=1
+[Mirror] ent=421FED70 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=421FED70 host says dead -> visual death locally
+[Mirror] dead ent=421FED70 left in place (no flags, no teleport)
+[Net] apply seq=9647 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=43F6E4F0 -> playback dummy objId=4026585410 pos=(32.6,-43.6,3.1) dead=0
+[Net] scene change: localKey=001F6C15 peerKey=001F7012 -> puppet shown
+[Net] PUP act=51 (rx=51) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=461C1C50 -> playback dummy objId=4026557562 pos=(31.3,-80.8,3.6) dead=0
+[Mirror] ent=4400DF50 -> playback dummy objId=4026585470 pos=(32.6,-45.8,3.1) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.63 26:0.35 36:0.02} ts=1.00 VEL=0.097
+[Net] scene change: localKey=001F6C14 peerKey=001F7012 -> puppet shown
+[Net] apply seq=9687 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] action -> 110759371 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 51)
+[Net] blendIn fix alias=110759371 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6C13 peerKey=001F7012 -> puppet shown
+[Mirror] ent=34AC0CF0 -> playback dummy objId=4026585546 pos=(32.7,-46.3,3.2) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.37 23:0.61 25:0.01 28:0.02} ts=1.00 VEL=0.151
+[Net] scene change: localKey=001F6C12 peerKey=001F7012 -> puppet shown
+[Mirror] ent=4EEFB460 -> playback dummy objId=4026584980 pos=(14.6,-113.4,3.6) dead=1
+[Mirror] ent=4EEFB460 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=4EEFB460 host says dead -> visual death locally
+[Mirror] dead ent=4EEFB460 left in place (no flags, no teleport)
+[Mirror] ent=3BE67210 -> playback dummy objId=4026573811 pos=(31.2,-113.8,3.5) dead=0
+[Smooth] frames=213 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=59 avgD=0.0833 maxD=0.5533
+[Net] stats tx=248 pkt, 138880 B, 0 ent  rx=355 pkt, 305234 B  |  27.1 kB/s up, 59.6 kB/s down  |  mirror ok=1959 nobod=1289 steal=316
+[Net] apply seq=9729 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F6C11 peerKey=001F7012 -> puppet shown
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=419B8790 -> playback dummy objId=4026585591 pos=(4.6,-104.2,3.5) dead=0
+[Net] scene change: localKey=001F7011 peerKey=001F7012 -> puppet shown
+[Mirror] ent=3FDAD340 -> playback dummy objId=4026585572 pos=(5.7,-103.0,3.5) dead=0
+[Net] cap SWITCH 194060297 -> 87 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=87 ch=0 ly=0 blend(n=3)={1:0.51 2:0.49} ts=1.00 VEL=0.093
+[Mirror] ent=44013850 -> playback dummy objId=4026585496 pos=(32.2,-46.3,3.2) dead=0
+[Net] scene change: localKey=001F7010 peerKey=001F7012 -> puppet shown
+[Net] cap SWITCH 87 -> 91 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=9771 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=110759371 (rx=110759371) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=91 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 48 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 110759371)
+[Net] blendIn fix alias=48 len 0.00 -> 0.20 type 0 -> 0 (t=0.00) [kept]
+[Net] cap SWITCH 91 -> 51 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=9815 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=51 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=462520C0 -> playback dummy objId=4026585613 pos=(5.3,-102.9,3.5) dead=0
+[Net] cap SWITCH 51 -> 110759371 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=110759371 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9862 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=3FE687E0 -> playback dummy objId=4026580906 pos=(21.8,-102.3,3.6) dead=0
+[Mirror] ent=41A0B5D0 -> playback dummy objId=4026585392 pos=(12.9,-52.9,3.1) dead=0
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110759371 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9904 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110759371 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9945 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 110759371 -> 48 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=9988 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=10030 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=213 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=57 avgD=0.0000 maxD=0.0000
+[Net] stats tx=240 pkt, 134400 B, 0 ent  rx=354 pkt, 306640 B  |  26.2 kB/s up, 59.9 kB/s down  |  mirror ok=2124 nobod=969 steal=489
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=10072 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=10118 pos=(37.4,-71.8,3.5) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=48 (rx=48) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 48)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Mirror] ent=34036250 -> playback dummy objId=4026587016 pos=(26.6,-73.1,3.6) dead=0
+[Mirror] ent=4765FE80 -> playback dummy objId=4026585517 pos=(27.7,-42.0,3.7) dead=0
+[Net] scene change: localKey=001F7010 peerKey=001F6C12 -> puppet shown
+[Net] apply seq=10167 pos=(37.1,-72.0,3.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={1:1.00} pupBlend(n=8)={1:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4437E790 -> playback dummy objId=4026588689 pos=(-13.0,-81.3,5.5) dead=0
+[Net] scene change: localKey=001F7010 peerKey=001F6C11 -> puppet shown
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.14 blendIn=0.20 (puppet, cur was 110764536)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] apply seq=10212 pos=(36.1,-72.6,3.5) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap action=48 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={9:0.28 12:0.64 26:0.05 38:0.01 40:0.02} pupBlend(n=46)={9:0.28 12:0.64 26:0.05 38:0.01 40:0.02} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 48 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=001F7010 peerKey=001F6811 -> puppet shown
+[Net] scene change: localKey=001F7010 peerKey=001F6810 -> puppet shown
+[Mirror] ent=449A5860 -> playback dummy objId=4026585667 pos=(11.3,-54.4,3.1) dead=0
+[Net] cap SWITCH 110764536 -> 87 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Mirror] ent=442AF580 -> playback dummy objId=4026589093 pos=(21.6,-77.7,7.8) dead=0
+[Net] cap action=87 ch=0 ly=0 blend(n=3)={0:0.94 1:0.06} ts=1.00 VEL=0.021
+[Net] apply seq=10259 pos=(33.8,-74.4,3.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] cap SWITCH 87 -> 94 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Mirror] ent=4407F6E0 -> playback dummy objId=4026589116 pos=(21.5,-89.2,3.6) dead=0
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.01 12:0.36 13:0.17 15:0.36 29:0.01 32:0.02 37:0.02 39:0.04} pupBlend(n=46)={8:0.01 12:0.36 13:0.17 15:0.36 29:0.01 32:0.02 37:0.02 39:0.04} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 94 -> 96 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=001F7010 peerKey=001F640F -> puppet shown
+[Net] cap action=96 ch=0 ly=0 blend(n=3)={2:1.00} ts=1.00 VEL=0.119
+[Net] cap SWITCH 96 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F6C10 peerKey=001F640F (last) -> puppet shown
+[Net] apply seq=10307 pos=(31.8,-76.2,3.6) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Mirror] ent=41810B90 -> playback dummy objId=4026589476 pos=(22.0,-74.3,3.6) dead=0
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={8:0.58 9:0.13 12:0.12 15:0.14 37:0.01 39:0.01} pupBlend(n=46)={8:0.58 9:0.13 12:0.12 15:0.14 37:0.01 39:0.01} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 194060297 -> 3595255830 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F6C0F peerKey=001F640F -> puppet shown
+[Net] action -> 228161314 ch=0 ly=0 ratio=0.00 blendIn=0.30 (puppet, cur was 194060297)
+[Net] blendIn fix alias=228161314 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Smooth] frames=188 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=60 avgD=0.0610 maxD=0.7348
+[Net] stats tx=222 pkt, 124320 B, 0 ent  rx=353 pkt, 314561 B  |  24.2 kB/s up, 61.2 kB/s down  |  mirror ok=2141 nobod=918 steal=351
+[Net] scene change: localKey=001F6C0E peerKey=001F640F -> puppet shown
+[Net] cap action=3595255830 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.166
+[Net] cap SWITCH 3595255830 -> 3595255831 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=1 ratio=0.00
+[Net] scene change: localKey=001F680E peerKey=001F640F -> puppet shown
+[Net] cap SWITCH 3595255831 -> 194060297 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.15
+[Net] apply seq=10365 pos=(30.9,-76.7,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=228161314 (rx=228161314) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] action -> 110764536 ch=0 ly=0 ratio=0.01 blendIn=0.30 (puppet, cur was 228161314)
+[Net] blendIn fix alias=110764536 len 0.00 -> 0.30 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F640E peerKey=001F640F -> puppet shown
+[Net] scene change: localKey=001F640D peerKey=001F640F -> puppet shown
+[Mirror] ent=3D817D80 -> playback dummy objId=4026589323 pos=(7.2,-102.2,3.5) dead=0
+[Mirror] ent=3D67C470 -> playback dummy objId=4026588958 pos=(10.8,-63.8,3.6) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.14 23:0.22 26:0.62 28:0.01 36:0.01} ts=1.00 VEL=0.132
+[Net] cap SWITCH 194060297 -> 87 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F600D peerKey=001F640F -> puppet shown
+[Mirror] ent=44728C50 -> playback dummy objId=4026588901 pos=(15.7,-40.8,3.6) dead=0
+[Mirror] ent=4605B390 -> playback dummy objId=4026589022 pos=(9.6,-63.7,3.6) dead=0
+[Net] cap SWITCH 87 -> 91 blendIn=0.00 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=10415 pos=(30.6,-77.0,3.7) spd=0.00 dst=1.00 ctx=4 bundle=1
+[Net] PUP act=110764536 (rx=110764536) rxBlend(n=8)={0:0.02 1:0.98} pupBlend(n=8)={0:0.02 1:0.98} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 91 -> 110766142 blendIn=0.10 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=110766142 ch=0 ly=0 blend(n=2)={0:0.04 1:0.96} ts=1.00 VEL=0.000
+[Net] cap SWITCH 110766142 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.10 trans=1 ratio=0.08
+[Net] action -> 194060297 ch=0 ly=0 ratio=0.13 blendIn=0.20 (puppet, cur was 110764536)
+[Net] blendIn fix alias=194060297 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F600D peerKey=001F600F -> puppet shown
+[Net] apply seq=10466 pos=(30.2,-78.1,3.7) spd=0.00 dst=0.79 ctx=4 bundle=1
+[Mirror] ent=23CEB880 -> playback dummy objId=4026585452 pos=(10.9,-49.9,3.1) dead=0
+[Net] scene change: localKey=001F640D peerKey=001F600F -> puppet shown
+[Net] scene change: localKey=001F640E peerKey=001F600F -> puppet shown
+[Net] PUP act=194060297 (rx=194060297) rxBlend(n=46)={0:0.01 1:0.19 5:0.75 30:0.04} pupBlend(n=46)={0:0.01 1:0.19 5:0.75 30:0.04} rxTS=1.00 pupTS=1.00
+[Mirror] ent=442C5D60 -> playback dummy objId=4026588979 pos=(11.9,-63.7,3.6) dead=0
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={3:0.90 7:0.10} ts=1.00 VEL=0.086
+[Net] cap SWITCH 110764536 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.13
+[Net] action -> 19605785 ch=0 ly=0 ratio=0.00 blendIn=0.13 (puppet, cur was 194060297)
+[Net] blendIn fix alias=19605785 len 0.13 -> 0.13 type 1 -> 1 (t=0.00)
+[Mirror] ent=31EB09B0 -> playback dummy objId=4026590294 pos=(32.0,-100.2,3.6) dead=0
+[Net] scene change: localKey=001F640F peerKey=001F600F -> puppet shown
+[Mirror] ent=4C211390 -> playback dummy objId=4026585684 pos=(10.8,-36.5,3.2) dead=0
+[Net] action -> 19348129 ch=0 ly=0 ratio=0.03 blendIn=0.13 (puppet, cur was 19605785)
+[Net] blendIn fix alias=19348129 len 0.00 -> 0.13 type 0 -> 2 (t=0.00)
+[Net] apply seq=10513 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={15:0.17 17:0.03 19:0.52 26:0.27 32:0.02} ts=1.00 VEL=0.079
+[Net] PUP act=19348129 (rx=19348129) rxBlend(n=2)={0:1.00} pupBlend(n=2)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F6410 peerKey=001F600F -> puppet shown
+[Net] action -> 50 ch=0 ly=0 ratio=0.00 blendIn=0.20 (puppet, cur was 19348129)
+[Net] blendIn fix alias=50 len 0.00 -> 0.20 type 0 -> 1 (t=0.00)
+[Net] scene change: localKey=001F6010 peerKey=001F600F -> puppet shown
+[Mirror] ent=506ED540 -> playback dummy objId=4026590494 pos=(18.3,-111.3,3.7) dead=0
+[Mirror] ent=31700450 -> playback dummy objId=4026590335 pos=(14.6,-113.4,3.6) dead=1
+[Mirror] ent=31700450 host reports DEAD (es.dead=1, from ai+0x8C)
+[Mirror] ent=31700450 host says dead -> visual death locally
+[Mirror] dead ent=31700450 left in place (no flags, no teleport)
+[Net] cap SWITCH 194060297 -> 2607276960 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 2607276960 -> 1612324394 blendIn=0.25 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Mirror] ent=317ACDA0 -> playback dummy objId=4026589305 pos=(23.9,-40.5,3.7) dead=0
+[Net] cap action=1612324394 ch=0 ly=0 blend(n=46)={1:0.18 19:0.12 43:0.41} ts=1.00 VEL=0.013
+[Net] scene change: localKey=001F600F peerKey=001F600F -> puppet shown
+[Net] scene change: localKey=002F600F peerKey=001F600F -> puppet shown
+[Net] apply seq=10576 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 1612324394 -> 1612324382 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 1612324382 -> 1612324430 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 1612324430 -> 890082183 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 890082183 -> 18003372 blendIn=0.10 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=18003372 ch=0 ly=0 blend(n=40)={3:0.23 4:0.13 11:0.41 12:0.23} ts=1.00 VEL=0.058
+[Net] cap SWITCH 18003372 -> 1830814048 blendIn=0.10 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F600F peerKey=001F600F (last) -> puppet shown
+[Net] scene change: localKey=001F5C0F peerKey=001F600F -> puppet shown
+[Net] apply seq=10621 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 1830814048 -> 1830814050 blendIn=0.20 type=0 flags=0400 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=181 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=58 avgD=0.0162 maxD=0.1889
+[Net] stats tx=208 pkt, 116480 B, 0 ent  rx=357 pkt, 326965 B  |  22.5 kB/s up, 63.3 kB/s down  |  mirror ok=2061 nobod=951 steal=251
+[Net] cap action=1830814050 ch=0 ly=0 blend(n=6)={0:0.87 3:0.13} ts=1.00 VEL=0.028
+[Net] scene change: localKey=001F5C0E peerKey=001F600F -> puppet shown
+[Net] cap SWITCH 1830814050 -> 228161314 blendIn=0.41 type=1 flags=0631 tgt=0.00 trans=1 ratio=0.00
+[Net] cap SWITCH 228161314 -> 110764536 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=10681 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.016
+[Net] apply seq=10730 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=110764536 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.020
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 110764536 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.13
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={12:0.10 13:0.20 16:0.13 17:0.09 18:0.41 20:0.04 26:0.02} ts=1.00 VEL=0.073
+[Net] apply seq=10776 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F5C0D peerKey=001F600F -> puppet shown
+[Mirror] ent=4477BF00 -> playback dummy objId=4026589069 pos=(15.0,-101.2,3.5) dead=0
+[Mirror] ent=4F478AB0 -> playback dummy objId=4026590354 pos=(27.5,-121.0,3.6) dead=0
+[Mirror] ent=4E62D330 -> playback dummy objId=4026590373 pos=(28.3,-121.5,3.7) dead=0
+[Net] scene change: localKey=001F580D peerKey=001F600F -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4E8B96A0 -> playback dummy objId=4026590417 pos=(27.5,-122.9,3.6) dead=0
+[Mirror] ent=31E08BF0 -> playback dummy objId=4026557571 pos=(26.9,-41.7,3.7) dead=0
+[Mirror] ent=4EE9B850 -> playback dummy objId=4026590396 pos=(35.5,-121.4,3.8) dead=0
+[Net] scene change: localKey=001F580E peerKey=001F600F -> puppet shown
+[Mirror] ent=46BC4E50 -> playback dummy objId=4026590472 pos=(35.6,-122.9,3.8) dead=0
+[Mirror] ent=4E8BD2C0 -> playback dummy objId=4026590454 pos=(28.2,-123.0,3.6) dead=0
+[Net] scene change: localKey=001F540E peerKey=001F600F -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={22:0.02 23:0.07 24:0.09 26:0.69 27:0.12 36:0.01} ts=1.00 VEL=0.099
+[Net] apply seq=10820 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=411A9AC0 -> playback dummy objId=4026589133 pos=(15.6,-101.1,3.5) dead=0
+[Net] scene change: localKey=001F500E peerKey=001F600F -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 194060297 -> 86 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] scene change: localKey=001F500F peerKey=001F600F -> puppet shown
+[Net] cap action=86 ch=0 ly=0 blend(n=3)={1:0.59 2:0.41} ts=1.00 VEL=0.043
+[Net] cap SWITCH 86 -> 2607276513 blendIn=0.25 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=10862 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 2607276513 -> 2607276508 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[GKT] guest death detected objId=0 ent=44C64440 life=36->65535
+[GKT] guest death push objId=0 seq=19321828 ent=44C64440
+[Net] cap action=2607276508 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.034
+[Net] cap SWITCH 2607276508 -> 2607276798 blendIn=0.25 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Mirror] ent=42493040 -> playback dummy objId=4026558612 pos=(31.0,-110.3,3.5) dead=0
+[Net] cap SWITCH 2607276798 -> 1773489078 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=10909 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=1773489078 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.005
+[Smooth] frames=193 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=58 avgD=0.0000 maxD=0.0000
+[Net] stats tx=235 pkt, 131090 B, 1 ent  rx=355 pkt, 323495 B  |  25.5 kB/s up, 63.0 kB/s down  |  mirror ok=2410 nobod=1057 steal=206
+[Net] cap SWITCH 1773489078 -> 144484172 blendIn=0.30 type=2 flags=0402 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 144484172 -> 512372772 blendIn=0.15 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=10956 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=512372772 ch=0 ly=0 blend(n=3)={0:0.37 1:0.63} ts=1.27 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 512372772 -> 512372767 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 512372767 -> 655405383 blendIn=0.20 type=1 flags=0441 tgt=0.00 trans=0 ratio=1.42
+[Net] cap action=655405383 ch=0 ly=0 blend(n=18)={6:0.12 7:0.88} ts=1.00 VEL=0.018
+[Net] apply seq=10996 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 655405383 -> 1541777982 blendIn=0.30 type=1 flags=0441 tgt=0.00 trans=0 ratio=0.47
+[Net] cap SWITCH 1541777982 -> 194060297 blendIn=0.40 type=1 flags=0441 tgt=0.00 trans=0 ratio=0.20
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:1.00} ts=1.00 VEL=0.029
+[Net] cap SWITCH 194060297 -> 2550653792 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11040 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F500E peerKey=001F600F -> puppet shown
+[Net] scene change: localKey=001F500F peerKey=001F600F -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 2550653792 -> 1773489075 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=1773489075 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 1773489075 -> 2550653793 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11083 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 2550653793 -> 2550653050 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=2550653050 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.15 VEL=0.000
+[Net] cap SWITCH 2550653050 -> 2550653051 blendIn=0.07 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 2550653051 -> 2550652981 blendIn=0.40 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11132 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=2550652981 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[GKT] guest death detected objId=0 ent=44E73810 life=36->65535
+[GKT] guest death push objId=0 seq=19326359 ent=44E73810
+[Mirror] ent=4400E420 -> playback dummy objId=4026588901 pos=(29.3,-42.5,3.6) dead=0
+[Net] apply seq=11173 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=2550652981 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.031
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=2550652981 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=11218 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=207 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=55 avgD=0.0000 maxD=0.0000
+[Net] stats tx=248 pkt, 138368 B, 1 ent  rx=354 pkt, 318943 B  |  27.0 kB/s up, 62.3 kB/s down  |  mirror ok=2489 nobod=1024 steal=250
+[Mirror] ent=38427BA0 -> playback dummy objId=4026585435 pos=(13.5,-65.1,3.5) dead=0
+[Net] cap action=2550652981 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.076
+[Net] apply seq=11260 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 2550652981 -> 144484173 blendIn=0.30 type=2 flags=0402 tgt=0.00 trans=0 ratio=0.00
+[Net] cap SWITCH 144484173 -> 3541332047 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=30361A40 -> playback dummy objId=4026589305 pos=(33.4,-54.9,3.6) dead=0
+[Net] cap action=3541332047 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=11301 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=31DF79B0 -> playback dummy objId=4026589182 pos=(6.6,-101.6,3.5) dead=0
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 3541332047 -> 53 blendIn=0.20 type=0 flags=0600 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=53 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=11341 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 53 -> 110759372 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=11387 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=110759372 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 110759372 -> 1236978703 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11427 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=1236978703 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.005
+[Net] cap SWITCH 1236978703 -> 1236978693 blendIn=0.20 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11470 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=1236978693 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4112FE00 -> playback dummy objId=4026594251 pos=(32.7,-106.4,3.5) dead=0
+[Net] cap action=1236978693 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=11515 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 1236978693 -> 1236978694 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=1236978694 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=213 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=56 avgD=0.0000 maxD=0.0000
+[Net] stats tx=246 pkt, 137760 B, 0 ent  rx=353 pkt, 311983 B  |  26.9 kB/s up, 60.9 kB/s down  |  mirror ok=2594 nobod=860 steal=248
+[Net] apply seq=11558 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=1236978694 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 1236978694 -> 50 blendIn=0.20 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11604 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 50 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] apply seq=11643 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 110764537 -> 228161315 blendIn=0.33 type=1 flags=0631 tgt=0.00 trans=1 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.002
+[Net] apply seq=11687 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=427364F0 -> playback dummy objId=4026585702 pos=(31.9,-76.4,3.6) dead=0
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 228161315 -> 110764537 blendIn=0.30 type=1 flags=06C1 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.018
+[Net] apply seq=11736 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=44345B90 -> playback dummy objId=4026590508 pos=(1.3,-101.3,3.6) dead=0
+[Net] cap action=110764537 ch=0 ly=0 blend(n=8)={1:1.00} ts=1.00 VEL=0.029
+[Net] cap SWITCH 110764537 -> 194060297 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=11777 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] scene change: localKey=001F540F peerKey=001F600F -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.97 29:0.03} ts=1.00 VEL=0.034
+[Net] apply seq=11838 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.97 31:0.03} ts=1.00 VEL=0.031
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=198 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=53 avgD=0.0000 maxD=0.0000
+[Net] stats tx=248 pkt, 138880 B, 0 ent  rx=355 pkt, 315395 B  |  27.1 kB/s up, 61.6 kB/s down  |  mirror ok=2617 nobod=788 steal=304
+[Net] scene change: localKey=001F580F peerKey=001F600F -> puppet shown
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={4:0.62 5:0.36 31:0.02} ts=1.00 VEL=0.032
+[Net] apply seq=11882 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=4EFBB320 -> playback dummy objId=4026567186 pos=(43.6,-40.8,3.5) dead=0
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=442B9D00 -> playback dummy objId=4026537713 pos=(74.9,-77.0,2.5) dead=0
+[Mirror] ent=44470520 -> playback dummy objId=4026567153 pos=(44.9,-39.6,3.5) dead=0
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={5:0.97 29:0.03} ts=1.00 VEL=0.034
+[Net] apply seq=11927 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] scene change: localKey=001F5C0F peerKey=001F600F -> puppet shown
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=194060297 ch=0 ly=0 blend(n=46)={5:0.96 29:0.03 37:0.01} ts=1.00 VEL=0.031
+[Net] apply seq=11972 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap SWITCH 194060297 -> 228161315 blendIn=0.33 type=1 flags=0631 tgt=0.00 trans=1 ratio=0.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.002
+[Net] apply seq=12012 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12056 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=228161315 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap SWITCH 228161315 -> 50 blendIn=0.20 type=6 flags=0406 tgt=0.00 trans=0 ratio=0.00
+[Net] apply seq=12102 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4478F230 -> playback dummy objId=4026585638 pos=(14.8,-100.4,3.6) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12144 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=208 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=54 avgD=0.0000 maxD=0.0000
+[Net] stats tx=246 pkt, 137760 B, 0 ent  rx=356 pkt, 321596 B  |  26.8 kB/s up, 62.6 kB/s down  |  mirror ok=2724 nobod=925 steal=177
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12190 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=37DBD1E0 -> playback dummy objId=4026588958 pos=(22.3,-70.6,3.5) dead=0
+[Net] apply seq=12233 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12272 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12320 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=4484EE00 -> playback dummy objId=4026580733 pos=(23.4,-100.8,3.6) dead=0
+[Mirror] ent=4EEA6A20 -> playback dummy objId=4026589022 pos=(23.1,-70.2,3.5) dead=0
+[Net] apply seq=12371 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=4626A490 -> playback dummy objId=4026594251 pos=(31.7,-87.8,3.6) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12421 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12463 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=201 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=62 avgD=0.0000 maxD=0.0000
+[Net] stats tx=236 pkt, 132160 B, 0 ent  rx=353 pkt, 302969 B  |  25.8 kB/s up, 59.2 kB/s down  |  mirror ok=2499 nobod=709 steal=208
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12517 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12562 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12602 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12645 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=3F571F30 -> playback dummy objId=4026601963 pos=(13.7,-53.0,3.2) dead=0
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Mirror] ent=50D2F8D0 -> playback dummy objId=4026557582 pos=(28.7,-40.8,3.6) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12696 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12736 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=200 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=58 avgD=0.0000 maxD=0.0000
+[Net] stats tx=250 pkt, 140000 B, 0 ent  rx=358 pkt, 314903 B  |  27.3 kB/s up, 61.5 kB/s down  |  mirror ok=2980 nobod=675 steal=210
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12780 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12824 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12867 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12910 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12946 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=12990 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13036 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=208 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=57 avgD=0.0000 maxD=0.0000
+[Net] stats tx=240 pkt, 134400 B, 0 ent  rx=353 pkt, 314407 B  |  26.2 kB/s up, 61.4 kB/s down  |  mirror ok=2845 nobod=638 steal=207
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13088 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Mirror] ent=317B45D0 -> playback dummy objId=4026604375 pos=(32.6,-49.3,3.4) dead=0
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13140 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13182 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13224 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13267 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13312 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13354 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=203 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=60 avgD=0.0000 maxD=0.0000
+[Net] stats tx=244 pkt, 136640 B, 0 ent  rx=353 pkt, 312164 B  |  26.7 kB/s up, 61.0 kB/s down  |  mirror ok=2776 nobod=702 steal=260
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13401 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13449 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13498 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13540 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13582 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13628 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Smooth] frames=195 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=62 avgD=0.0000 maxD=0.0000
+[Net] stats tx=227 pkt, 127120 B, 0 ent  rx=355 pkt, 316707 B  |  24.7 kB/s up, 61.7 kB/s down  |  mirror ok=2576 nobod=714 steal=251
+[Net] apply seq=13680 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13733 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13778 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13826 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13869 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13933 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=13981 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Smooth] frames=183 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=73 avgD=0.0000 maxD=0.0000
+[Net] stats tx=204 pkt, 114240 B, 0 ent  rx=353 pkt, 308282 B  |  22.2 kB/s up, 60.0 kB/s down  |  mirror ok=2184 nobod=645 steal=211
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14032 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=4E77DF60 -> playback dummy objId=4026590508 pos=(11.1,-47.5,3.1) dead=0
+[Net] apply seq=14083 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14136 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14190 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14250 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Smooth] frames=170 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=78 avgD=0.0000 maxD=0.0000
+[Net] stats tx=201 pkt, 112560 B, 0 ent  rx=355 pkt, 319347 B  |  22.0 kB/s up, 62.4 kB/s down  |  mirror ok=2098 nobod=699 steal=172
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14302 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=4EE9C9F0 -> playback dummy objId=4026585517 pos=(33.6,-50.9,3.3) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Mirror] ent=4C2AB3D0 -> playback dummy objId=4026547952 pos=(31.2,-62.9,3.6) dead=0
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] apply seq=14370 pos=(30.1,-78.5,3.7) spd=0.00 dst=0.00 ctx=4 bundle=1
+[Net] cap SWITCH 50 -> 512372772 blendIn=0.15 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Smooth] frames=42 hold=0 ext=0 clamp=0 eqT=0 drop=0 wipe=0 extra=21 avgD=0.0000 maxD=0.0000
+[Net] stats tx=201 pkt, 112560 B, 0 ent  rx=94 pkt, 81816 B  |  22.0 kB/s up, 16.0 kB/s down  |  mirror ok=2274 nobod=601 steal=258
+[Net] cap SWITCH 512372772 -> 512372779 blendIn=0.30 type=2 flags=0602 tgt=0.00 trans=0 ratio=0.00
+[Net] PUP act=50 (rx=50) rxBlend(n=1)={0:1.00} pupBlend(n=1)={0:1.00} rxTS=1.00 pupTS=1.00
+[Net] cap action=512372779 ch=0 ly=0 blend(n=9)={1:0.78 2:0.22} ts=1.93 VEL=0.000
+[Net] cap SWITCH 512372779 -> 50 blendIn=0.40 type=1 flags=0601 tgt=0.00 trans=0 ratio=0.00
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000
+[Net] cap action=50 ch=0 ly=0 blend(n=1)={0:1.00} ts=1.00 VEL=0.000

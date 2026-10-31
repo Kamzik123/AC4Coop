@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091246Z_TEST_15340",
+  "seat": "TEST",
+  "status": "DONE",
+  "ts": "2026-10-30T09:12:46.674824+00:00",
+  "text": "selftest report: the bus writes a file and the inbox reads it back",
+  "session": ""
+}

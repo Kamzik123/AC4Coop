@@ -1,0 +1,1028 @@
+{
+  "text_base": "0x00401000",
+  "count": 146,
+  "hits": [
+    {
+      "site": 5705733,
+      "reg": "edx",
+      "target": 5705761,
+      "first_deref": "00571021 8d42ff lea eax, [edx - 1]",
+      "disp": "eax, [edx - 1]"
+    },
+    {
+      "site": 6756590,
+      "reg": "eax",
+      "target": 6756602,
+      "first_deref": "006718FA 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 6759802,
+      "reg": "edi",
+      "target": 6759886,
+      "first_deref": "006725CE 833f01 cmp dword ptr [edi], 1",
+      "disp": "dword ptr [edi], 1"
+    },
+    {
+      "site": 6795654,
+      "reg": "eax",
+      "target": 6795719,
+      "first_deref": "0067B1C7 80b81901000000 cmp byte ptr [eax + 0x119], 0",
+      "disp": "byte ptr [eax + 0x119], 0"
+    },
+    {
+      "site": 6795732,
+      "reg": "eax",
+      "target": 6795823,
+      "first_deref": "0067B22F 80b81801000000 cmp byte ptr [eax + 0x118], 0",
+      "disp": "byte ptr [eax + 0x118], 0"
+    },
+    {
+      "site": 6821889,
+      "reg": "edi",
+      "target": 6821911,
+      "first_deref": "00681817 0fb78fb6020000 movzx ecx, word ptr [edi + 0x2b6]",
+      "disp": "ecx, word ptr [edi + 0x2b6]"
+    },
+    {
+      "site": 8433330,
+      "reg": "edi",
+      "target": 8433526,
+      "first_deref": "0080AF76 8b07 mov eax, dword ptr [edi]",
+      "disp": "eax, dword ptr [edi]"
+    },
+    {
+      "site": 8433601,
+      "reg": "edi",
+      "target": 8433797,
+      "first_deref": "0080B085 8b4704 mov eax, dword ptr [edi + 4]",
+      "disp": "eax, dword ptr [edi + 4]"
+    },
+    {
+      "site": 8489953,
+      "reg": "ebx",
+      "target": 8489968,
+      "first_deref": "00818BF0 8d53ff lea edx, [ebx - 1]",
+      "disp": "edx, [ebx - 1]"
+    },
+    {
+      "site": 8835520,
+      "reg": "edi",
+      "target": 8835638,
+      "first_deref": "0086D236 8d047f lea eax, [edi + edi*2]",
+      "disp": "eax, [edi + edi*2]"
+    },
+    {
+      "site": 9559118,
+      "reg": "eax",
+      "target": 9559125,
+      "first_deref": "0091DC55 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9562717,
+      "reg": "eax",
+      "target": 9562724,
+      "first_deref": "0091EA64 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9568114,
+      "reg": "eax",
+      "target": 9568121,
+      "first_deref": "0091FF79 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9568453,
+      "reg": "eax",
+      "target": 9568460,
+      "first_deref": "009200CC 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9571712,
+      "reg": "eax",
+      "target": 9571719,
+      "first_deref": "00920D87 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9571875,
+      "reg": "eax",
+      "target": 9571882,
+      "first_deref": "00920E2A 8b08 mov ecx, dword ptr [eax]",
+      "disp": "ecx, dword ptr [eax]"
+    },
+    {
+      "site": 9601737,
+      "reg": "esi",
+      "target": 9601784,
+      "first_deref": "009282F8 8d4601 lea eax, [esi + 1]",
+      "disp": "eax, [esi + 1]"
+    },
+    {
+      "site": 9712566,
+      "reg": "eax",
+      "target": 9712573,
+      "first_deref": "009433BD 0fb64054 movzx eax, byte ptr [eax + 0x54]",
+      "disp": "eax, byte ptr [eax + 0x54]"
+    },
+    {
+      "site": 10397972,
+      "reg": "ecx",
+      "target": 10397990,
+      "first_deref": "009EA926 8b01 mov eax, dword ptr [ecx]",
+      "disp": "eax, dword ptr [ecx]"
+    },
+    {
+      "site": 10838516,
+      "reg": "edi",
+      "target": 10838546,
+      "first_deref": "00A56212 0fb6b7381b5b02 movzx esi, byte ptr [edi + 0x25b1b38]",
+      "disp": "esi, byte ptr [edi + 0x25b1b38]"
+    },
+    {
+      "site": 10856729,
+      "reg": "eax",
+      "target": 10856745,
+      "first_deref": "00A5A929 8d58ff lea ebx, [eax - 1]",
+      "disp": "ebx, [eax - 1]"
+    },
+    {
+      "site": 10866634,
+      "reg": "edi",
+      "target": 10866666,
+      "first_deref": "00A5CFEA 0fb6b7481c5b02 movzx esi, byte ptr [edi + 0x25b1c48]",
+      "disp": "esi, byte ptr [edi + 0x25b1c48]"
+    },
+    {
+      "site": 10947355,
+      "reg": "ebx",
+      "target": 10947377,
+      "first_deref": "00A70B31 8d5c0301 lea ebx, [ebx + eax + 1]",
+      "disp": "ebx, [ebx + eax + 1]"
+    },
+    {
+      "site": 11018203,
+      "reg": "eax",
+      "target": 11018221,
+      "first_deref": "00A81FED 83780c00 cmp dword ptr [eax + 0xc], 0",
+      "disp": "dword ptr [eax + 0xc], 0"
+    },
+    {
+      "site": 11299434,
+      "reg": "ecx",
+      "target": 11299442,
+      "first_deref": "00AC6A72 8d59ff lea ebx, [ecx - 1]",
+      "disp": "ebx, [ecx - 1]"
+    },
+    {
+      "site": 11300095,
+      "reg": "ecx",
+      "target": 11300110,
+      "first_deref": "00AC6D0E 8d59ff lea ebx, [ecx - 1]",
+      "disp": "ebx, [ecx - 1]"
+    },
+    {
+      "site": 11444479,
+      "reg": "edx",
+      "target": 11444494,
+      "first_deref": "00AEA10E 8a5229 mov dl, byte ptr [edx + 0x29]",
+      "disp": "dl, byte ptr [edx + 0x29]"
+    },
+    {
+      "site": 11718925,
+      "reg": "esi",
+      "target": 11719328,
+      "first_deref": "00B2D2A0 8b4e14 mov ecx, dword ptr [esi + 0x14]",
+      "disp": "ecx, dword ptr [esi + 0x14]"
+    },
+    {
+      "site": 11718953,
+      "reg": "esi",
+      "target": 11719328,
+      "first_deref": "00B2D2A0 8b4e14 mov ecx, dword ptr [esi + 0x14]",
+      "disp": "ecx, dword ptr [esi + 0x14]"
+    },
+    {
+      "site": 11719368,
+      "reg": "esi",
+      "target": 11719589,
+      "first_deref": "00B2D3A5 837e1400 cmp dword ptr [esi + 0x14], 0",
+      "disp": "dword ptr [esi + 0x14], 0"
+    },
+    {
+      "site": 11860268,
+      "reg": "eax",
+      "target": 11860317,
+      "first_deref": "00B4F95D 8b90a0000000 mov edx, dword ptr [eax + 0xa0]",
+      "disp": "edx, dword ptr [eax + 0xa0]"
+    },
+    {
+      "site": 11890495,
+      "reg": "edi",
+      "target": 11890555,
+      "first_deref": "00B56F7B 8b5704 mov edx, dword ptr [edi + 4]",
+      "disp": "edx, dword ptr [edi + 4]"
+    },
+    {
+      "site": 11920457,
+      "reg": "eax",
+      "target": 11920464,
+      "first_deref": "00B5E450 8b4840 mov ecx, dword ptr [eax + 0x40]",
+      "disp": "ecx, dword ptr [eax + 0x40]"
+    },
+    {
+      "site": 11920635,
+      "reg": "eax",
+      "target": 11920642,
+      "first_deref": "00B5E502 8b4840 mov ecx, dword ptr [eax + 0x40]",
+      "disp": "ecx, dword ptr [eax + 0x40]"
+    },
+    {
+      "site": 11921015,
+      "reg": "eax",
+      "target": 11921022,
+      "first_deref": "00B5E67E 385838 cmp byte ptr [eax + 0x38], bl",
+      "disp": "byte ptr [eax + 0x38], bl"
+    },
+    {
+      "site": 11921048,
+      "reg": "eax",
+      "target": 11921055,
+      "first_deref": "00B5E69F 385838 cmp byte ptr [eax + 0x38], bl",
+      "disp": "byte ptr [eax + 0x38], bl"
+    },
+    {
+      "site": 11921090,
+      "reg": "ecx",
+      "target": 11921097,
+      "first_deref": "00B5E6C9 385938 cmp byte ptr [ecx + 0x38], bl",
+      "disp": "byte ptr [ecx + 0x38], bl"
+    },
+    {
+      "site": 12274800,
+      "reg": "ecx",
+      "target": 12274816,
+      "first_deref": "00BB4C80 8b4110 mov eax, dword ptr [ecx + 0x10]",
+      "disp": "eax, dword ptr [ecx + 0x10]"
+    },
+    {
+      "site": 12275024,
+      "reg": "ecx",
+      "target": 12275040,
+      "first_deref": "00BB4D60 8b4118 mov eax, dword ptr [ecx + 0x18]",
+      "disp": "eax, dword ptr [ecx + 0x18]"
+    },
+    {
+      "site": 12284868,
+      "reg": "esi",
+      "target": 12284803,
+      "first_deref": "00BB7383 8954cefc mov dword ptr [esi + ecx*8 - 4], edx",
+      "disp": "dword ptr [esi + ecx*8 - 4], edx"
+    },
+    {
+      "site": 12635687,
+      "reg": "esi",
+      "target": 12635698,
+      "first_deref": "00C0CE32 8d4640 lea eax, [esi + 0x40]",
+      "disp": "eax, [esi + 0x40]"
+    },
+    {
+      "site": 12753878,
+      "reg": "eax",
+      "target": 12753893,
+      "first_deref": "00C29BE5 8d4804 lea ecx, [eax + 4]",
+      "disp": "ecx, [eax + 4]"
+    },
+    {
+      "site": 12806001,
+      "reg": "edi",
+      "target": 12806020,
+      "first_deref": "00C36784 8907 mov dword ptr [edi], eax",
+      "disp": "dword ptr [edi], eax"
+    },
+    {
+      "site": 12806224,
+      "reg": "edi",
+      "target": 12806243,
+      "first_deref": "00C36863 8907 mov dword ptr [edi], eax",
+      "disp": "dword ptr [edi], eax"
+    },
+    {
+      "site": 13423171,
+      "reg": "esi",
+      "target": 13423197,
+      "first_deref": "00CCD25D 83660cfd and dword ptr [esi + 0xc], 0xfffffffd",
+      "disp": "dword ptr [esi + 0xc], 0xfffffffd"
+    },
+    {
+      "site": 13423399,
+      "reg": "eax",
+      "target": 13423427,
+      "first_deref": "00CCD343 f6400c01 test byte ptr [eax + 0xc], 1",
+      "disp": "byte ptr [eax + 0xc], 1"
+    },
+    {
+      "site": 14639588,
+      "reg": "eax",
+      "target": 14639595,
+      "first_deref": "00DF61EB 8b4008 mov eax, dword ptr [eax + 8]",
+      "disp": "eax, dword ptr [eax + 8]"
+    },
+    {
+      "site": 14677185,
+      "reg": "eax",
+      "target": 14677192,
+      "first_deref": "00DFF4C8 8b480c mov ecx, dword ptr [eax + 0xc]",
+      "disp": "ecx, dword ptr [eax + 0xc]"
+    },
+    {
+      "site": 14777820,
+      "reg": "ecx",
+      "target": 14777826,
+      "first_deref": "00E17DE2 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14777854,
+      "reg": "ecx",
+      "target": 14777860,
+      "first_deref": "00E17E04 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14778225,
+      "reg": "edx",
+      "target": 14778231,
+      "first_deref": "00E17F77 8b7208 mov esi, dword ptr [edx + 8]",
+      "disp": "esi, dword ptr [edx + 8]"
+    },
+    {
+      "site": 14781478,
+      "reg": "ecx",
+      "target": 14781484,
+      "first_deref": "00E18C2C 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14781798,
+      "reg": "ecx",
+      "target": 14781804,
+      "first_deref": "00E18D6C 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14855271,
+      "reg": "ecx",
+      "target": 14855277,
+      "first_deref": "00E2AC6D 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14855302,
+      "reg": "edx",
+      "target": 14855308,
+      "first_deref": "00E2AC8C 8b7208 mov esi, dword ptr [edx + 8]",
+      "disp": "esi, dword ptr [edx + 8]"
+    },
+    {
+      "site": 14855465,
+      "reg": "edx",
+      "target": 14855471,
+      "first_deref": "00E2AD2F 8b7208 mov esi, dword ptr [edx + 8]",
+      "disp": "esi, dword ptr [edx + 8]"
+    },
+    {
+      "site": 14882871,
+      "reg": "ecx",
+      "target": 14882877,
+      "first_deref": "00E3183D 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14882902,
+      "reg": "ecx",
+      "target": 14882908,
+      "first_deref": "00E3185C 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 14883081,
+      "reg": "edx",
+      "target": 14883087,
+      "first_deref": "00E3190F 8b7208 mov esi, dword ptr [edx + 8]",
+      "disp": "esi, dword ptr [edx + 8]"
+    },
+    {
+      "site": 14921165,
+      "reg": "ecx",
+      "target": 14921171,
+      "first_deref": "00E3ADD3 8b5108 mov edx, dword ptr [ecx + 8]",
+      "disp": "edx, dword ptr [ecx + 8]"
+    },
+    {
+      "site": 15246472,
+      "reg": "esi",
+      "target": 15246493,
+      "first_deref": "00E8A49D 803e5d cmp byte ptr [esi], 0x5d",
+      "disp": "byte ptr [esi], 0x5d"
+    },
+    {
+      "site": 15249155,
+      "reg": "edi",
+      "target": 15249172,
+      "first_deref": "00E8AF14 803f7d cmp byte ptr [edi], 0x7d",
+      "disp": "byte ptr [edi], 0x7d"
+    },
+    {
+      "site": 15254626,
+      "reg": "ebp",
+      "target": 15254919,
+      "first_deref": "00E8C587 8b45dc mov eax, dword ptr [ebp - 0x24]",
+      "disp": "eax, dword ptr [ebp - 0x24]"
+    },
+    {
+      "site": 15254727,
+      "reg": "ecx",
+      "target": 15254778,
+      "first_deref": "00E8C4FA 8b09 mov ecx, dword ptr [ecx]",
+      "disp": "ecx, dword ptr [ecx]"
+    },
+    {
+      "site": 15254810,
+      "reg": "ecx",
+      "target": 15254834,
+      "first_deref": "00E8C532 8b09 mov ecx, dword ptr [ecx]",
+      "disp": "ecx, dword ptr [ecx]"
+    },
+    {
+      "site": 15348561,
+      "reg": "ebx",
+      "target": 15348588,
+      "first_deref": "00EA336C 8d7302 lea esi, [ebx + 2]",
+      "disp": "esi, [ebx + 2]"
+    },
+    {
+      "site": 15469456,
+      "reg": "eax",
+      "target": 15469503,
+      "first_deref": "00EC0BBF 8d0440 lea eax, [eax + eax*2]",
+      "disp": "eax, [eax + eax*2]"
+    },
+    {
+      "site": 15469616,
+      "reg": "eax",
+      "target": 15469663,
+      "first_deref": "00EC0C5F 8d1440 lea edx, [eax + eax*2]",
+      "disp": "edx, [eax + eax*2]"
+    },
+    {
+      "site": 15469776,
+      "reg": "eax",
+      "target": 15469823,
+      "first_deref": "00EC0CFF 8d1440 lea edx, [eax + eax*2]",
+      "disp": "edx, [eax + eax*2]"
+    },
+    {
+      "site": 16336371,
+      "reg": "edx",
+      "target": 16336486,
+      "first_deref": "00F94666 8b4a08 mov ecx, dword ptr [edx + 8]",
+      "disp": "ecx, dword ptr [edx + 8]"
+    },
+    {
+      "site": 17573119,
+      "reg": "edi",
+      "target": 17573177,
+      "first_deref": "010C2539 c7870401000001000000 mov dword ptr [edi + 0x104], 1",
+      "disp": "dword ptr [edi + 0x104], 1"
+    },
+    {
+      "site": 17651638,
+      "reg": "esi",
+      "target": 17651723,
+      "first_deref": "010D580B 8b863c010000 mov eax, dword ptr [esi + 0x13c]",
+      "disp": "eax, dword ptr [esi + 0x13c]"
+    },
+    {
+      "site": 18901334,
+      "reg": "eax",
+      "target": 18901531,
+      "first_deref": "01206A1B f30f1080240b0000 movss xmm0, dword ptr [eax + 0xb24]",
+      "disp": "xmm0, dword ptr [eax + 0xb24]"
+    },
+    {
+      "site": 19198345,
+      "reg": "eax",
+      "target": 19198380,
+      "first_deref": "0124F1AC f30f10403c movss xmm0, dword ptr [eax + 0x3c]",
+      "disp": "xmm0, dword ptr [eax + 0x3c]"
+    },
+    {
+      "site": 19219609,
+      "reg": "eax",
+      "target": 19219619,
+      "first_deref": "012544A3 8b10 mov edx, dword ptr [eax]",
+      "disp": "edx, dword ptr [eax]"
+    },
+    {
+      "site": 19396520,
+      "reg": "eax",
+      "target": 19396589,
+      "first_deref": "0127F7ED 8b80e8000000 mov eax, dword ptr [eax + 0xe8]",
+      "disp": "eax, dword ptr [eax + 0xe8]"
+    },
+    {
+      "site": 19489784,
+      "reg": "ebx",
+      "target": 19489875,
+      "first_deref": "01296453 8b83e8000000 mov eax, dword ptr [ebx + 0xe8]",
+      "disp": "eax, dword ptr [ebx + 0xe8]"
+    },
+    {
+      "site": 20560145,
+      "reg": "edx",
+      "target": 20560172,
+      "first_deref": "0139B92C 8d42ff lea eax, [edx - 1]",
+      "disp": "eax, [edx - 1]"
+    },
+    {
+      "site": 20850289,
+      "reg": "esi",
+      "target": 20850329,
+      "first_deref": "013E2699 8b465c mov eax, dword ptr [esi + 0x5c]",
+      "disp": "eax, dword ptr [esi + 0x5c]"
+    },
+    {
+      "site": 22113249,
+      "reg": "edi",
+      "target": 22113361,
+      "first_deref": "01516C51 8b8f9c000000 mov ecx, dword ptr [edi + 0x9c]",
+      "disp": "ecx, dword ptr [edi + 0x9c]"
+    },
+    {
+      "site": 22261055,
+      "reg": "eax",
+      "target": 22261065,
+      "first_deref": "0153AD49 8b10 mov edx, dword ptr [eax]",
+      "disp": "edx, dword ptr [eax]"
+    },
+    {
+      "site": 22466638,
+      "reg": "esi",
+      "target": 22466671,
+      "first_deref": "0156D06F 8b869c000000 mov eax, dword ptr [esi + 0x9c]",
+      "disp": "eax, dword ptr [esi + 0x9c]"
+    },
+    {
+      "site": 22917522,
+      "reg": "ecx",
+      "target": 22917532,
+      "first_deref": "015DB19C 8b11 mov edx, dword ptr [ecx]",
+      "disp": "edx, dword ptr [ecx]"
+    },
+    {
+      "site": 23790678,
+      "reg": "edx",
+      "target": 23790783,
+      "first_deref": "016B04BF 8d42ff lea eax, [edx - 1]",
+      "disp": "eax, [edx - 1]"
+    },
+    {
+      "site": 24114582,
+      "reg": "ecx",
+      "target": 24114635,
+      "first_deref": "016FF5CB 8d440901 lea eax, [ecx + ecx + 1]",
+      "disp": "eax, [ecx + ecx + 1]"
+    },
+    {
+      "site": 24265182,
+      "reg": "esi",
+      "target": 24265223,
+      "first_deref": "01724207 8b869c000000 mov eax, dword ptr [esi + 0x9c]",
+      "disp": "eax, dword ptr [esi + 0x9c]"
+    },
+    {
+      "site": 24622111,
+      "reg": "edx",
+      "target": 24622140,
+      "first_deref": "0177B43C 8d7a01 lea edi, [edx + 1]",
+      "disp": "edi, [edx + 1]"
+    },
+    {
+      "site": 24812408,
+      "reg": "edi",
+      "target": 24812458,
+      "first_deref": "017A9BAA 8db7c8000000 lea esi, [edi + 0xc8]",
+      "disp": "esi, [edi + 0xc8]"
+    },
+    {
+      "site": 24915151,
+      "reg": "esi",
+      "target": 24915166,
+      "first_deref": "017C2CDE 8b7658 mov esi, dword ptr [esi + 0x58]",
+      "disp": "esi, dword ptr [esi + 0x58]"
+    },
+    {
+      "site": 25094224,
+      "reg": "eax",
+      "target": 25094253,
+      "first_deref": "017EE86D 8b405c mov eax, dword ptr [eax + 0x5c]",
+      "disp": "eax, dword ptr [eax + 0x5c]"
+    },
+    {
+      "site": 25279895,
+      "reg": "edi",
+      "target": 25280179,
+      "first_deref": "0181BEB3 8d4f0c lea ecx, [edi + 0xc]",
+      "disp": "ecx, [edi + 0xc]"
+    },
+    {
+      "site": 25575866,
+      "reg": "ebx",
+      "target": 25575938,
+      "first_deref": "01864202 8b839c000000 mov eax, dword ptr [ebx + 0x9c]",
+      "disp": "eax, dword ptr [ebx + 0x9c]"
+    },
+    {
+      "site": 25606684,
+      "reg": "edi",
+      "target": 25606732,
+      "first_deref": "0186BA4C 837f0801 cmp dword ptr [edi + 8], 1",
+      "disp": "dword ptr [edi + 8], 1"
+    },
+    {
+      "site": 26281463,
+      "reg": "ebx",
+      "target": 26281503,
+      "first_deref": "0191061F 8b0b mov ecx, dword ptr [ebx]",
+      "disp": "ecx, dword ptr [ebx]"
+    },
+    {
+      "site": 26281676,
+      "reg": "ebx",
+      "target": 26281716,
+      "first_deref": "019106F4 8b0b mov ecx, dword ptr [ebx]",
+      "disp": "ecx, dword ptr [ebx]"
+    },
+    {
+      "site": 26380713,
+      "reg": "eax",
+      "target": 26380723,
+      "first_deref": "019289B3 8b10 mov edx, dword ptr [eax]",
+      "disp": "edx, dword ptr [eax]"
+    },
+    {
+      "site": 27131996,
+      "reg": "eax",
+      "target": 27132006,
+      "first_deref": "019E0066 8b10 mov edx, dword ptr [eax]",
+      "disp": "edx, dword ptr [eax]"
+    },
+    {
+      "site": 27338487,
+      "reg": "edi",
+      "target": 27338517,
+      "first_deref": "01A12715 8b4f5c mov ecx, dword ptr [edi + 0x5c]",
+      "disp": "ecx, dword ptr [edi + 0x5c]"
+    },
+    {
+      "site": 27457584,
+      "reg": "esi",
+      "target": 27457665,
+      "first_deref": "01A2F881 8b16 mov edx, dword ptr [esi]",
+      "disp": "edx, dword ptr [esi]"
+    },
+    {
+      "site": 27797590,
+      "reg": "esi",
+      "target": 27797660,
+      "first_deref": "01A8289C 8b8698000000 mov eax, dword ptr [esi + 0x98]",
+      "disp": "eax, dword ptr [esi + 0x98]"
+    },
+    {
+      "site": 28980308,
+      "reg": "esi",
+      "target": 28980393,
+      "first_deref": "01BA34A9 8b868c000000 mov eax, dword ptr [esi + 0x8c]",
+      "disp": "eax, dword ptr [esi + 0x8c]"
+    },
+    {
+      "site": 28983642,
+      "reg": "edi",
+      "target": 28983673,
+      "first_deref": "01BA4179 8d8788080000 lea eax, [edi + 0x888]",
+      "disp": "eax, [edi + 0x888]"
+    },
+    {
+      "site": 29222939,
+      "reg": "edi",
+      "target": 29222969,
+      "first_deref": "01BDE839 837f6800 cmp dword ptr [edi + 0x68], 0",
+      "disp": "dword ptr [edi + 0x68], 0"
+    },
+    {
+      "site": 29223120,
+      "reg": "edi",
+      "target": 29223150,
+      "first_deref": "01BDE8EE 8b4768 mov eax, dword ptr [edi + 0x68]",
+      "disp": "eax, dword ptr [edi + 0x68]"
+    },
+    {
+      "site": 29258019,
+      "reg": "ebx",
+      "target": 29258141,
+      "first_deref": "01BE719D 8d8be8000000 lea ecx, [ebx + 0xe8]",
+      "disp": "ecx, [ebx + 0xe8]"
+    },
+    {
+      "site": 30279667,
+      "reg": "eax",
+      "target": 30279687,
+      "first_deref": "01CE0807 8b484c mov ecx, dword ptr [eax + 0x4c]",
+      "disp": "ecx, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30287837,
+      "reg": "eax",
+      "target": 30287857,
+      "first_deref": "01CE27F1 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30288710,
+      "reg": "eax",
+      "target": 30288730,
+      "first_deref": "01CE2B5A 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30289072,
+      "reg": "eax",
+      "target": 30289092,
+      "first_deref": "01CE2CC4 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30290257,
+      "reg": "eax",
+      "target": 30290277,
+      "first_deref": "01CE3165 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30291344,
+      "reg": "eax",
+      "target": 30291364,
+      "first_deref": "01CE35A4 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30291710,
+      "reg": "eax",
+      "target": 30291730,
+      "first_deref": "01CE3712 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30291912,
+      "reg": "eax",
+      "target": 30291932,
+      "first_deref": "01CE37DC 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30292184,
+      "reg": "eax",
+      "target": 30292204,
+      "first_deref": "01CE38EC 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30292289,
+      "reg": "eax",
+      "target": 30292309,
+      "first_deref": "01CE3955 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30292833,
+      "reg": "eax",
+      "target": 30292853,
+      "first_deref": "01CE3B75 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30293390,
+      "reg": "eax",
+      "target": 30293410,
+      "first_deref": "01CE3DA2 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30293486,
+      "reg": "eax",
+      "target": 30293506,
+      "first_deref": "01CE3E02 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30293552,
+      "reg": "eax",
+      "target": 30293572,
+      "first_deref": "01CE3E44 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30316497,
+      "reg": "eax",
+      "target": 30316517,
+      "first_deref": "01CE97E5 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30324749,
+      "reg": "eax",
+      "target": 30324769,
+      "first_deref": "01CEB821 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30337428,
+      "reg": "eax",
+      "target": 30337448,
+      "first_deref": "01CEE9A8 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30353823,
+      "reg": "eax",
+      "target": 30353843,
+      "first_deref": "01CF29B3 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30354006,
+      "reg": "eax",
+      "target": 30354026,
+      "first_deref": "01CF2A6A 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30402096,
+      "reg": "eax",
+      "target": 30402116,
+      "first_deref": "01CFE644 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30452199,
+      "reg": "eax",
+      "target": 30452219,
+      "first_deref": "01D0A9FB 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30463920,
+      "reg": "edi",
+      "target": 30463964,
+      "first_deref": "01D0D7DC 8b0f mov ecx, dword ptr [edi]",
+      "disp": "ecx, dword ptr [edi]"
+    },
+    {
+      "site": 30496814,
+      "reg": "eax",
+      "target": 30496834,
+      "first_deref": "01D15842 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30499686,
+      "reg": "eax",
+      "target": 30499706,
+      "first_deref": "01D1637A 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30502089,
+      "reg": "eax",
+      "target": 30502109,
+      "first_deref": "01D16CDD 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30503438,
+      "reg": "eax",
+      "target": 30503458,
+      "first_deref": "01D17222 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30535779,
+      "reg": "eax",
+      "target": 30535799,
+      "first_deref": "01D1F077 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30556800,
+      "reg": "eax",
+      "target": 30556820,
+      "first_deref": "01D24294 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30631988,
+      "reg": "eax",
+      "target": 30632008,
+      "first_deref": "01D36848 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30642887,
+      "reg": "eax",
+      "target": 30642907,
+      "first_deref": "01D392DB 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30645944,
+      "reg": "eax",
+      "target": 30645964,
+      "first_deref": "01D39ECC 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30664805,
+      "reg": "eax",
+      "target": 30664825,
+      "first_deref": "01D3E879 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30692575,
+      "reg": "eax",
+      "target": 30692595,
+      "first_deref": "01D454F3 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30695602,
+      "reg": "eax",
+      "target": 30695622,
+      "first_deref": "01D460C6 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30696554,
+      "reg": "eax",
+      "target": 30696574,
+      "first_deref": "01D4647E 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30761264,
+      "reg": "eax",
+      "target": 30761284,
+      "first_deref": "01D56144 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30761395,
+      "reg": "eax",
+      "target": 30761415,
+      "first_deref": "01D561C7 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30763449,
+      "reg": "eax",
+      "target": 30763469,
+      "first_deref": "01D569CD 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 30768166,
+      "reg": "eax",
+      "target": 30768189,
+      "first_deref": "01D57C3D 8b404c mov eax, dword ptr [eax + 0x4c]",
+      "disp": "eax, dword ptr [eax + 0x4c]"
+    },
+    {
+      "site": 31107371,
+      "reg": "esi",
+      "target": 31107447,
+      "first_deref": "01DAA977 8b4e08 mov ecx, dword ptr [esi + 8]",
+      "disp": "ecx, dword ptr [esi + 8]"
+    },
+    {
+      "site": 31422330,
+      "reg": "esi",
+      "target": 31422421,
+      "first_deref": "01DF77D5 f30f7e4610 movq xmm0, qword ptr [esi + 0x10]",
+      "disp": "xmm0, qword ptr [esi + 0x10]"
+    }
+  ]
+}

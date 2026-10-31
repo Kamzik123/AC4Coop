@@ -1,0 +1,8 @@
+{
+  "id": "20261030T144023Z_IMPL_17216",
+  "seat": "IMPL",
+  "status": "DONE",
+  "ts": "2026-10-30T14:40:23.870068+00:00",
+  "text": "T21 DONE, two separate commits for A/B. FIX A = f34bd08: kCollisionLayerDisabled=0x28 (:107) used at both collision-filter sites - puppet :1286/log :1288, corpse :5980/log :5981 - and both log texts now print Disabled(0x28) from the constant. No 0x29 call sites remain (grep). FIX B = 3c80c85: IsSoldierBody(kind3&role1) replaced by IsFighterRole/IsFighterBody (:2688-2708) - kind==3 and role in {1,3,5,6,15,16,17,23,25,28}; 23 NavalNPC kept for the naval lane; kind==2 civilian and every non-fighter role are rejected by the same test. Filter site :3290. New per-window line [Sync] krreject total=%u  kind/role:count pairs (max 16 distinct, +overflow) printed next to kindrole, reset with the window (:7900). kindrole soldier= now means fighter-role, civilian/other unchanged. [KR] per-body line unchanged (still prints raw/kind/role). compile: Rule 9 lock, MSBuild clean 0 warnings, throwaway E6C9123424BC discarded (bin only). Both commits touch src/phase1.cpp only, tree clean at 3c80c85. A/B: build f34bd08 alone = collision fix only; build 3c80c85 adds the role set. next: deploy, run a fort scene and a market scene, read [Sync] krreject - any role that fights but is not in the set will show up there. blocked-by: nothing.",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx"
+}

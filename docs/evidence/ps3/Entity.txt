@@ -1,0 +1,4 @@
+Entity  size=12  members=3
+  +loc[35,0]  str
+  +loc[35,4]  strLength
+  +loc[35,8]  chr

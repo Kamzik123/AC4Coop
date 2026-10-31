@@ -1,0 +1,12 @@
+{
+  "id": "MSG-20261029T1500Z-orch-002",
+  "from": "orch",
+  "to": "doc",
+  "type": "TASK",
+  "re": "Phase-0 / 0.5-0.7",
+  "created": "2026-10-29T15:00:00Z",
+  "deadline": "2026-11-01T18:00:00Z",
+  "body": "Read ops/PROGRAM-PLAN.md section 4-Phase-0 (0.5, 0.6, 0.7) and ops/PROTOCOL.md.\n\nYou own the prose. There are ten live contradictions, listed in audit/ledger/contradictions.jsonl; each row quotes both sides and both quotes are re-verified on every audit run. Your job:\n\n1. Resolve or delete every one. Rules:\n   - Never delete history from MODLOG.md. Amend the headline in place with `SUPERSEDED <date> - see <file>:<line>`.\n   - SHIP-SYNC-HANDOFF.md's hull HP line is wrong (the value regenerates +6/tick). Delete the line and add a one-line pointer to the disproof.\n   - COOP-ROADMAP.md's 'host-authoritative' and 'type + position is reliable' lines are contradicted by COOP-MASTER-PLAN.md and by decision D-002. Mark them SUPERSEDED with a pointer to ops/DECISIONS.md D-002.\n   - Do not touch ref/AC4Coop/src/ or the plugin's git repo.\n2. Then regenerate STATUS.md from audit/report/audit.json + ops/STATE.json. If you cannot fully automate it, write a script that emits the factual half and keep a short hand-written 'what changed this week' section clearly marked as prose.\n3. Re-run `bf-coop\\audit\\tools\\run_audit.ps1` and report the contradiction count before/after.\n\nDo not use the words verified/proven/working unless the sentence cites an audit claim id (A-01, B-03, ...).\n\nReply with: files changed, contradiction count before/after, and any contradiction you believe is NOT a contradiction (with the argument).",
+  "evidence": {"artifacts": [], "claims": [], "verdict": null},
+  "reply_to": null
+}

@@ -1,0 +1,344 @@
+016d1e1c 00000008     0                         scimitar::CSrvHealth::SetMaxLifeInternal(int)
+016d1e24 00000008     0                         scimitar::CSrvHealth::SetIncapacitatedLimitInternal(int)
+016d1e2c 0000000c     0                         scimitar::CSrvNPCHealth::GetStaticClassDescriptor()
+016d1e38 0000000c     0                         scimitar::CSrvNPCHealth::Method_SetBeatUpLifePoints(int)
+016d1e44 00000010     0                         scimitar::CSrvNPCHealth::Method_GetBeatUpLifePoints(int&)
+016d1e54 0000000c     0                         scimitar::CSrvNPCHealth::Method_SetFeedbackThreshold(float)
+016d1e60 00000010     0                         scimitar::CSrvNPCHealth::Method_GetFeedbackThreshold(float&)
+016d1e70 00000014     0                         scimitar::CSrvNPCHealth::Method_IsIncapacitated(bool&)
+016d1e84 00000014     0                         scimitar::CSrvNPCHealth::Method_GetGodMode(bool&)
+016d1e98 00000014     0                         scimitar::CSrvNPCHealth::Method_GetIsPoisoned(bool&)
+016d1eac 00000014     0                         scimitar::CSrvNPCHealth::Method_GetIsKO(bool&)
+016d1ec0 0000003c     0                         scimitar::CSrvNPCHealth::Method_CanRefillHealth(bool&)
+016d1efc 00000024     0                         scimitar::CSrvNPCHealth::Method_SetIsKO(bool)
+016d1f20 00000024     0                         scimitar::CSrvNPCHealth::Method_SetIsIncapacitated(bool)
+016d1f44 0000003c     0                         scimitar::CSrvNPCHealth::Method_RefillHealth(int)
+016d1f80 0000000c     0                         scimitar::CSrvNPCHealth::Method_SetIsGoingToDie(bool)
+016dfb3c 00000030     0                         scimitar::CSrvNPCHealth::Method_SetFeedback(scimitar::Reference<scimitar::CustomActionPack> const&)
+016e07fc 000000d8     0                         scimitar::ICSrvNPCHealth::MethodGetFeedback(scimitar::Reference<scimitar::CustomActionPack>&)
+016e08d4 000000d8     0                         scimitar::ICSrvNPCHealth::MethodSetFeedback(scimitar::Reference<scimitar::CustomActionPack> const&)
+016e09ac 000000d8     0                         scimitar::ICSrvNPCHealth::MethodGetBeatUpLifePoints(int&)
+016e0a84 000000d8     0                         scimitar::ICSrvNPCHealth::MethodSetBeatUpLifePoints(int)
+016e3678 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::~FeedbackEnabled_ThresholdNotReached()
+016e36a8 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::~FeedbackEnabled_ThresholdNotReached()
+016e36d8 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::~FeedbackEnabled_ThresholdReached_FeedbackPlayed()
+016e3708 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::~FeedbackEnabled_ThresholdReached_FeedbackPlayed()
+016e3738 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::~FeedbackEnabled_ThresholdReached_FeedbackNotPlayed()
+016e3768 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::~FeedbackEnabled_ThresholdReached_FeedbackNotPlayed()
+016e3798 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::~FeedbackEnabled_ThresholdReached()
+016e37c8 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::~FeedbackEnabled_ThresholdReached()
+016e37f8 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::~FeedbackEnabled()
+016e3828 00000030     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::~FeedbackEnabled()
+016e3858 00000030     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::~FeedbackDisabled()
+016e3888 00000030     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::~FeedbackDisabled()
+016e38b8 00000030     0                         scimitar::CSrvNPCHealth::StateRoot::~StateRoot()
+016e38e8 00000030     0                         scimitar::CSrvNPCHealth::StateRoot::~StateRoot()
+016f3148 00000024     0                         scimitar::CSrvNPCHealth::Method_GetLifePoints(int&)
+016f316c 00000024     0                         scimitar::CSrvNPCHealth::Method_GetMaxLifePoints(int&)
+016f3190 0000003c     0                         scimitar::CSrvHealth::IsInjured()
+016f31cc 00000024     0                         scimitar::CSrvNPCHealth::Method_IsInjured(bool&)
+016f31f0 0000006c     0                         scimitar::CSrvHealth::GetLifeRatio()
+016f325c 00000040     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action()
+016f329c 00000004     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+016f32a0 00000040     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action()
+016f32e0 00000004     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+016f32e4 00000024     0                         scimitar::CSrvNPCHealth::Method_GetLifeRatio(float&)
+016f3308 000000f8     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action()
+016f3400 00000004     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+016f3404 00000024     0                         scimitar::CSrvNPCHealth::Method_SetMaxLifePoints(int)
+016f3428 00000024     0                         scimitar::CSrvNPCHealth::Method_GetIncapacitatedLimitPoints(int&)
+016f344c 00000020     0                         scimitar::CSrvNPCHealth::ReleaseResources()
+016f346c 0000004c     0                         scimitar::CSrvNPCHealth::Duplicate(scimitar::Object*, scimitar::DuplicateMode)
+016f34b8 00000020     0                         scimitar::CSrvNPCHealth::FastLoad(scimitar::FastLoadSerializer&)
+016f34d8 00000020     0                         scimitar::CSrvNPCHealth::StatechartDeactivate()
+016f34f8 00000020     0                         scimitar::CSrvNPCHealth::StatechartActivate()
+016f3518 00000040     0                         scimitar::CSrvNPCHealth::OnEmbeddedStatechartAdded(scimitar::Statechart*)
+016fb0c8 0000004c     0                         scimitar::CSrvNPCHealth::Method_IsEnableFeedback(bool&)
+016fcab0 00000028     0                         scimitar::CSrvNPCHealth::StateRoot::Method_SetLifePoints(int)
+016fd278 00000024     0                         scimitar::CSrvNPCHealth::Method_IsBeatUpTarget(bool&)
+017008d8 00000040     0                         scimitar::CSrvNPCHealth::OnEmbeddedStatechartRemoved(scimitar::Statechart*)
+01700918 00000048     0                         scimitar::CSrvNPCHealth::StateRoot::Method_HasEnoughLifeToSurviveFall(int, bool&)
+01700d18 00000030     0                         scimitar::CSrvNPCHealth::Method_GetFeedback(scimitar::Reference<scimitar::CustomActionPack>&)
+01700f80 00000024     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetGodMode(bool)
+01700fa4 00000028     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsPoisoned(bool)
+01700fcc 00000028     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsKO(bool)
+01700ff4 00000028     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsIncapacitated(bool)
+01701dc4 00000058     0                         scimitar::CSrvNPCHealth::StateRoot::Method_HasEnoughLifeToSurvive(int, bool&)
+01701e1c 00000014     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsGoingToDie(bool)
+01701e30 00000060     0                         scimitar::CSrvNPCHealth::SetLifeInternal(int)
+01702e54 0000001c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_IsIncapacitated(bool&)
+01702e70 0000001c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetGodMode(bool&)
+01702e8c 0000001c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIsPoisoned(bool&)
+01702ea8 0000001c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIsKO(bool&)
+01702f00 000000d8     0                         scimitar::ICSrvNPCHealth::MethodGetFeedbackThreshold(float&)
+01706bb8 000000e0     0                         scimitar::ICSrvNPCHealth::MethodSetFeedbackThreshold(float)
+01708dd8 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetMaxLifePoints(int&)
+01708e04 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIncapacitatedLimitPoints(int&)
+01708e30 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetLifeRatio(float&)
+01708e5c 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_IsInjured(bool&)
+01708e88 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetLifePoints(int&)
+01708eb4 0000002c     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetMaxLifePoints(int)
+017095b0 00000058     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+01709608 00000058     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+01709660 00000058     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0170cc2c 00000058     0                         scimitar::CSrvNPCHealth::StateRoot::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0170cc84 00000058     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0170ccdc 00000058     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0170cd34 00000058     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+01712ccc 00000044     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_CanRefillHealth(bool&)
+01712d10 00000044     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_RefillHealth(int)
+0171742c 00000054     0                         scimitar::CSrvNPCHealth::~CSrvNPCHealth()
+01717480 0000004c     0                         scimitar::CSrvNPCHealth::~CSrvNPCHealth()
+0171a6b8 000000d8     0                         scimitar::ICSrvNPCHealth::MethodIsEnableFeedback(bool&)
+0171a790 000000d8     0                         scimitar::ICSrvNPCHealth::MethodIsBeatUpTarget(bool&)
+0171ee0c 000000bc     0                         scimitar::CSrvNPCHealth::InternalStatechartConstructor()
+0171eec8 00000058     0                         scimitar::CSrvNPCHealth::CSrvNPCHealth()
+0171ef20 00000004     0                         scimitar::CSrvNPCHealth::InplaceConstructor(void*)
+0171ef24 00000048     0                         scimitar::CSrvNPCHealth::CreateStatechart()
+0172c1fc 0000014c     0                         scimitar::ICSrvNPCHealth::StatechartRegister()
+0172e2e4 000005c8     0                         scimitar::CSrvNPCHealth::StatechartRegister()
+01852f9c 0000000c     0                         scimitar::CSrvHealth::GetLife()
+01852fa8 0000000c     0                         scimitar::CSrvHealth::GetMaxLife()
+01852fb4 0000000c     0                         scimitar::CSrvHealth::GetIncapacitatedLimit()
+01852fc0 00000008     0                         scimitar::CSrvHealth::SetLifeInternal(int)
+01852fc8 0000000c     0                         scimitar::CSrvHealth::GetStaticClassDescriptor()
+01852fd4 00000058     0                         scimitar::CSrvHealth::SetLife_Callback(int)
+0185d7a8 000000d8     0                         scimitar::ICSrvHealth::MethodSetLifePoints(int)
+018665e0 00000030     0                         scimitar::CSrvHealth::~CSrvHealth()
+01866610 00000030     0                         scimitar::CSrvHealth::~CSrvHealth()
+0186fae4 000000d4     0                         scimitar::CSrvHealth::Duplicate(scimitar::Object*, scimitar::DuplicateMode)
+0186fc08 00000028     0                         scimitar::CSrvHealth::CanRefillLife()
+018707f0 000000e0     0                         scimitar::ICSrvHealth::MethodHasEnoughLifeToSurviveFall(int, bool&)
+01873364 00000068     0                         scimitar::CSrvHealth::CSrvHealth()
+01875c5c 000000e0     0                         scimitar::ICSrvHealth::MethodHasEnoughLifeToSurvive(int, bool&)
+01885ce8 000000a0     0                         scimitar::CSrvHealth::RefillLife(int)
+0188bcec 0000004c     0                         scimitar::CSrvHealth::ClearGoingToDieCache()
+0188be98 00000050     0                         scimitar::CSrvHealth::SetGoingToDieCache()
+0188d90c 000000a4     0                         scimitar::ICSrvHealth::MethodSetInfiniteBreathMode(bool)
+0188d9b0 000000a4     0                         scimitar::ICSrvHealth::MethodGetInfiniteBreathMode(bool&)
+0188da54 000000a4     0                         scimitar::ICSrvHealth::MethodGetLifePoints(int&)
+0188daf8 000000a4     0                         scimitar::ICSrvHealth::MethodGetMaxLifePoints(int&)
+0188db9c 000000a4     0                         scimitar::ICSrvHealth::MethodGetAvailableMaxLifePoints(int&)
+0188dc40 000000a4     0                         scimitar::ICSrvHealth::MethodSetIsGoingToDie(bool)
+0188dce4 0000009c     0                         scimitar::ICSrvHealth::MethodAutoKill()
+0188dd80 000000a4     0                         scimitar::ICSrvHealth::MethodRefillHealth(int)
+0188de24 000000a4     0                         scimitar::ICSrvHealth::MethodSetIsKO(bool)
+0188dec8 000000a4     0                         scimitar::ICSrvHealth::MethodSetIsPoisoned(bool)
+0188df6c 000000a4     0                         scimitar::ICSrvHealth::MethodSetGodMode(bool)
+0188e010 000000a4     0                         scimitar::ICSrvHealth::MethodSetMaxLifePoints(int)
+0188e0b4 000000a4     0                         scimitar::ICSrvHealth::MethodCanRefillHealth(bool&)
+0188e158 000000a4     0                         scimitar::ICSrvHealth::MethodGetIsKO(bool&)
+0188e1fc 000000a4     0                         scimitar::ICSrvHealth::MethodGetIsPoisoned(bool&)
+0188e2a0 000000a4     0                         scimitar::ICSrvHealth::MethodGetGodMode(bool&)
+0188e344 000000a4     0                         scimitar::ICSrvHealth::MethodIsIncapacitated(bool&)
+0188e3e8 000000a4     0                         scimitar::ICSrvHealth::MethodGetLifeRatio(float&)
+018a0bd4 0000028c     0                         scimitar::ICSrvHealth::StatechartRegister()
+02366c20 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached
+02366c58 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed
+02366c90 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed
+02366cc8 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached
+02366d00 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackEnabled
+02366d38 00000038     0                         vtable for scimitar::CSrvNPCHealth::FeedbackDisabled
+02366d70 00000038     0                         vtable for scimitar::CSrvNPCHealth::StateRoot
+02366da8 0000005c     0                         vtable for scimitar::CSrvNPCHealth::ComponentICSrvHealth
+02498088 00000008     0                         scimitar::CSrvHealth::SetMaxLifeInternal(int)
+02498090 00000008     0                         scimitar::CSrvHealth::SetIncapacitatedLimitInternal(int)
+02498098 00000008     0                         scimitar::CSrvNPCHealth::GetClassDescriptor() const
+024980a0 00000008     0                         scimitar::CSrvNPCHealth::Destruct()
+024980a8 00000008     0                         scimitar::CSrvNPCHealth::Method_SetBeatUpLifePoints(int)
+024980b0 00000008     0                         scimitar::CSrvNPCHealth::Method_GetBeatUpLifePoints(int&)
+024980b8 00000008     0                         scimitar::CSrvNPCHealth::Method_SetFeedbackThreshold(float)
+024980c0 00000008     0                         scimitar::CSrvNPCHealth::Method_GetFeedbackThreshold(float&)
+024980c8 00000008     0                         scimitar::CSrvNPCHealth::Method_IsIncapacitated(bool&)
+024980d0 00000008     0                         scimitar::CSrvNPCHealth::Method_GetGodMode(bool&)
+024980d8 00000008     0                         scimitar::CSrvNPCHealth::Method_GetIsPoisoned(bool&)
+024980e0 00000008     0                         scimitar::CSrvNPCHealth::Method_GetIsKO(bool&)
+024980e8 00000008     0                         scimitar::CSrvNPCHealth::Method_CanRefillHealth(bool&)
+024980f0 00000008     0                         scimitar::CSrvNPCHealth::Method_SetGodMode(bool)
+024980f8 00000008     0                         scimitar::CSrvNPCHealth::Method_SetIsPoisoned(bool)
+02498100 00000008     0                         scimitar::CSrvNPCHealth::Method_SetIsKO(bool)
+02498108 00000008     0                         scimitar::CSrvNPCHealth::Method_SetIsIncapacitated(bool)
+02498110 00000008     0                         scimitar::CSrvNPCHealth::Method_RefillHealth(int)
+02498118 00000008     0                         scimitar::CSrvNPCHealth::Method_AutoKill()
+02498120 00000008     0                         scimitar::CSrvNPCHealth::Method_SetIsGoingToDie(bool)
+02498128 00000008     0                         scimitar::CSrvNPCHealth::Method_GetInfiniteBreathMode(bool&)
+02498130 00000008     0                         scimitar::CSrvNPCHealth::Method_SetInfiniteBreathMode(bool)
+02498138 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::Method_DebugDisplay()
+02498de0 00000008     0                         scimitar::CSrvNPCHealth::Method_SetFeedback(scimitar::Reference<scimitar::CustomActionPack> const&)
+02499348 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::~FeedbackEnabled_ThresholdNotReached()
+02499350 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::~FeedbackEnabled_ThresholdNotReached()
+02499358 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::~FeedbackEnabled_ThresholdReached_FeedbackPlayed()
+02499360 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::~FeedbackEnabled_ThresholdReached_FeedbackPlayed()
+02499368 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::~FeedbackEnabled_ThresholdReached_FeedbackNotPlayed()
+02499370 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::~FeedbackEnabled_ThresholdReached_FeedbackNotPlayed()
+02499378 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::~FeedbackEnabled_ThresholdReached()
+02499380 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::~FeedbackEnabled_ThresholdReached()
+02499388 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::~FeedbackEnabled()
+02499390 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::~FeedbackEnabled()
+02499398 00000008     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::~FeedbackDisabled()
+024993a0 00000008     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::~FeedbackDisabled()
+024993a8 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::~StateRoot()
+024993b0 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::~StateRoot()
+0249b708 00000008     0                         scimitar::CSrvNPCHealth::Method_GetLifePoints(int&)
+0249b710 00000008     0                         scimitar::CSrvNPCHealth::Method_GetMaxLifePoints(int&)
+0249b718 00000008     0                         scimitar::CSrvNPCHealth::Method_GetAvailableMaxLifePoints(int&)
+0249b720 00000008     0                         scimitar::CSrvNPCHealth::Method_IsInjured(bool&)
+0249b728 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+0249b730 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+0249b738 00000008     0                         scimitar::CSrvNPCHealth::Method_GetLifeRatio(float&)
+0249b740 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::_Reaction_On_IAIUpdatable_UpdateSingleThreaded_Action(scimitar::StatechartState*, scimitar::StatechartTrigger&)
+0249b748 00000008     0                         scimitar::CSrvNPCHealth::Method_SetMaxLifePoints(int)
+0249b750 00000008     0                         scimitar::CSrvNPCHealth::Method_GetIncapacitatedLimitPoints(int&)
+0249b758 00000008     0                         scimitar::CSrvNPCHealth::ReleaseResources()
+0249b760 00000008     0                         scimitar::CSrvNPCHealth::Duplicate(scimitar::Object*, scimitar::DuplicateMode)
+0249b768 00000008     0                         scimitar::CSrvNPCHealth::FastLoad(scimitar::FastLoadSerializer&)
+0249b770 00000008     0                         scimitar::CSrvNPCHealth::StatechartDeactivate()
+0249b778 00000008     0                         scimitar::CSrvNPCHealth::StatechartActivate()
+0249b780 00000008     0                         scimitar::CSrvNPCHealth::OnEmbeddedStatechartAdded(scimitar::Statechart*)
+0249bd80 00000008     0                         scimitar::CSrvNPCHealth::Method_IsEnableFeedback(bool&)
+0249bfb8 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::Method_SetLifePoints(int)
+0249c050 00000008     0                         scimitar::CSrvNPCHealth::Method_IsBeatUpTarget(bool&)
+0249c0e0 00000008     0                         scimitar::CSrvNPCHealth::OnEmbeddedStatechartRemoved(scimitar::Statechart*)
+0249c0e8 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::Method_HasEnoughLifeToSurviveFall(int, bool&)
+0249c0f8 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetInfiniteBreathMode(bool&)
+0249c100 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetInfiniteBreathMode(bool)
+0249c120 00000008     0                         scimitar::CSrvNPCHealth::Method_GetFeedback(scimitar::Reference<scimitar::CustomActionPack>&)
+0249c690 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::InternalOnEnter(scimitar::Statechart&)
+0249c698 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::InternalOnExit(scimitar::Statechart&)
+0249c6a0 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::InternalOnExit(scimitar::Statechart&)
+0249c6a8 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::InternalOnEnter(scimitar::Statechart&)
+0249c6b0 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::InternalOnExit(scimitar::Statechart&)
+0249c6b8 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::InternalOnEnter(scimitar::Statechart&)
+0249c6c0 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::InternalOnExit(scimitar::Statechart&)
+0249c6c8 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::InternalOnEnter(scimitar::Statechart&)
+0249c6d0 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::InternalOnExit(scimitar::Statechart&)
+0249c6d8 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetGodMode(bool)
+0249c6e0 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsPoisoned(bool)
+0249c6e8 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsKO(bool)
+0249c6f0 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsIncapacitated(bool)
+0249c6f8 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_AutoKill()
+0249df58 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::Method_HasEnoughLifeToSurvive(int, bool&)
+0249df60 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::InternalOnExit(scimitar::Statechart&)
+0249df68 00000008     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::InternalOnEnter(scimitar::Statechart&)
+0249df70 00000008     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::InternalOnExit(scimitar::Statechart&)
+0249df78 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::InternalOnEnter(scimitar::Statechart&)
+0249df80 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetIsGoingToDie(bool)
+0249df88 00000008     0                         scimitar::CSrvNPCHealth::SetLifeInternal(int)
+0249e108 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::InternalOnEnter(scimitar::Statechart&)
+0249e210 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_IsIncapacitated(bool&)
+0249e218 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetGodMode(bool&)
+0249e220 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIsPoisoned(bool&)
+0249e228 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIsKO(bool&)
+0249e530 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetMaxLifePoints(int&)
+0249e538 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetIncapacitatedLimitPoints(int&)
+0249e540 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetLifeRatio(float&)
+0249e548 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_IsInjured(bool&)
+0249e550 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetLifePoints(int&)
+0249e558 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_GetAvailableMaxLifePoints(int&)
+0249e598 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_SetMaxLifePoints(int)
+0249e638 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdNotReached::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249e640 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackNotPlayed::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249e648 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached_FeedbackPlayed::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249eb60 00000008     0                         scimitar::CSrvNPCHealth::StateRoot::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249eb68 00000008     0                         scimitar::CSrvNPCHealth::FeedbackDisabled::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249eb70 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249eb78 00000008     0                         scimitar::CSrvNPCHealth::FeedbackEnabled_ThresholdReached::Create(scimitar::StatechartStateDesc*, scimitar::Statechart*, scimitar::StatechartState*)
+0249f470 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_CanRefillHealth(bool&)
+0249f478 00000008     0                         scimitar::CSrvNPCHealth::ComponentICSrvHealth::Method_RefillHealth(int)
+0249fea8 00000008     0                         scimitar::CSrvNPCHealth::~CSrvNPCHealth()
+0249feb0 00000008     0                         scimitar::CSrvNPCHealth::~CSrvNPCHealth()
+024a03b8 00000008     0                         scimitar::CSrvNPCHealth::InplaceConstructor(void*)
+024a03c0 00000008     0                         scimitar::CSrvNPCHealth::CreateStatechart()
+024a9ae8 00000008     0                         scimitar::CSrvHealth::GetLife()
+024a9af0 00000008     0                         scimitar::CSrvHealth::GetMaxLife()
+024a9af8 00000008     0                         scimitar::CSrvHealth::GetIncapacitatedLimit()
+024a9b00 00000008     0                         scimitar::CSrvHealth::SetLifeInternal(int)
+024a9b08 00000008     0                         scimitar::CSrvHealth::GetClassDescriptor() const
+024aba50 00000008     0                         scimitar::CSrvHealth::ReleaseResources()
+024aba90 00000008     0                         scimitar::CSrvHealth::~CSrvHealth()
+024aba98 00000008     0                         scimitar::CSrvHealth::~CSrvHealth()
+024abb28 00000008     0                         scimitar::CSrvHealth::FastLoad(scimitar::FastLoadSerializer&)
+024ac4f8 00000008     0                         scimitar::CSrvHealth::Duplicate(scimitar::Object*, scimitar::DuplicateMode)
+024ac510 00000008     0                         scimitar::CSrvHealth::CanRefillLife()
+024ae420 00000008     0                         scimitar::CSrvHealth::SetLife(int)
+024ae1b8 00000008     0                         scimitar::CSrvHealth::SetMaxLife(int)
+024ae1c0 00000008     0                         scimitar::CSrvHealth::SetIncapacitatedLimit(int)
+024ae730 00000008     0                         scimitar::CSrvHealth::RefillLife(int)
+0276e7cc 00000004     0                         scimitar::CSrvNPCHealth::FeedbackEnabled::ms_StateDesc
+02770d50 0000000e     0                         scimitar::CSrvNPCHealth::StatechartRegister()::dynamicHierarchyOrder
+029af0d4 00000004     0                         scimitar::CSrvNPCHealth::Triggers::PlayFeedback
+029af0d8 00000004     0                         scimitar::CSrvNPCHealth::Triggers::ReachThreshold
+029af0dc 00000004     0                         scimitar::CSrvNPCHealth::Triggers::LeaveThreshold
+029af0e0 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetBeatUpLifePoints_0x404649F0
+029af0e4 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetBeatUpLifePoints_0x3D341383
+029af0e8 00000004     0                         scimitar::CSrvNPCHealth::MethodId_IsBeatUpTarget_0x08BE6D15
+029af0ec 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetFeedback_0xF3FBDE39
+029af0f0 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetFeedbackThreshold_0xC2130BAE
+029af0f4 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetFeedbackThreshold_0xE0051840
+029af0f8 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetFeedback_0xD402D427
+029af0fc 00000004     0                         scimitar::CSrvNPCHealth::MethodId_IsEnableFeedback_0x9DA302E1
+029af100 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetLifePoints_0x525DB193
+029af104 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetAvailableMaxLifePoints_0x9B90459E
+029af108 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetMaxLifePoints_0xCCC7D5B3
+029af10c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetIncapacitatedLimitPoints_0x8B2CDCB9
+029af110 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetLifeRatio_0xA3552C7F
+029af114 00000004     0                         scimitar::CSrvNPCHealth::MethodId_IsInjured_0x3204CC50
+029af118 00000004     0                         scimitar::CSrvNPCHealth::MethodId_IsIncapacitated_0xB7920682
+029af11c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetGodMode_0x2988E413
+029af120 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetIsPoisoned_0x1B3E53F2
+029af124 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetIsKO_0xAB30D189
+029af128 00000004     0                         scimitar::CSrvNPCHealth::MethodId_CanRefillHealth_0x5E793767
+029af12c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_HasEnoughLifeToSurvive_0x7BA0C8FA
+029af130 00000004     0                         scimitar::CSrvNPCHealth::MethodId_HasEnoughLifeToSurviveFall_0x93B68B2E
+029af134 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetLifePoints_0xC013E35B
+029af138 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetMaxLifePoints_0x319E8FF5
+029af13c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetGodMode_0x3A1E45CB
+029af140 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetIsPoisoned_0x9EB7B929
+029af144 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetIsKO_0x91981358
+029af148 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetIsIncapacitated_0x0A1D6D42
+029af14c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_RefillHealth_0x03E8243D
+029af150 00000004     0                         scimitar::CSrvNPCHealth::MethodId_AutoKill_0xBA503C02
+029af154 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetIsGoingToDie_0xC69ACA27
+029af158 00000004     0                         scimitar::CSrvNPCHealth::MethodId_GetInfiniteBreathMode_0xEF1F7143
+029af15c 00000004     0                         scimitar::CSrvNPCHealth::MethodId_SetInfiniteBreathMode_0xD8833CE7
+029af160 00000004     0                         scimitar::CSrvNPCHealth::MethodId_DebugDisplay_0x503EBE1A
+029af164 00000004     0                         scimitar::CSrvNPCHealth::MethodId_BuildDebugStrings_0x18FE5E2F
+029af268 00000004     0                         scimitar::CSrvNPCHealth::ms_StatechartDesc
+029af854 00000004     0                         scimitar::ICSrvNPCHealth::Triggers::EnableFeedback
+029af858 00000004     0                         scimitar::ICSrvNPCHealth::Triggers::DisableFeedback
+029af85c 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_SetBeatUpLifePoints_0x404649F0
+029af860 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_GetBeatUpLifePoints_0x3D341383
+029af864 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_IsBeatUpTarget_0x08BE6D15
+029af868 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_SetFeedback_0xF3FBDE39
+029af86c 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_SetFeedbackThreshold_0xC2130BAE
+029af870 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_GetFeedbackThreshold_0xE0051840
+029af874 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_GetFeedback_0xD402D427
+029af878 00000004     0                         scimitar::ICSrvNPCHealth::MethodId_IsEnableFeedback_0x9DA302E1
+029af87c 00000004     0                         scimitar::ICSrvNPCHealth::ms_StatechartDesc
+029af978 00000002     0                         scimitar::ICSrvNPCHealth::StatechartRegister()::dynamicHierarchyOrder
+029b430c 00000004     0                         scimitar::ICSrvHealth::MethodId_GetLifePoints_0x525DB193
+029b4310 00000004     0                         scimitar::ICSrvHealth::MethodId_GetAvailableMaxLifePoints_0x9B90459E
+029b4314 00000004     0                         scimitar::ICSrvHealth::MethodId_GetMaxLifePoints_0xCCC7D5B3
+029b4318 00000004     0                         scimitar::ICSrvHealth::MethodId_GetIncapacitatedLimitPoints_0x8B2CDCB9
+029b431c 00000004     0                         scimitar::ICSrvHealth::MethodId_GetLifeRatio_0xA3552C7F
+029b4320 00000004     0                         scimitar::ICSrvHealth::MethodId_IsInjured_0x3204CC50
+029b4324 00000004     0                         scimitar::ICSrvHealth::MethodId_IsIncapacitated_0xB7920682
+029b4328 00000004     0                         scimitar::ICSrvHealth::MethodId_GetGodMode_0x2988E413
+029b432c 00000004     0                         scimitar::ICSrvHealth::MethodId_GetIsPoisoned_0x1B3E53F2
+029b4330 00000004     0                         scimitar::ICSrvHealth::MethodId_GetIsKO_0xAB30D189
+029b4334 00000004     0                         scimitar::ICSrvHealth::MethodId_CanRefillHealth_0x5E793767
+029b4338 00000004     0                         scimitar::ICSrvHealth::MethodId_HasEnoughLifeToSurvive_0x7BA0C8FA
+029b433c 00000004     0                         scimitar::ICSrvHealth::MethodId_HasEnoughLifeToSurviveFall_0x93B68B2E
+029b4340 00000004     0                         scimitar::ICSrvHealth::MethodId_SetLifePoints_0xC013E35B
+029b4344 00000004     0                         scimitar::ICSrvHealth::MethodId_SetMaxLifePoints_0x319E8FF5
+029b4348 00000004     0                         scimitar::ICSrvHealth::MethodId_SetGodMode_0x3A1E45CB
+029b434c 00000004     0                         scimitar::ICSrvHealth::MethodId_SetIsPoisoned_0x9EB7B929
+029b4350 00000004     0                         scimitar::ICSrvHealth::MethodId_SetIsKO_0x91981358
+029b4354 00000004     0                         scimitar::ICSrvHealth::MethodId_SetIsIncapacitated_0x0A1D6D42
+029b4358 00000004     0                         scimitar::ICSrvHealth::MethodId_RefillHealth_0x03E8243D
+029b435c 00000004     0                         scimitar::ICSrvHealth::MethodId_AutoKill_0xBA503C02
+029b4360 00000004     0                         scimitar::ICSrvHealth::MethodId_SetIsGoingToDie_0xC69ACA27
+029b4364 00000004     0                         scimitar::ICSrvHealth::MethodId_GetInfiniteBreathMode_0xEF1F7143
+029b4368 00000004     0                         scimitar::ICSrvHealth::MethodId_SetInfiniteBreathMode_0xD8833CE7
+029b436c 00000004     0                         scimitar::ICSrvHealth::ms_StatechartDesc
+029b59a8 00000002     0                         scimitar::ICSrvHealth::StatechartRegister()::dynamicHierarchyOrder

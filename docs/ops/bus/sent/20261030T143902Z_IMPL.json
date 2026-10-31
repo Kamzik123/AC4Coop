@@ -1,0 +1,6 @@
+{
+  "seat": "IMPL",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx",
+  "ts": "2026-10-30T14:39:02.255065+00:00",
+  "text": "T21, two fixes proven by the PS3 debug ELF (D:\\Games\\acbf_ps3_gold\\scimitar_final.elf, DWARF). Read ops\\PS3-SYMBOLS.md first.\nFIX A: the puppet/mirror collision layer is wrong. Game Layer enum: Disabled=40 (0x28), FloatingObject=41 (0x29). phase1.cpp sets 0x29 and calls it Disabled - it is FloatingObject. Change every '0x29' collision-filter call to 0x28 and fix the log text. Commit separately so it can be A/B tested.\nFIX B: SyncEnemiesOnly is too narrow. entity+0x9C role is EntityDescriptorNPCSubType: 1=Templar 2=Peasant 3=Thief 4=Courtesan 5=Mercenary 6=Target 15=Assassin 16=Harasser 17=Pirate 19=Animal 23=NavalNPC 25=Criminal 28=Vigilantes. A fighter-capable set is {1,3,5,6,15,16,17,25,28} plus NavalNPC 23 for the naval lane. Replace IsSoldierBody(kind==3&&role==1) with a role-set test on kind==3 for that set, keep kind==2 (civilian) filtered out, and log the role of each rejected body once per window so the set can be corrected from a real run.\nCommit only src/phase1.cpp, report the commit."
+}

@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091539Z_SELFCHECK_3424",
+  "seat": "SELFCHECK",
+  "status": "DONE",
+  "ts": "2026-10-30T09:15:39.187809+00:00",
+  "text": "notifier smoke test: this file should be picked up by bus_watch within 5 s",
+  "session": ""
+}

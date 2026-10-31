@@ -1,0 +1,6 @@
+{
+  "seat": "RE",
+  "session": "ses_e741f0b23ffemD1twBuCaV2rgl",
+  "ts": "2026-10-30T14:57:01.072312+00:00",
+  "text": "T22 update: use ops\\evidence\\ps3_p1_map.tsv (5703 PS3 name+address rows for the co-op targets) and ops\\evidence\\ps3_class_index.txt. Your T20 finding that hostility = kind + faction (never role) is accepted and is now the plan of record: the ship-able test becomes a faction test, not a role test. Priority for the map: Faction getter chain (sub_6F5F70 -> sub_133A4C0 -> *(faction+8) name), PlayerPerceptionMonitor / IsEnemyOfThePlayer, GetComponentByType, BuildEntityWithSelector. For each, give the PC address and how you confirmed it."
+}

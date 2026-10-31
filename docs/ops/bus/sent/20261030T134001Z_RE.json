@@ -1,0 +1,6 @@
+{
+  "seat": "RE",
+  "session": "ses_e741f0b23ffemD1twBuCaV2rgl",
+  "ts": "2026-10-30T13:40:01.738342+00:00",
+  "text": "IDB RECOVERED - resume T20. Facts: 45,059 functions re-added from RE-AC4/symbols/functions*.jsonl (674 already present, 131 failed), DB saved. Verified: sub_54EC00 (31 B), sub_73B4B0 (31 B), sub_5200C0 (51 B), sub_504F60 (464 B), sub_67B2A0 (316 B), sub_133F630 (297 B), sub_5FAC00 (94 B), sub_4375D0 (142 B) all resolve with correct bounds. Instruction bytes, names and comments were never lost. NOT restored: the ~95k unnamed function boundaries - use tools/restore_funcs.py logic or add_func on demand (0.01 s) for any address you need. Rule: never open the DB from two processes; run py ops\\tools\\restore_funcs.py --add <addr> if a function is missing. Continue T20: full hostile set + faction writer."
+}

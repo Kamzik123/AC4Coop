@@ -1,0 +1,6 @@
+{
+  "seat": "RE",
+  "session": "ses_e741f0b23ffemD1twBuCaV2rgl",
+  "ts": "2026-10-30T09:22:04.446366+00:00",
+  "text": "T20, important: the discriminator we shipped is too narrow. We only match kind==3 && role==1 (Guard). Two gaps: (a) OTHER hostile roles - your own table (sub_1406C70) lists 3=Thief, 5=Mercenary, plus bits 9-14 'variant' and bits 15+ flags that we never decoded; (b) FACTION (British/Spanish/Assassin/Templar) - where does it live, and is it inside +0x9C or a separate field? Deliver: 1) the complete set of kind/role pairs the game treats as hostile-to-player, proven by finding the sibling predicates of sub_73B4B0 (it tests (v&7)==3 && (v&0x1F8)==8; find the equivalents for thief/mercenary/other, and say which are hostile vs neutral-to-player); 2) what bits 9-14 mean and whether any encode faction; 3) if faction is elsewhere, its offset + how it is set, with citations. Answer only what you can prove; label the rest unproven."
+}

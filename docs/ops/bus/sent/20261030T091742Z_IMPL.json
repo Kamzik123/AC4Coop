@@ -1,0 +1,6 @@
+{
+  "seat": "IMPL",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx",
+  "ts": "2026-10-30T09:17:42.971452+00:00",
+  "text": "T17, 10 minutes of work, from QA T14: the [Sync] kindrole aggregate cannot prove C21 because soldier/civilian are counted BY the predicate under test - it can never disagree with itself. Add a per-body line so the packing itself is checked: read ops/QA-T14-C21-probe.md and implement its 3-line [KR] emit (no new engine calls): for a sample of guard bodies, 'kind=%u role=%u raw=06X' plus Skeleton-present and component-walk count, so a wrong shift or a wrong offset is visible as a mismatch. Rate-cap it, put it behind the same StageLog-class flag (e.g. KrLog default 0). Commit only src/phase1.cpp, report the commit."
+}

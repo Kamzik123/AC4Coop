@@ -1,0 +1,8 @@
+{
+  "id": "20261030T091453Z_IMPL_25956",
+  "seat": "IMPL",
+  "status": "DONE",
+  "ts": "2026-10-30T09:14:53.872434+00:00",
+  "text": "T13 DONE. (1) helper EntityKindRole(ent) = one dword at entity+0x9C, kind=v&7, role=(v>>3)&0x3F, with IsSoldierBody (kind3/role1, sub_73B4B0) and IsCivilianBody (kind2/role2, sub_54EC00); readable()-guarded, ok flag distinguishes unreadable from kind=0. phase1.cpp:2667-2683. (2) SyncEnemiesOnly=1 now really filters characters: kr is counted for every candidate, then `if (SyncEnemiesOnly() && !IsSoldierBody(kr)) continue;` before the scope counters - ships are packed by CaptureShips and unaffected. phase1.cpp:3228-3237. =0 keeps the old every-human behaviour. (3) new line, same 5s window as [Sync] scope: [Sync] kindrole n=%u soldier=%u civilian=%u other=%u - counted PRE-filter so it does not collapse to 0, and soldier+civilian+other==n. phase1.cpp:7798-7799 print, :7842 reset. Also removed the stale no class discriminator / SyncEnemiesOnly equivalent to 0 comments at :2668-2709 and :3260 so the file matches the code. compile: Rule 9 lock, MSBuild clean 0 warnings, throwaway 278EE292AD8A discarded (bin only, not copied). commit b221394 (parent 12905e6), src/phase1.cpp only, 53+/11-, tree clean. next: build REL, run one populated-street window: expect kindrole soldier>0 civilian>0, and scope candidates == soldier (radius permitting). blocked-by: nothing.",
+  "session": "ses_e741f0b73ffeeVFuPV4Qu0iltx"
+}

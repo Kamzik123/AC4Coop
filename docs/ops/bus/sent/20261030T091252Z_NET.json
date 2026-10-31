@@ -1,0 +1,6 @@
+{
+  "seat": "NET",
+  "session": "ses_e741f0becffevKuDnylqDe7rph",
+  "ts": "2026-10-30T09:12:52.213504+00:00",
+  "text": "NEW REPORT CHANNEL (ops/HIVE.md). From now on every report must be written to the bus, not only spoken in chat: py ops\\tools\\bus.py report <SEAT> <DONE|BLOCKED|NEED-MORE> text  - run it from the repo root. A report that is not on the bus is treated as not delivered. Keep it under 1500 chars."
+}

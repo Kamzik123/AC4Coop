@@ -1,0 +1,2 @@
+[BG] ts=2026-10-29T13:52:49.877 pid=26160 path=D:\SteamLibrary\steamapps\common\Assassin's Creed IV Black Flag\AC4BFSP.exe size=45056040 mtime=134356005783758073 sha256=bc11ad7924e1eca7363ee86aa3332c05386d0a05896c0b7370131daee9ab5150 imagebase=0x00400000 verdict=KNOWN AC4BFSP 1.0 deployed-2026-10-25
+[BG] build trusted: AC4BFSP 1.0 deployed-2026-10-25
